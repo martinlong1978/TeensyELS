@@ -5,11 +5,18 @@
 #include <math.h>
 
 #ifndef ELS_SPINDLE_DRIVEN
+#ifdef ESP32
+Spindle::Spindle(int pinA, int pinB) : m_encoder() {
+#else
 Spindle::Spindle(int pinA, int pinB) : m_encoder(pinA, pinB) {
+#endif
 #else
 Spindle::Spindle() {
 #endif
 
+#ifdef ESP32
+  m_encoder.attachHalfQuad(pinA, pinB);
+#endif
   m_unconsumedPosition = 0;
   m_lastPulseMicros = 0;
   m_lastFullPulseDurationMicros = 0;
@@ -19,9 +26,14 @@ Spindle::Spindle() {
 void Spindle::update() {
   // read the encoder and update the current position
   // todo: we should keep the absolute position of the spindle, cbf right now
+#ifdef ESP32
+  int position = m_encoder.clearCount();
+  incrementCurrentPosition(position);
+#else
   int position = m_encoder.read();
   incrementCurrentPosition(position);
   m_encoder.write(0);
+#endif
 }
 
 void Spindle::setCurrentPosition(int position) {
