@@ -136,9 +136,9 @@ void ButtonHandler::enableHandler() {
   if (m_enable.resetClicked()) {
     Serial.println("Enable button clicked");
     if (motionMode == GlobalMotionMode::ENABLED) {
-      GlobalState::getInstance()->setMotionMode(GlobalMotionMode::DISABLED);
+      GlobalState::getInstance()->setMotionMode(GlobalMotionMode::S_DISABLED);
     }
-    if (motionMode == GlobalMotionMode::DISABLED) {
+    if (motionMode == GlobalMotionMode::S_DISABLED) {
       GlobalState::getInstance()->setMotionMode(GlobalMotionMode::ENABLED);
     }
   }
@@ -294,6 +294,6 @@ void ButtonHandler::jogHandler() {
   // if neither jog button is held, reset the motion mode
   if (!m_jogLeft.isHeld() && !m_jogRight.isHeld() &&
       motionMode == GlobalMotionMode::JOG) {
-    GlobalState::getInstance()->setMotionMode(GlobalMotionMode::DISABLED);
+    GlobalState::getInstance()->setMotionMode(GlobalMotionMode::S_DISABLED);
   }
 }

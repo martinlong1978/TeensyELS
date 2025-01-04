@@ -34,6 +34,7 @@
 #define ELS_SPINDLE_ENCODER_B 15
 #endif
 
+#if defined(CORE_TEENSY)
 #define ELS_LEADSCREW_STEP 2
 #define ELS_LEADSCREW_DIR 3
 
@@ -47,6 +48,32 @@
 #define ELS_JOG_LEFT_BUTTON 24
 #define ELS_JOG_RIGHT_BUTTON 25
 
+#elif defined(ESP32)
+#define ELS_LEADSCREW_STEP 12
+#define ELS_LEADSCREW_DIR 13
+
+#define ELS_RATE_INCREASE_BUTTON 17
+#define ELS_RATE_DECREASE_BUTTON 36
+#define ELS_MODE_CYCLE_BUTTON 10
+#define ELS_THREAD_SYNC_BUTTON 20
+#define ELS_HALF_NUT_BUTTON 9
+#define ELS_ENABLE_BUTTON 33
+#define ELS_LOCK_BUTTON 34
+#define ELS_JOG_LEFT_BUTTON 12
+#define ELS_JOG_RIGHT_BUTTON 18
+#define ELS_USE_BUTTON_ARRAY
+#endif
+
+#elif defined(ELS_USE_BUTTON_ARRAY)
+#define ELS_PAD_H1 32
+#define ELS_PAD_H2 33
+#define ELS_PAD_H3 2
+
+#define ELS_PAD_V1 15
+#define ELS_PAD_V2 13
+#define ELS_PAD_V3 12
+#endif
+
 /**
  * Display
  *
@@ -55,8 +82,13 @@
  *
  * Options:
  *   SSD1306_128_64: 128x64 oled
+ *   ST7789_240_135
  */
+#if defined(ESP32)
+#define ELS_DISPLAY ST7789_240_135
+#else
 #define ELS_DISPLAY SSD1306_128_64
+#endif
 
 #if ELS_DISPLAY == SSD1306_128_64
 // define this if you have a dedicated pin for the oled reset

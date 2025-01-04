@@ -220,7 +220,7 @@ void Leadscrew::update() {
   
 
   switch (globalState->getMotionMode()) {
-    case GlobalMotionMode::DISABLED:
+    case GlobalMotionMode::S_DISABLED:
       // consume position but don't move
       m_spindle->consumePosition();
       break;

@@ -15,7 +15,7 @@ void GlobalState::printState() {
 #ifndef PIO_UNIT_TESTING
   Serial.print("Drive Mode: ");
   switch (m_motionMode) {
-    case DISABLED:
+    case S_DISABLED:
       Serial.println("DISABLED");
       break;
     case ENABLED:

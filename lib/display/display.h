@@ -5,6 +5,7 @@
 #include <spindle.h>
 
 #define SSD1306_128_64 0
+#define ST7789_240_135 1
 
 #if ELS_DISPLAY == SSD1306_128_64
 
@@ -16,6 +17,9 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
+#elif  ELS_DISPLAY == ST7789_240_135
+#include <TFT_eSPI.h>
+#include <SPI.h>
 #else
 
 #error "Please choose a valid display. Refer to config.h for options"
@@ -31,6 +35,8 @@ class Display {
  public:
 #if ELS_DISPLAY == SSD1306_128_64
   Adafruit_SSD1306 m_ssd1306;
+#elif ELS_DISPLAY == ST7789_240_135
+  TFT_eSPI tft = TFT_eSPI();
 #endif
   Display(Spindle* spindle, Leadscrew* leadscrew) {
     this->m_spindle = spindle;
@@ -39,6 +45,7 @@ class Display {
 #if ELS_DISPLAY == SSD1306_128_64
     this->m_ssd1306 =
         Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, PIN_DISPLAY_RESET);
+#elif ELS_DISPLAY == ST7789_240_135
 #endif
   }
 

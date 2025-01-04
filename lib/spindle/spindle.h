@@ -1,4 +1,8 @@
+#ifdef ESP32
+#include <ESP32Encoder.h>
+#else
 #include <Encoder.h>
+#endif
 #include <axis.h>
 #include <els_elapsedMillis.h>
 
@@ -11,7 +15,11 @@ class Spindle : public RotationalAxis {
   int m_unconsumedPosition;
 
 #ifndef ELS_SPINDLE_DRIVEN
-  Encoder m_encoder;
+#ifdef ESP32
+  ESP32Encoder  m_encoder;
+#else
+  Encoder  m_encoder;
+#endif
 #endif
 
  public:

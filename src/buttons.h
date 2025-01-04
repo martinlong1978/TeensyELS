@@ -36,6 +36,7 @@ class ButtonHandler {
  public:
   ButtonHandler(Spindle *spindle, Leadscrew *leadscrew);
 
+  volatile int keycode;
   void handle();
   void printState();
 };
