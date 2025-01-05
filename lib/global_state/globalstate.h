@@ -27,7 +27,7 @@ enum GlobalUnitMode { METRIC, IMPERIAL };
  * Unsync: The spindle and leadscrew are out of sync
  * Resync:
  */
-enum GlobalThreadSyncState { SYNC, UNSYNC };
+enum GlobalThreadSyncState { SS_UNSET, SS_SYNC, SS_UNSYNC };
 
 /**
  * The state of the global button lock
@@ -61,7 +61,7 @@ class GlobalState {
     setUnitMode(DEFAULT_UNIT_MODE);
     setButtonLock(LK_LOCKED);
     setFeedSelect(-1);
-    setThreadSyncState(UNSYNC);
+    setThreadSyncState(SS_UNSYNC);
     m_motionMode = MM_DISABLED;
     m_resyncPulseCount = 0;
   }

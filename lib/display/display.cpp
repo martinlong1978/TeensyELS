@@ -64,6 +64,7 @@ void Display::update() {
   drawLocked();
   drawEnabled();
   drawSpindleRpm();
+  drawSyncStatus();
 
   drawStopStatus();
 
@@ -139,17 +140,24 @@ void Display::drawSyncStatus() {
   m_ssd1306.setTextColor(WHITE);
   m_ssd1306.print("SYNC");
   // cross it out if not synced
-  if (sync == GlobalThreadSyncState::UNSYNC) {
+  if (sync == GlobalThreadSyncState::SS_UNSYNC) {
     m_ssd1306.drawLine(0, 16, 64, 16, WHITE);
   }
 #elif ELS_DISPLAY == ST7789_240_135
-  tft.setCursor(0, 32);
-  tft.setTextSize(4);
-  tft.setTextColor(TFT_WHITE);
-  tft.print("SYNC");
-  // cross it out if not synced
-  if (sync == GlobalThreadSyncState::UNSYNC) {
-    tft.drawLine(0, 32, 128, 32, TFT_WHITE);
+  if(sync == m_sync)return;
+  m_sync = sync;
+  if (sync == GlobalThreadSyncState::SS_UNSYNC) {
+    tft.drawLine(0, 32, 70, 48, TFT_RED);
+    tft.setCursor(0, 32);
+    tft.setTextSize(3);
+    tft.setTextColor(TFT_RED);
+    tft.print("SYNC");
+  } else {
+    tft.drawLine(0, 32, 70, 48, TFT_BLACK);
+    tft.setCursor(0, 32);
+    tft.setTextSize(3);
+    tft.setTextColor(TFT_WHITE);
+    tft.print("SYNC");
   }
 #endif
 }
@@ -158,9 +166,9 @@ void Display::drawMode() {
   GlobalFeedMode mode = GlobalState::getInstance()->getFeedMode();
 
 #if ELS_DISPLAY == SSD1306_128_64
-  if (mode == GlobalFeedMode::FEED) {
+  if (mode == GlobalFeedMode::FM_FEED) {
     m_ssd1306.drawBitmap(57, 32, feedSymbol, 64, 32, WHITE);
-  } else if (mode == GlobalFeedMode::THREAD) {
+  } else if (mode == GlobalFeedMode::FM_THREAD) {
     m_ssd1306.drawBitmap(57, 32, threadSymbol, 64, 32, WHITE);
   }
 #elif ELS_DISPLAY == ST7789_240_135

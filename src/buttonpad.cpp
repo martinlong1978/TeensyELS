@@ -99,11 +99,12 @@ void ButtonPad::enableHandler(ButtonInfo press) {
   }
 
   if (press.buttonState == BS_CLICKED) {
-    Serial.println("Enable button clicked");
     if (motionMode == GlobalMotionMode::MM_ENABLED) {
+      Serial.println("Enable button clicked, disabling");
       GlobalState::getInstance()->setMotionMode(GlobalMotionMode::MM_DISABLED);
     }
     if (motionMode == GlobalMotionMode::MM_DISABLED) {
+      Serial.println("Enable button clicked, enabling");
       GlobalState::getInstance()->setMotionMode(GlobalMotionMode::MM_ENABLED);
     }
   }
@@ -133,11 +134,13 @@ void ButtonPad::threadSyncHandler(ButtonInfo press) {
   if (press.buttonState == BS_CLICKED) {
     if (GlobalState::getInstance()->getMotionMode() ==
       GlobalMotionMode::MM_ENABLED) {
+      Serial.println("Sync button clicked, enabled, unsyncing");
       GlobalState::getInstance()->setThreadSyncState(
-        GlobalThreadSyncState::UNSYNC);
+        GlobalThreadSyncState::SS_UNSYNC);
     } else {
+      Serial.println("Sync button clicked, disabled, syncing");
       GlobalState::getInstance()->setThreadSyncState(
-        GlobalThreadSyncState::SYNC);
+        GlobalThreadSyncState::SS_SYNC);
     }
   }
 }
@@ -152,8 +155,6 @@ void ButtonPad::modeCycleHandler(ButtonInfo press) {
     return;
   }
   
-  Serial.printf("Mode Button info %d %d\n");
-
   // pressing mode button swaps between feed and thread
   if (press.buttonState == BS_CLICKED) {
     switch (GlobalState::getInstance()->getFeedMode()) {
@@ -199,13 +200,13 @@ void ButtonPad::jogDirectionHandler(ButtonInfo press) {
     case ELS_JOG_LEFT_BUTTON:
       if (m_leadscrew->getStopPositionState(LeadscrewStopPosition::LEFT) != LeadscrewStopState::UNSET) {
         m_leadscrew->setExpectedPosition(m_leadscrew->getStopPosition(LeadscrewStopPosition::LEFT));
-        globalState->setThreadSyncState(GlobalThreadSyncState::UNSYNC);
+        globalState->setThreadSyncState(GlobalThreadSyncState::SS_UNSYNC);
       }
       break;
     case ELS_JOG_RIGHT_BUTTON:
       if (m_leadscrew->getStopPositionState(LeadscrewStopPosition::RIGHT) != LeadscrewStopState::UNSET) {
         m_leadscrew->setExpectedPosition(m_leadscrew->getStopPosition(LeadscrewStopPosition::RIGHT));
-        globalState->setThreadSyncState(GlobalThreadSyncState::SYNC);
+        globalState->setThreadSyncState(GlobalThreadSyncState::SS_SYNC);
       }
       break;
     }

@@ -37,6 +37,7 @@ private:
   GlobalFeedMode m_mode = GlobalFeedMode::FM_UNSET;
   GlobalMotionMode m_motionMode = GlobalMotionMode::MM_UNSET;
   GlobalButtonLock m_locked = GlobalButtonLock::LK_UNSET;
+  GlobalThreadSyncState m_sync = GlobalThreadSyncState::SS_UNSET;
 #endif
 
 public:

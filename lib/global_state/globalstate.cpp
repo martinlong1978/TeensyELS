@@ -45,10 +45,10 @@ void GlobalState::printState() {
   }
   Serial.print("Thread Sync State: ");
   switch (m_threadSyncState) {
-    case SYNC:
+    case SS_SYNC:
       Serial.println("SYNC");
       break;
-    case UNSYNC:
+    case SS_UNSYNC:
       Serial.println("UNSYNC");
       break;
   }

@@ -48,7 +48,6 @@ ButtonInfo KeyArray::consumeButton() {
     if (buttonState.buttonState == BS_PRESSED || buttonState.buttonState == BS_NONE) {
         return { 0, BS_NONE };
     }
-    Serial.printf("Consuing button %d %d\n", buttonState.button, buttonState.buttonState);
     ButtonInfo ret = { buttonState.button, buttonState.buttonState };
     buttonState.buttonState = BS_NONE;
     buttonState.button = 0;
@@ -76,7 +75,6 @@ void KeyArray::handle() {
     if (a == 0 || b == 0) {
         // Release
         timerStop(Timer0_Cfg);
-        Serial.println("Released");
         keycodeMillis = time;
         if (buttonState.buttonState == BS_PRESSED) {
             buttonState.buttonState = BS_CLICKED;

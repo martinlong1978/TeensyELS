@@ -103,7 +103,7 @@ void Leadscrew::setStopPosition(LeadscrewStopPosition position, int stopPosition
       if(m_syncPositionState == LeadscrewSpindleSyncPositionState::UNSET && stopPosition == getCurrentPosition()) {
         m_spindleSyncPosition = m_spindle->getCurrentPosition();
         m_syncPositionState = LeadscrewSpindleSyncPositionState::LEFT;
-        GlobalState::getInstance()->setThreadSyncState(GlobalThreadSyncState::SYNC);
+        GlobalState::getInstance()->setThreadSyncState(GlobalThreadSyncState::SS_SYNC);
       }
       break;
     case LeadscrewStopPosition::RIGHT:
@@ -112,7 +112,7 @@ void Leadscrew::setStopPosition(LeadscrewStopPosition position, int stopPosition
       if(m_syncPositionState == LeadscrewSpindleSyncPositionState::UNSET && stopPosition == getCurrentPosition()) {
         m_spindleSyncPosition = m_spindle->getCurrentPosition();
         m_syncPositionState = LeadscrewSpindleSyncPositionState::RIGHT;
-        GlobalState::getInstance()->setThreadSyncState(GlobalThreadSyncState::SYNC);
+        GlobalState::getInstance()->setThreadSyncState(GlobalThreadSyncState::SS_SYNC);
       }
       break;
   }
@@ -274,7 +274,7 @@ void Leadscrew::update() {
        * If we are not in sync with the thread, if not, figure out where we should restart based on
        * the difference in position between the sync point and the current position
        */
-      if(m_syncPositionState != LeadscrewSpindleSyncPositionState::UNSET && globalState->getThreadSyncState() == UNSYNC) {
+      if(m_syncPositionState != LeadscrewSpindleSyncPositionState::UNSET && globalState->getThreadSyncState() == SS_UNSYNC) {
         int syncPosition = 0;
         switch(m_syncPositionState) {
           case LeadscrewSpindleSyncPositionState::LEFT:
@@ -291,7 +291,7 @@ void Leadscrew::update() {
 
         int expectedSyncPosition = (m_currentPosition - syncPosition)%((int)(leadAxisPPR *getRatio())) + m_spindleSyncPosition;
         if(m_spindle->getCurrentPosition() == expectedSyncPosition) {
-          globalState->setThreadSyncState(GlobalThreadSyncState::SYNC);
+          globalState->setThreadSyncState(GlobalThreadSyncState::SS_SYNC);
         }
       }
 
@@ -304,7 +304,7 @@ void Leadscrew::update() {
        */
       if (m_lastPulseMicros < m_currentPulseDelay 
           || m_currentDirection == LeadscrewDirection::UNKNOWN
-          || (m_syncPositionState != LeadscrewSpindleSyncPositionState::UNSET && globalState->getThreadSyncState() == UNSYNC)) {
+          || (m_syncPositionState != LeadscrewSpindleSyncPositionState::UNSET && globalState->getThreadSyncState() == SS_UNSYNC)) {
         break;
       }
 

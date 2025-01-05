@@ -173,10 +173,10 @@ void ButtonHandler::threadSyncHandler() {
     if (GlobalState::getInstance()->getMotionMode() ==
         GlobalMotionMode::MM_ENABLED) {
       GlobalState::getInstance()->setThreadSyncState(
-          GlobalThreadSyncState::UNSYNC);
+          GlobalThreadSyncState::SS_UNSYNC);
     } else {
       GlobalState::getInstance()->setThreadSyncState(
-          GlobalThreadSyncState::SYNC);
+          GlobalThreadSyncState::SS_SYNC);
     }
   }
 }
@@ -244,13 +244,13 @@ void ButtonHandler::jogDirectionHandler(JogDirection direction) {
      case JogDirection::LEFT:
       if(m_leadscrew->getStopPositionState(LeadscrewStopPosition::LEFT) != LeadscrewStopState::UNSET) {
           m_leadscrew->setExpectedPosition(m_leadscrew->getStopPosition(LeadscrewStopPosition::LEFT));
-          globalState->setThreadSyncState(GlobalThreadSyncState::UNSYNC);
+          globalState->setThreadSyncState(GlobalThreadSyncState::SS_UNSYNC);
       }
       break;
      case JogDirection::RIGHT:
       if(m_leadscrew->getStopPositionState(LeadscrewStopPosition::RIGHT) != LeadscrewStopState::UNSET) {
           m_leadscrew->setExpectedPosition(m_leadscrew->getStopPosition(LeadscrewStopPosition::RIGHT));
-          globalState->setThreadSyncState(GlobalThreadSyncState::SYNC);
+          globalState->setThreadSyncState(GlobalThreadSyncState::SS_SYNC);
       }
       break;
    }
