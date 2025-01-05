@@ -64,7 +64,7 @@
 #define ELS_USE_BUTTON_ARRAY
 #endif
 
-#elif defined(ELS_USE_BUTTON_ARRAY)
+#if defined(ELS_USE_BUTTON_ARRAY)
 #define ELS_PAD_H1 32
 #define ELS_PAD_H2 33
 #define ELS_PAD_H3 2
