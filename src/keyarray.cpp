@@ -1,3 +1,4 @@
+#include <config.h>
 #ifdef ELS_USE_BUTTON_ARRAY
 #include <keyarray.h>
 
