@@ -1,3 +1,5 @@
+
+#ifdef ELS_USE_BUTTON_ARRAY
 #include "buttonpad.h"
 
 #include <config.h>
@@ -250,3 +252,4 @@ void ButtonPad::jogHandler(ButtonInfo press) {
     GlobalState::getInstance()->setMotionMode(GlobalMotionMode::MM_DISABLED);
   }
 }
+#endif

@@ -1,3 +1,5 @@
+
+#ifdef ELS_USE_BUTTON_ARRAY
 #include <leadscrew.h>
 #include <spindle.h>
 #include <keyarray.h>
@@ -28,3 +30,4 @@ class ButtonPad {
   void handle();
   void printState();
 };
+#endif

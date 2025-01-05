@@ -1,7 +1,6 @@
+#ifdef ELS_USE_BUTTON_ARRAY
 #include <keyarray.h>
 
-
-#ifdef ELS_USE_BUTTON_ARRAY
 
 KeyArray keyArray;
 
@@ -99,3 +98,4 @@ void IRAM_ATTR timerInterrupt() {
     keyArray.handleTimer();
 }
 #endif
+

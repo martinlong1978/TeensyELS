@@ -1,5 +1,8 @@
+#ifdef ELS_USE_BUTTON_ARRAY
 #ifndef KEYARRAY_H
 #define KEYARRAY_H
+
+
 #include <leadscrew.h>
 #include <spindle.h>
 
@@ -27,4 +30,5 @@ public:
 };
 
 extern KeyArray keyArray;
+#endif
 #endif

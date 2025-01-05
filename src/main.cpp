@@ -7,7 +7,6 @@
 #include <leadscrew.h>
 #include <leadscrew_io_impl.h>
 #include <spindle.h>
-#include <esp_task_wdt.h>
 
 #include "buttons.h"
 #include "buttonpad.h"
@@ -15,7 +14,9 @@
 #include "display.h"
 #include "keyarray.h"
 
-#ifndef ESP32
+#ifdef ESP32
+#include <esp_task_wdt.h>
+#else
 IntervalTimer timer;
 #endif
 

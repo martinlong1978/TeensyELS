@@ -230,17 +230,17 @@ void Display::drawEnabled() {
 #if ELS_DISPLAY == SSD1306_128_64
   m_ssd1306.fillRoundRect(26, 40, 20, 20, 2, WHITE);
   switch (mode) {
-  case GlobalMotionMode::S_DISABLED:
+  case GlobalMotionMode::MM_DISABLED:
     m_ssd1306.drawBitmap(28, 42, pauseSymbol, 16, 16, BLACK);
     break;
-  case GlobalMotionMode::JOG:
+  case GlobalMotionMode::MM_JOG:
     // todo bitmap for jogging
     m_ssd1306.setCursor(28, 42);
     m_ssd1306.setTextSize(2);
     m_ssd1306.setTextColor(BLACK);
     m_ssd1306.print("J");
     break;
-  case GlobalMotionMode::ENABLED:
+  case GlobalMotionMode::MM_ENABLED:
     m_ssd1306.drawBitmap(28, 42, runSymbol, 16, 16, BLACK);
     break;
   }
@@ -274,10 +274,10 @@ void Display::drawLocked() {
 #if ELS_DISPLAY == SSD1306_128_64
   m_ssd1306.fillRoundRect(2, 40, 20, 20, 2, WHITE);
   switch (lock) {
-  case GlobalButtonLock::LOCKED:
+  case GlobalButtonLock::LK_LOCKED:
     m_ssd1306.drawBitmap(4, 42, lockedSymbol, 16, 16, BLACK);
     break;
-  case GlobalButtonLock::UNLOCKED:
+  case GlobalButtonLock::LK_UNLOCKED:
     m_ssd1306.drawBitmap(4, 42, unlockedSymbol, 16, 16, BLACK);
     break;
   }
