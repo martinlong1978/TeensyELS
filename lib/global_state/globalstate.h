@@ -7,13 +7,13 @@
 // Major modes are the main modes of the application, like the feed or thread
 // The spindle acts the same way in both threading and feeding mode
 // this is just for the indicator on the screen
-enum GlobalFeedMode { FEED, THREAD };
+enum GlobalFeedMode { FM_UNSET = -1, FM_FEED = 0, FM_THREAD = 1 };
 
 // The motion mode of the leadscrew in relation to the spindle
 // Disabled: The leadscrew does not move when the spindle is moving
 // Jog: The leadscrew is moving independently of the spindle
 // Enabled: The leadscrew is moving in sync with the spindle
-enum GlobalMotionMode { S_DISABLED, JOG, ENABLED };
+enum GlobalMotionMode { MM_UNSET, MM_DISABLED, MM_JOG, MM_ENABLED };
 
 /**
  * The unit mode of the application, usually for threading
@@ -34,7 +34,7 @@ enum GlobalThreadSyncState { SYNC, UNSYNC };
  * Unlocked: The buttons are unlocked
  * Locked: The buttons are locked
  */
-enum GlobalButtonLock { UNLOCKED, LOCKED };
+enum GlobalButtonLock { LK_UNSET, LK_UNLOCKED, LK_LOCKED };
 
 // this is a singleton class - we don't want more than one of these existing at
 // a time!
@@ -59,10 +59,10 @@ class GlobalState {
   GlobalState() {
     setFeedMode(DEFAULT_FEED_MODE);
     setUnitMode(DEFAULT_UNIT_MODE);
-    setButtonLock(LOCKED);
+    setButtonLock(LK_LOCKED);
     setFeedSelect(-1);
     setThreadSyncState(UNSYNC);
-    m_motionMode = S_DISABLED;
+    m_motionMode = MM_DISABLED;
     m_resyncPulseCount = 0;
   }
 

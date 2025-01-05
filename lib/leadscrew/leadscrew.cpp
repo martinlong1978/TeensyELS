@@ -220,12 +220,12 @@ void Leadscrew::update() {
   
 
   switch (globalState->getMotionMode()) {
-    case GlobalMotionMode::S_DISABLED:
+    case GlobalMotionMode::MM_DISABLED:
       // consume position but don't move
       m_spindle->consumePosition();
       break;
-    case GlobalMotionMode::JOG:
-    case GlobalMotionMode::ENABLED:
+    case GlobalMotionMode::MM_JOG:
+    case GlobalMotionMode::MM_ENABLED:
       LeadscrewDirection nextDirection = LeadscrewDirection::UNKNOWN;
 
       /**

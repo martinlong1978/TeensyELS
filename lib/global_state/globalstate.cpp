@@ -15,22 +15,22 @@ void GlobalState::printState() {
 #ifndef PIO_UNIT_TESTING
   Serial.print("Drive Mode: ");
   switch (m_motionMode) {
-    case S_DISABLED:
+    case MM_DISABLED:
       Serial.println("DISABLED");
       break;
-    case ENABLED:
+    case MM_ENABLED:
       Serial.println("ENABLED");
       break;
-    case JOG:
+    case MM_JOG:
       Serial.println("JOG");
       break;
   }
   Serial.print("Feed Mode: ");
   switch (m_feedMode) {
-    case FEED:
+    case FM_FEED:
       Serial.println("FEED");
       break;
-    case THREAD:
+    case FM_THREAD:
       Serial.println("THREAD");
       break;
   }
@@ -70,13 +70,13 @@ int GlobalState::getCurrentFeedSelectArraySize() {
   // this just ensures that the feedSelect doesn't go out of bounds for the
   // current arry
   if (m_unitMode == METRIC) {
-    if (m_feedMode == THREAD) {
+    if (m_feedMode == FM_THREAD) {
       return ARRAY_SIZE(threadPitchMetric);
     } else {
       return ARRAY_SIZE(feedPitchMetric);
     }
   } else {
-    if (m_feedMode == THREAD) {
+    if (m_feedMode == FM_THREAD) {
       return ARRAY_SIZE(threadPitchImperial);
     } else {
       return ARRAY_SIZE(feedPitchImperial);
@@ -96,7 +96,7 @@ void GlobalState::setFeedSelect(int select) {
     m_feedSelect = select;
   } else {
     // if we're out of bounds, just set the default
-    if (m_feedMode == THREAD) {
+    if (m_feedMode == FM_THREAD) {
       if (m_unitMode == METRIC) {
         m_feedSelect = DEFAULT_METRIC_THREAD_PITCH_IDX;
       } else {
@@ -114,7 +114,7 @@ void GlobalState::setFeedSelect(int select) {
 
 float GlobalState::getCurrentFeedPitch() {
   if (m_unitMode == METRIC) {
-    if (m_feedMode == THREAD) {
+    if (m_feedMode == FM_THREAD) {
       return threadPitchMetric[m_feedSelect];
     } else {
       return feedPitchMetric[m_feedSelect];
@@ -122,7 +122,7 @@ float GlobalState::getCurrentFeedPitch() {
   }
 
   // special cases for imperial
-  if (m_feedMode == THREAD) {
+  if (m_feedMode == FM_THREAD) {
     // threads are defined in TPI, not pitch
     return (1.0 / threadPitchImperial[m_feedSelect]) * 25.4;
   }

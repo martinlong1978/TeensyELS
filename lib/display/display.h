@@ -27,12 +27,19 @@
 #endif
 
 class Display {
- private:
+private:
   Spindle* m_spindle;
   Leadscrew* m_leadscrew;
   GlobalState* m_globalState;
+#if ELS_DISPLAY == ST7789_240_135
+  char m_rpmString[10];
+  char m_pitchString[10];
+  GlobalFeedMode m_mode = GlobalFeedMode::FM_UNSET;
+  GlobalMotionMode m_motionMode = GlobalMotionMode::MM_UNSET;
+  GlobalButtonLock m_locked = GlobalButtonLock::LK_UNSET;
+#endif
 
- public:
+public:
 #if ELS_DISPLAY == SSD1306_128_64
   Adafruit_SSD1306 m_ssd1306;
 #elif ELS_DISPLAY == ST7789_240_135
@@ -44,7 +51,7 @@ class Display {
     this->m_globalState = GlobalState::getInstance();
 #if ELS_DISPLAY == SSD1306_128_64
     this->m_ssd1306 =
-        Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, PIN_DISPLAY_RESET);
+      Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, PIN_DISPLAY_RESET);
 #elif ELS_DISPLAY == ST7789_240_135
 #endif
   }
@@ -52,7 +59,7 @@ class Display {
   void init();
   void update();
 
- protected:
+protected:
   void drawMode();
   void drawPitch();
   void drawEnabled();

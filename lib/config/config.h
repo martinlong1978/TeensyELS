@@ -123,7 +123,7 @@
  *  GlobalUnitMode::IMPERIAL: Imperial system
  */
 #define DEFAULT_UNIT_MODE GlobalUnitMode::METRIC
-#define DEFAULT_FEED_MODE GlobalFeedMode::FEED
+#define DEFAULT_FEED_MODE GlobalFeedMode::FM_FEED
 
 // The default starting speed for leadscrew in mm/s
 // this is the maximum allowable speed (in mm/s) for the leadscrew to

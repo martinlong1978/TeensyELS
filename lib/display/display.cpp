@@ -83,11 +83,15 @@ void Display::drawSpindleRpm() {
   // pad the rpm with spaces so the RPM text stays in the same place
   m_ssd1306.print(rpmString);
 #elif ELS_DISPLAY == ST7789_240_135
-  tft.setCursor(0, 0);
-  tft.setTextSize(2);
-  tft.setTextColor(TFT_WHITE);
   // pad the rpm with spaces so the RPM text stays in the same place
-  tft.print(rpmString);
+  if (strcmp(rpmString, m_rpmString)) {
+    tft.setCursor(0, 0);
+    tft.setTextSize(2);
+    tft.setTextColor(TFT_WHITE);
+    tft.fillRect(0, 0, 85, 16, TFT_BLACK);
+    tft.print(rpmString);
+    strcpy(m_rpmString, rpmString);
+  }
 #endif
 }
 
@@ -160,11 +164,14 @@ void Display::drawMode() {
     m_ssd1306.drawBitmap(57, 32, threadSymbol, 64, 32, WHITE);
   }
 #elif ELS_DISPLAY == ST7789_240_135
-  if (mode == GlobalFeedMode::FEED) {
+  if (mode == m_mode)return;
+  m_mode = mode;
+  tft.fillRect(104, 64, 128, 64, TFT_BLACK);
+  if (mode == GlobalFeedMode::FM_FEED) {
     uint8_t scaled[128 * 64 / 2];
     ScaleBMP(feedSymbol, scaled, 128, 64);
     tft.drawBitmap(104, 64, scaled, 128, 64, TFT_WHITE);
-  } else if (mode == GlobalFeedMode::THREAD) {
+  } else if (mode == GlobalFeedMode::FM_THREAD) {
     uint8_t scaled[128];
     ScaleBMP(threadSymbol, scaled, 128, 64);
     tft.drawBitmap(104, 64, scaled, 128, 64, TFT_WHITE);
@@ -179,13 +186,13 @@ void Display::drawPitch() {
   int feedSelect = state->getFeedSelect();
   char pitch[10];
   if (unit == GlobalUnitMode::METRIC) {
-    if (mode == GlobalFeedMode::THREAD) {
+    if (mode == GlobalFeedMode::FM_THREAD) {
       sprintf(pitch, "%.2fmm", threadPitchMetric[feedSelect]);
     } else {
       sprintf(pitch, "%.2fmm", feedPitchMetric[feedSelect]);
     }
   } else {
-    if (mode == GlobalFeedMode::THREAD) {
+    if (mode == GlobalFeedMode::FM_THREAD) {
       sprintf(pitch, "%dTPI", (int)threadPitchImperial[feedSelect]);
     } else {
       sprintf(pitch, "%dth", (int)(feedPitchImperial[feedSelect] * 1000));
@@ -198,6 +205,9 @@ void Display::drawPitch() {
   m_ssd1306.setTextColor(WHITE);
   m_ssd1306.print(pitch);
 #elif ELS_DISPLAY == ST7789_240_135
+  if (!strcmp(pitch, m_pitchString))return;
+  strcpy(m_pitchString, pitch);
+  tft.fillRect(110, 16, 130, 20, TFT_BLACK);
   tft.setCursor(110, 16);
   tft.setTextSize(3);
   tft.setTextColor(TFT_WHITE);
@@ -227,23 +237,25 @@ void Display::drawEnabled() {
     break;
   }
 #elif ELS_DISPLAY == ST7789_240_135
+  if (mode == m_motionMode)return;
+  m_motionMode = mode;
   tft.fillRoundRect(52, 80, 40, 40, 4, TFT_WHITE);
   uint8_t scaled[128];
   switch (mode) {
-  case GlobalMotionMode::S_DISABLED:
+  case GlobalMotionMode::MM_DISABLED:
     ScaleBMP(pauseSymbol, scaled, 16, 16);
     tft.drawBitmap(56, 84, scaled, 32, 32, TFT_BLACK);
     break;
-  case GlobalMotionMode::JOG:
+  case GlobalMotionMode::MM_JOG:
     // todo bitmap for jogging
     tft.setCursor(56, 84);
     tft.setTextSize(4);
     tft.setTextColor(TFT_BLACK);
     tft.print("J");
     break;
-  case GlobalMotionMode::ENABLED:
+  case GlobalMotionMode::MM_ENABLED:
     ScaleBMP(runSymbol, scaled, 16, 16);
-    tft.drawBitmap(56, 84, runSymbol, 16, 16, TFT_BLACK);
+    tft.drawBitmap(56, 84, scaled, 32, 32, TFT_BLACK);
     break;
   }
 #endif
@@ -262,14 +274,17 @@ void Display::drawLocked() {
     break;
   }
 #elif ELS_DISPLAY == ST7789_240_135
+  if (lock == m_locked)return;
+  m_locked = lock;
+
   tft.fillRoundRect(4, 80, 40, 40, 4, TFT_WHITE);
   uint8_t scaled[128];
   switch (lock) {
-  case GlobalButtonLock::LOCKED:
+  case GlobalButtonLock::LK_LOCKED:
     ScaleBMP(lockedSymbol, scaled, 16, 16);
     tft.drawBitmap(8, 84, scaled, 32, 32, TFT_BLACK);
     break;
-  case GlobalButtonLock::UNLOCKED:
+  case GlobalButtonLock::LK_UNLOCKED:
     ScaleBMP(unlockedSymbol, scaled, 16, 16);
     tft.drawBitmap(8, 84, scaled, 32, 32, TFT_BLACK);
     break;
