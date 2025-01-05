@@ -1,0 +1,103 @@
+#include <keyarray.h>
+
+
+#ifdef ELS_USE_BUTTON_ARRAY
+
+KeyArray keyArray;
+
+void KeyArray::setupKeys() {
+
+    // Set pad H pins as input
+    pinMode(ELS_PAD_H1, INPUT_PULLDOWN);
+    pinMode(ELS_PAD_H2, INPUT_PULLDOWN);
+    pinMode(ELS_PAD_H3, INPUT_PULLDOWN);
+
+    // Set pad V pins as out, high
+    pinMode(ELS_PAD_V1, OUTPUT);
+    pinMode(ELS_PAD_V2, OUTPUT);
+    pinMode(ELS_PAD_V3, OUTPUT);
+    digitalWrite(ELS_PAD_V1, 1);
+    digitalWrite(ELS_PAD_V2, 1);
+    digitalWrite(ELS_PAD_V3, 1);
+
+    attachInterrupt(digitalPinToInterrupt(ELS_PAD_H1), buttonInterrupt, CHANGE);
+    attachInterrupt(digitalPinToInterrupt(ELS_PAD_H2), buttonInterrupt, CHANGE);
+    attachInterrupt(digitalPinToInterrupt(ELS_PAD_H3), buttonInterrupt, CHANGE);
+
+}
+
+void KeyArray::initPad() {
+
+    Timer0_Cfg = timerBegin(0, 80, true);
+    timerAttachInterrupt(Timer0_Cfg, &timerInterrupt, true);
+    timerAlarmWrite(Timer0_Cfg, 1000000, true);
+    timerStop(Timer0_Cfg);
+    timerAlarmEnable(Timer0_Cfg);
+    setupKeys();
+}
+
+void KeyArray::handleTimer() {
+    timerStop(Timer0_Cfg);
+    Serial.println("Held");
+    if (buttonState.buttonState == BS_PRESSED) {
+        buttonState.buttonState = BS_HELD;
+    }
+}
+
+ButtonInfo KeyArray::consumeButton() {
+    if (buttonState.buttonState == BS_PRESSED || buttonState.buttonState == BS_NONE) {
+        return { 0, BS_NONE };
+    }
+    Serial.printf("Consuing button %d %d\n", buttonState.button, buttonState.buttonState);
+    ButtonInfo ret = { buttonState.button, buttonState.buttonState };
+    buttonState.buttonState = BS_NONE;
+    buttonState.button = 0;
+    return ret;
+}
+
+void KeyArray::handle() {
+    unsigned long time = millis();
+    if (time < keycodeMillis + 10)return; // debounce
+    // First read the H states
+    int a = digitalRead(ELS_PAD_H1) | (digitalRead(ELS_PAD_H2) << 1) | (digitalRead(ELS_PAD_H3) << 2);
+    // Now, flip the input to V and set H high
+    pinMode(ELS_PAD_V1, INPUT_PULLDOWN);
+    pinMode(ELS_PAD_V2, INPUT_PULLDOWN);
+    pinMode(ELS_PAD_V3, INPUT_PULLDOWN);
+    pinMode(ELS_PAD_H1, OUTPUT);
+    pinMode(ELS_PAD_H2, OUTPUT);
+    pinMode(ELS_PAD_H3, OUTPUT);
+    digitalWrite(ELS_PAD_H1, 1);
+    digitalWrite(ELS_PAD_H2, 1);
+    digitalWrite(ELS_PAD_H3, 1);
+    // Now read the V states
+    int b = digitalRead(ELS_PAD_V1) | (digitalRead(ELS_PAD_V2) << 1) | (digitalRead(ELS_PAD_V3) << 2);
+    int code = a | b << 3;
+    if (a == 0 || b == 0) {
+        // Release
+        timerStop(Timer0_Cfg);
+        Serial.println("Released");
+        keycodeMillis = time;
+        if (buttonState.buttonState == BS_PRESSED) {
+            buttonState.buttonState = BS_CLICKED;
+        }
+    } else {
+        Serial.printf("Pressed %d\n", code);
+        buttonState.button = code;
+        buttonState.buttonState = BS_PRESSED;
+        keycodeMillis = time;
+        timerRestart(Timer0_Cfg);
+        timerStart(Timer0_Cfg);
+    }
+    setupKeys();
+}
+
+
+void buttonInterrupt() {
+    keyArray.handle();
+}
+
+void IRAM_ATTR timerInterrupt() {
+    keyArray.handleTimer();
+}
+#endif

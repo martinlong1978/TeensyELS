@@ -40,7 +40,7 @@ void ButtonHandler::rateIncreaseHandler() {
     m_rateIncrease.resetSingleClicked();
     m_rateIncrease.resetDoubleClicked();
 
-    return;
+    return;   
   }
 
   if (m_rateIncrease.resetSingleClicked()) {
