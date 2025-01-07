@@ -89,7 +89,6 @@ void SpindleTask(void* parameter) {
 
 
 void setup() {
-  Serial.begin(115200);
   // config - compile time checks for safety
   CHECK_BOUNDS(DEFAULT_METRIC_THREAD_PITCH_IDX, threadPitchMetric,
     "DEFAULT_METRIC_THREAD_PITCH_IDX out of bounds");

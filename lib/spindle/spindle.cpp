@@ -15,7 +15,10 @@ Spindle::Spindle() {
 #endif
 
 #ifdef ESP32
-  m_encoder.attachHalfQuad(pinA, pinB);
+  Serial.begin(115200);
+  ESP32Encoder::useInternalWeakPullResistors = puType::up;
+  m_encoder.attachFullQuad(pinA, pinB);
+
 #endif
   m_unconsumedPosition = 0;
   m_lastPulseMicros = 0;
@@ -27,7 +30,8 @@ void Spindle::update() {
   // read the encoder and update the current position
   // todo: we should keep the absolute position of the spindle, cbf right now
 #ifdef ESP32
-  int position = m_encoder.clearCount();
+  int position = m_encoder.getCount();
+  m_encoder.clearCount();
   incrementCurrentPosition(position);
 #else
   int position = m_encoder.read();
