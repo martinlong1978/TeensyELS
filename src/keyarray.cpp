@@ -39,25 +39,27 @@ void KeyArray::initPad() {
 void KeyArray::handleTimer() {
     timerStop(Timer0_Cfg);
     Serial.println("Held");
-    if (buttonState.buttonState == BS_PRESSED) {
-        buttonState.buttonState = BS_HELD;
+    int code = getCodeFromArray();
+    if (buttonState.buttonState == ButtonState::BS_PRESSED && buttonState.button == code) {
+        buttonState.buttonState = ButtonState::BS_HELD;
+    }else{
+        // if the same button isnt' still pressed, then cancel the whole thing. 
+        buttonState.buttonState = ButtonState::BS_NONE;
+        buttonState.button = 0;
     }
 }
 
 ButtonInfo KeyArray::consumeButton() {
-    if (buttonState.buttonState == BS_PRESSED || buttonState.buttonState == BS_NONE) {
-        return { 0, BS_NONE };
+    if (buttonState.buttonState == ButtonState::BS_PRESSED || buttonState.buttonState == ButtonState::BS_NONE) {
+        return { 0, ButtonState::BS_NONE };
     }
     ButtonInfo ret = { buttonState.button, buttonState.buttonState };
-    buttonState.buttonState = BS_NONE;
+    buttonState.buttonState = ButtonState::BS_NONE;
     buttonState.button = 0;
     return ret;
 }
 
-void KeyArray::handle() {
-    unsigned long time = millis();
-    if (time < keycodeMillis + 10)return; // debounce
-    // First read the H states
+int KeyArray::getCodeFromArray() {
     int a = digitalRead(ELS_PAD_H1) | (digitalRead(ELS_PAD_H2) << 1) | (digitalRead(ELS_PAD_H3) << 2);
     // Now, flip the input to V and set H high
     pinMode(ELS_PAD_V1, INPUT_PULLDOWN);
@@ -71,8 +73,18 @@ void KeyArray::handle() {
     digitalWrite(ELS_PAD_H3, 1);
     // Now read the V states
     int b = digitalRead(ELS_PAD_V1) | (digitalRead(ELS_PAD_V2) << 1) | (digitalRead(ELS_PAD_V3) << 2);
-    int code = a | b << 3;
-    if (a == 0 || b == 0) {
+    int code = (a == 0 || b == 0) ? 0 : a | b << 3;
+    setupKeys();
+    return code;
+
+}
+
+void KeyArray::handle() {
+    unsigned long time = millis();
+    if (time < keycodeMillis + 10)return; // debounce
+    // First read the H states
+    int code = getCodeFromArray();
+    if (code == 0) {
         // Release
         timerStop(Timer0_Cfg);
         keycodeMillis = time;
@@ -87,7 +99,6 @@ void KeyArray::handle() {
         timerRestart(Timer0_Cfg);
         timerStart(Timer0_Cfg);
     }
-    setupKeys();
 }
 
 

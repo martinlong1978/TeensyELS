@@ -9,7 +9,7 @@
 void buttonInterrupt();
 void IRAM_ATTR timerInterrupt();
 
-enum ButtonState { BS_NONE = 0, BS_PRESSED = 1, BS_CLICKED = 2,  BS_HELD = 3, BS_RELEASED = 4, BS_DOUBLE_CLICKED = 5 };
+enum ButtonState { BS_NONE = 0, BS_PRESSED = 1, BS_CLICKED = 2, BS_HELD = 3, BS_RELEASED = 4, BS_DOUBLE_CLICKED = 5 };
 
 typedef struct buttonInfo {
     int button;
@@ -17,12 +17,13 @@ typedef struct buttonInfo {
 } ButtonInfo;
 
 class KeyArray {
- private:
+private:
     volatile ButtonInfo buttonState;
     volatile unsigned long keycodeMillis;
-    hw_timer_t *Timer0_Cfg;
+    hw_timer_t* Timer0_Cfg;
     void setupKeys();
-public: 
+    int getCodeFromArray();
+public:
     void initPad();
     void handle();
     void handleTimer();
