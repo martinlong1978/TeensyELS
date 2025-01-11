@@ -5,6 +5,13 @@
 
 KeyArray keyArray;
 
+KeyArray::KeyArray() {
+    ESP32Encoder::useInternalWeakPullResistors = puType::none;
+    m_encoder.attachFullQuad(ELS_UI_ENCODER_A, ELS_UI_ENCODER_B);
+    gpio_pulldown_en((gpio_num_t)ELS_UI_ENCODER_A);
+    gpio_pulldown_en((gpio_num_t)ELS_UI_ENCODER_B);
+}
+
 void KeyArray::setupKeys() {
 
     // Set pad H pins as input
@@ -42,7 +49,7 @@ void KeyArray::handleTimer() {
     int code = getCodeFromArray();
     if (buttonState.buttonState == ButtonState::BS_PRESSED && buttonState.button == code) {
         buttonState.buttonState = ButtonState::BS_HELD;
-    }else{
+    } else {
         // if the same button isnt' still pressed, then cancel the whole thing. 
         buttonState.buttonState = ButtonState::BS_NONE;
         buttonState.button = 0;
@@ -50,6 +57,7 @@ void KeyArray::handleTimer() {
 }
 
 ButtonInfo KeyArray::consumeButton() {
+    //Serial.printf("Enc: %d\n", m_encoder.getCount());
     if (buttonState.buttonState == ButtonState::BS_PRESSED || buttonState.buttonState == ButtonState::BS_NONE) {
         return { 0, ButtonState::BS_NONE };
     }

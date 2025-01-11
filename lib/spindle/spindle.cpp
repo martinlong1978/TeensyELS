@@ -16,8 +16,10 @@ Spindle::Spindle() {
 
 #ifdef ESP32
   Serial.begin(115200);
-  ESP32Encoder::useInternalWeakPullResistors = puType::up;
+  ESP32Encoder::useInternalWeakPullResistors = puType::none;
   m_encoder.attachFullQuad(pinA, pinB);
+  gpio_pullup_en((gpio_num_t)pinA);
+  gpio_pullup_en((gpio_num_t)pinB);
 
 #endif
   m_unconsumedPosition = 0;
@@ -31,6 +33,7 @@ void Spindle::update() {
   // todo: we should keep the absolute position of the spindle, cbf right now
 #ifdef ESP32
   int position = m_encoder.getCount();
+  //Serial.printf("Enc: %d\n", position);
   m_encoder.clearCount();
   incrementCurrentPosition(position);
 #else

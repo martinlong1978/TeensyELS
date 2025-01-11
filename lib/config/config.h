@@ -33,6 +33,8 @@
 #ifdef ESP32
 #define ELS_SPINDLE_ENCODER_A 21
 #define ELS_SPINDLE_ENCODER_B 22
+#define ELS_UI_ENCODER_A 37
+#define ELS_UI_ENCODER_B 38
 #else
 #define ELS_SPINDLE_ENCODER_A 14 
 #define ELS_SPINDLE_ENCODER_B 15 
@@ -100,15 +102,15 @@
 #define PIN_DISPLAY_RESET -1
 #endif
 
-#define ELS_SPINDLE_ENCODER_PPR 4000
-#define ELS_LEADSCREW_STEPPER_PPR 800
+#define ELS_SPINDLE_ENCODER_PPR 1200
+#define ELS_LEADSCREW_STEPPER_PPR 3200
 
 // uncomment this if your leadscrew direction is inverted to what is expected
 // i.e if setting right stop actually sets the left stop
 #define ELS_INVERT_DIRECTION
 
-#define ELS_GEARBOX_RATIO 95
-#define ELS_LEADSCREW_PITCH_MM ((float)(25.4/16))
+#define ELS_GEARBOX_RATIO 4
+#define ELS_LEADSCREW_PITCH_MM ((float)(25.4/10))
 
 #define ELS_LEADSCREW_STEPS_PER_MM \
   (float)((ELS_LEADSCREW_STEPPER_PPR) / ELS_LEADSCREW_PITCH_MM)

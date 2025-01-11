@@ -108,6 +108,9 @@ void setup() {
   pinMode(ELS_LEADSCREW_STEP, OUTPUT); // step output pin
   pinMode(ELS_LEADSCREW_DIR, OUTPUT);  // direction output pin
 
+  pinMode(ELS_UI_ENCODER_A, INPUT_PULLDOWN); // encoder pin 1
+  pinMode(ELS_UI_ENCODER_B, INPUT_PULLDOWN); // encoder pin 2
+
 #ifdef ELS_USE_BUTTON_ARRAY
   keyArray.initPad();
 #else

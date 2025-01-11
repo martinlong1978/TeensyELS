@@ -5,6 +5,7 @@
 
 #include <leadscrew.h>
 #include <spindle.h>
+#include <ESP32Encoder.h>
 
 void buttonInterrupt();
 void IRAM_ATTR timerInterrupt();
@@ -21,9 +22,11 @@ private:
     volatile ButtonInfo buttonState;
     volatile unsigned long keycodeMillis;
     hw_timer_t* Timer0_Cfg;
+    ESP32Encoder m_encoder;
     void setupKeys();
     int getCodeFromArray();
 public:
+    KeyArray();
     void initPad();
     void handle();
     void handleTimer();
