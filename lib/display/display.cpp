@@ -86,10 +86,10 @@ void Display::drawSpindleRpm() {
 #elif ELS_DISPLAY == ST7789_240_135
   // pad the rpm with spaces so the RPM text stays in the same place
   if (strcmp(rpmString, m_rpmString)) {
-    tft.setCursor(0, 0);
-    tft.setTextSize(2);
+    tft.setCursor(100, 0);
+    tft.setTextSize(3);
     tft.setTextColor(TFT_WHITE);
-    tft.fillRect(0, 0, 85, 16, TFT_BLACK);
+    tft.fillRect(100, 0, 85, 32, TFT_BLACK);
     tft.print(rpmString);
     strcpy(m_rpmString, rpmString);
   }
@@ -114,9 +114,10 @@ void Display::drawStopStatus() {
     m_ssd1306.print(" ");
   }
 #elif ELS_DISPLAY == ST7789_240_135
-  tft.setCursor(0, 16);
-  tft.setTextSize(2);
+  tft.setCursor(0, 0);
+  tft.setTextSize(3);
   tft.setTextColor(TFT_WHITE);
+  tft.fillRect(0, 0, 100, 32, TFT_BLACK);
   if (m_leadscrew->getStopPositionState(LeadscrewStopPosition::LEFT) ==
     LeadscrewStopState::SET) {
     tft.print("[");
@@ -215,8 +216,8 @@ void Display::drawPitch() {
 #elif ELS_DISPLAY == ST7789_240_135
   if (!strcmp(pitch, m_pitchString))return;
   strcpy(m_pitchString, pitch);
-  tft.fillRect(110, 16, 130, 20, TFT_BLACK);
-  tft.setCursor(110, 16);
+  tft.fillRect(110, 32, 130, 20, TFT_BLACK);
+  tft.setCursor(110, 32);
   tft.setTextSize(3);
   tft.setTextColor(TFT_WHITE);
   tft.print(pitch);
