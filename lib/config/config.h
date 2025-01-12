@@ -33,12 +33,16 @@
 #ifdef ESP32
 #define ELS_SPINDLE_ENCODER_A 21
 #define ELS_SPINDLE_ENCODER_B 22
-#define ELS_UI_ENCODER_A 37
-#define ELS_UI_ENCODER_B 38
 #else
 #define ELS_SPINDLE_ENCODER_A 14 
 #define ELS_SPINDLE_ENCODER_B 15 
 #endif
+#endif
+
+#define ELS_UI_ENCODER
+#ifdef ELS_UI_ENCODER
+#define ELS_UI_ENCODER_A 37
+#define ELS_UI_ENCODER_B 38
 #endif
 
 #if defined(CORE_TEENSY)
