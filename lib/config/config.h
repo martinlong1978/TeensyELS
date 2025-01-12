@@ -102,7 +102,7 @@
 #define PIN_DISPLAY_RESET -1
 #endif
 
-#define ELS_SPINDLE_ENCODER_PPR 1200
+#define ELS_SPINDLE_ENCODER_PPR 4800
 #define ELS_LEADSCREW_STEPPER_PPR 3200
 
 // uncomment this if your leadscrew direction is inverted to what is expected
