@@ -75,7 +75,7 @@ void DisplayTask(void* parameter) {
   while (true) {
     displayLoop();
     esp_task_wdt_reset();
-    vTaskDelay(100);
+    vTaskDelay(250);
   }
 }
 
