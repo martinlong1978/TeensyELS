@@ -51,7 +51,7 @@ void Leadscrew::setRatio(float ratio) {
 /**
  * Returns the ratio of one pulse on the spindle to one pulse on the leadscrew
  */
-float Leadscrew::getRatio() { return m_ratio * (float)(((float)leadAxisPPR) / ((float)motorPulsePerRevolution)); }
+float Leadscrew::getRatio() { return m_ratio * (float)(((float)motorPulsePerRevolution) / ((float)leadAxisPPR)); }
 
 float Leadscrew::getExpectedPosition() {
   return m_expectedPosition;
