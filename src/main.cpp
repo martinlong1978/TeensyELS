@@ -134,10 +134,16 @@ void setup() {
   display.update();
 
 #ifdef ESP32
-  xTaskCreate(SpindleTask, "Spindle", 2048, NULL, 10, NULL);
-  xTaskCreate(DisplayTask, "Display", 16192, NULL, 1, NULL);
+  TaskHandle_t spindleTask;
+  TaskHandle_t displayTask;
+  xTaskCreate(SpindleTask, "Spindle", 2048, NULL, 10, &spindleTask);
+  xTaskCreate(DisplayTask, "Display", 4096, NULL, 1, &displayTask);
   disableLoopWDT();
   esp_task_wdt_delete(xTaskGetHandle("IDLE0"));
+  esp_task_wdt_delete(xTaskGetHandle("IDLE1"));
+  esp_task_wdt_delete(spindleTask);
+  esp_task_wdt_delete(displayTask);
+
 #else
   timer.begin(timerCallback, LEADSCREW_TIMER_US);
 #endif
