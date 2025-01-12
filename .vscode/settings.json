@@ -6,6 +6,7 @@
         "initializer_list": "cpp",
         "utility": "cpp",
         "*.tcc": "cpp",
-        "istream": "cpp"
+        "istream": "cpp",
+        "algorithm": "cpp"
     }
 }
