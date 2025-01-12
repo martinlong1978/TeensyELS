@@ -139,7 +139,7 @@ void setup() {
   TaskHandle_t spindleTask;
   TaskHandle_t displayTask;
   xTaskCreate(SpindleTask, "Spindle", 2048, NULL, 10, &spindleTask);
-  xTaskCreate(DisplayTask, "Display", 4096, NULL, 1, &displayTask);
+  xTaskCreate(DisplayTask, "Display", 8000, NULL, 1, &displayTask);
   disableLoopWDT();
   esp_task_wdt_delete(xTaskGetHandle("IDLE0"));
   esp_task_wdt_delete(xTaskGetHandle("IDLE1"));

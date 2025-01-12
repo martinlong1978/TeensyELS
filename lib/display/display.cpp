@@ -181,7 +181,7 @@ void Display::drawMode() {
     ScaleBMP(feedSymbol, scaled, 128, 64);
     tft.drawBitmap(104, 64, scaled, 128, 64, TFT_WHITE);
   } else if (mode == GlobalFeedMode::FM_THREAD) {
-    uint8_t scaled[128];
+    uint8_t scaled[128 * 64 / 2];
     ScaleBMP(threadSymbol, scaled, 128, 64);
     tft.drawBitmap(104, 64, scaled, 128, 64, TFT_WHITE);
   }
