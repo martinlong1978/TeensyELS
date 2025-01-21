@@ -107,17 +107,17 @@
 #endif
 
 #define ELS_SPINDLE_ENCODER_PPR 4800
-#define ELS_LEADSCREW_STEPPER_PPR 3200
+#define ELS_LEADSCREW_STEPPER_PPR 400
 
 // uncomment this if your leadscrew direction is inverted to what is expected
 // i.e if setting right stop actually sets the left stop
 #define ELS_INVERT_DIRECTION
 
-#define ELS_GEARBOX_RATIO 4
+#define ELS_GEARBOX_RATIO 2
 #define ELS_LEADSCREW_PITCH_MM ((float)(25.4/10))
 
 #define ELS_LEADSCREW_STEPS_PER_MM \
-  (float)((ELS_LEADSCREW_STEPPER_PPR) / ELS_LEADSCREW_PITCH_MM)
+  (float)((ELS_LEADSCREW_STEPPER_PPR * ELS_GEARBOX_RATIO) / ELS_LEADSCREW_PITCH_MM)
 
 // extra config options
 // jog speed in mm/s
