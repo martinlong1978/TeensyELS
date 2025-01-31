@@ -12643,7 +12643,7 @@
 		(layer "Edge.Cuts")
 		(uuid "e5551502-f604-409e-9fc4-d35cf2bd7cad")
 	)
-	(gr_text "TeensyELS v0.3"
+	(gr_text "TeensyELS v0.4"
 		(at 48 28 0)
 		(layer "B.SilkS")
 		(uuid "775136d7-4478-4ce0-b1ec-ddf439c89ce4")
@@ -12655,7 +12655,7 @@
 			(justify left bottom mirror)
 		)
 	)
-	(gr_text "TeensyELS v0.3"
+	(gr_text "TeensyELS v0.4\n"
 		(at 21.5 28 0)
 		(layer "F.SilkS")
 		(uuid "33b49b2e-6cae-427e-81f1-e2231687a4c0")
