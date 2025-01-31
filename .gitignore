@@ -3,3 +3,11 @@
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/ipch
+kicad/2Layer/TeensyELS-backups/
+kicad/4Layer/TeensyELS-backups/
+
+kicad/2Layer/gerbers/
+
+kicad/2Layer/gerbers.zip
+
+kicad/4Layer/gerbers/
