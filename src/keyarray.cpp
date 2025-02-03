@@ -1,15 +1,15 @@
 #include <config.h>
 #ifdef ELS_USE_BUTTON_ARRAY
 #include <keyarray.h>
+#include <globalstate.h>
 
 
-KeyArray keyArray;
 
-KeyArray::KeyArray() {
+KeyArray::KeyArray(Leadscrew* leadscrew) : m_leadscrew(leadscrew) {
     ESP32Encoder::useInternalWeakPullResistors = puType::none;
-    m_encoder.attachFullQuad(ELS_UI_ENCODER_A, ELS_UI_ENCODER_B);
-    gpio_pulldown_en((gpio_num_t)ELS_UI_ENCODER_A);
-    gpio_pulldown_en((gpio_num_t)ELS_UI_ENCODER_B);
+    m_encoder.attachSingleEdge(ELS_UI_ENCODER_A, ELS_UI_ENCODER_B);
+    m_encoder.setFilter(1023);
+    encoderPos = m_encoder.getCount();
 }
 
 void KeyArray::setupKeys() {
@@ -57,7 +57,10 @@ void KeyArray::handleTimer() {
 }
 
 ButtonInfo KeyArray::consumeButton() {
-    //Serial.printf("Enc: %d\n", m_encoder.getCount());
+    int64_t val = m_encoder.getCount();
+    if (val != encoderPos) {
+        updateEncoderPos(val - encoderPos);
+    }
     if (buttonState.buttonState == ButtonState::BS_PRESSED || buttonState.buttonState == ButtonState::BS_NONE) {
         return { 0, ButtonState::BS_NONE };
     }
@@ -65,6 +68,27 @@ ButtonInfo KeyArray::consumeButton() {
     buttonState.buttonState = ButtonState::BS_NONE;
     buttonState.button = 0;
     return ret;
+}
+
+void KeyArray::updateEncoderPos(int64_t pos) {
+    GlobalButtonLock lockState = GlobalState::getInstance()->getButtonLock();
+    if (lockState == GlobalButtonLock::LK_LOCKED) {
+        Serial.println("Locked, ingoring rat inc");
+        return;
+    }
+    int64_t p = pos;
+    if (pos > 0) {
+        while (p-- > 0) {
+            GlobalState::getInstance()->nextFeedPitch();
+            m_leadscrew->setRatio(GlobalState::getInstance()->getCurrentFeedPitch());
+        }
+    } else {
+        while (p++ < 0) {
+            GlobalState::getInstance()->prevFeedPitch();
+            m_leadscrew->setRatio(GlobalState::getInstance()->getCurrentFeedPitch());
+        }
+    }
+    encoderPos += pos;
 }
 
 int KeyArray::getCodeFromArray() {

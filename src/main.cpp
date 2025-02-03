@@ -33,6 +33,7 @@ Leadscrew leadscrew(&spindle, &leadscrewIOImpl,
   ELS_LEADSCREW_PITCH_MM, ELS_SPINDLE_ENCODER_PPR);
 
 #ifdef ESP32  
+KeyArray keyArray(&leadscrew);
 ButtonPad keyPad(&spindle, &leadscrew, &keyArray);
 #else
 ButtonHandler keyPad(&spindle, &leadscrew);
@@ -102,16 +103,22 @@ void setup() {
   // Pinmodes
 
 #ifndef ELS_SPINDLE_DRIVEN
-  pinMode(ELS_SPINDLE_ENCODER_A, INPUT_PULLUP); // encoder pin 1
-  pinMode(ELS_SPINDLE_ENCODER_B, INPUT_PULLUP); // encoder pin 2
+//  pinMode(ELS_SPINDLE_ENCODER_A, INPUT_PULLUP); // encoder pin 1
+//  pinMode(ELS_SPINDLE_ENCODER_B, INPUT_PULLUP); // encoder pin 2
 #endif
   pinMode(ELS_LEADSCREW_STEP, OUTPUT); // step output pin
   pinMode(ELS_LEADSCREW_DIR, OUTPUT);  // direction output pin
 
 #ifdef ELS_UI_ENCODER
-  pinMode(ELS_UI_ENCODER_A, INPUT_PULLDOWN); // encoder pin 1
-  pinMode(ELS_UI_ENCODER_B, INPUT_PULLDOWN); // encoder pin 2
+//  pinMode(ELS_UI_ENCODER_A, INPUT); // encoder pin 1
+//  pinMode(ELS_UI_ENCODER_B, INPUT); // encoder pin 2
+
+#ifdef ELS_IND_GREEN
+  pinMode(ELS_IND_GREEN, OUTPUT);
+  pinMode(ELS_IND_RED, OUTPUT);
 #endif
+#endif
+
 
 #ifdef ELS_USE_BUTTON_ARRAY
   keyArray.initPad();

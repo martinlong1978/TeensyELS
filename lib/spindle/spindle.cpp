@@ -90,7 +90,7 @@ float Spindle::getEstimatedVelocityInRPM() {
   if (m_lastRevMicros == 0)return 0;
   return abs((m_lastRevSize * 60000000) / (m_lastRevMicros * ELS_SPINDLE_ENCODER_PPR));
 #else
-  return getEstimatedVelocityInPulsesPerSecond() / ELS_SPINDLE_ENCODER_PPR;
+  return (getEstimatedVelocityInPulsesPerSecond() * 60) / ELS_SPINDLE_ENCODER_PPR;
 #endif
 }
 

@@ -145,7 +145,7 @@ void Display::drawSyncStatus() {
     m_ssd1306.drawLine(0, 16, 64, 16, WHITE);
   }
 #elif ELS_DISPLAY == ST7789_240_135
-  if(sync == m_sync)return;
+  if (sync == m_sync)return;
   m_sync = sync;
   if (sync == GlobalThreadSyncState::SS_UNSYNC) {
     tft.drawLine(0, 32, 70, 48, TFT_RED);
@@ -250,19 +250,32 @@ void Display::drawEnabled() {
   m_motionMode = mode;
   tft.fillRoundRect(52, 80, 40, 40, 4, TFT_WHITE);
   uint8_t scaled[128];
+  GlobalButtonLock lock = GlobalState::getInstance()->getButtonLock();
   switch (mode) {
   case GlobalMotionMode::MM_DISABLED:
+#ifdef ELS_IND_GREEN
+    digitalWrite(ELS_IND_GREEN, 0);
+    digitalWrite(ELS_IND_RED, lock == LK_LOCKED ? 1 : 0);
+#endif
     ScaleBMP(pauseSymbol, scaled, 16, 16);
     tft.drawBitmap(56, 84, scaled, 32, 32, TFT_BLACK);
     break;
   case GlobalMotionMode::MM_JOG:
     // todo bitmap for jogging
+#ifdef ELS_IND_GREEN
+    digitalWrite(ELS_IND_GREEN, 1);
+    digitalWrite(ELS_IND_RED, 1);
+#endif
     tft.setCursor(56, 84);
     tft.setTextSize(4);
     tft.setTextColor(TFT_BLACK);
     tft.print("J");
     break;
   case GlobalMotionMode::MM_ENABLED:
+#ifdef ELS_IND_GREEN
+    digitalWrite(ELS_IND_GREEN, 1);
+    digitalWrite(ELS_IND_RED, 0);
+#endif
     ScaleBMP(runSymbol, scaled, 16, 16);
     tft.drawBitmap(56, 84, scaled, 32, 32, TFT_BLACK);
     break;

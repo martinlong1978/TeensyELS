@@ -19,18 +19,22 @@ typedef struct buttonInfo {
 
 class KeyArray {
 private:
+    Leadscrew* m_leadscrew;
     volatile ButtonInfo buttonState;
     volatile unsigned long keycodeMillis;
     hw_timer_t* Timer0_Cfg;
     ESP32Encoder m_encoder;
     void setupKeys();
     int getCodeFromArray();
+    void updateEncoderPos(int64_t pos);
+    int64_t encoderPos;
 public:
     KeyArray();
     void initPad();
     void handle();
     void handleTimer();
     ButtonInfo consumeButton();
+    KeyArray( Leadscrew *leadscrew);
 };
 
 extern KeyArray keyArray;
