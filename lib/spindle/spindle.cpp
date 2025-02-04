@@ -15,7 +15,7 @@ Spindle::Spindle() {
 #endif
 
 #ifdef ESP32
-  Serial.begin(115200);
+  Serial.begin(921600);
   ESP32Encoder::useInternalWeakPullResistors = puType::none;
   m_encoder.attachFullQuad(pinA, pinB);
   gpio_pullup_en((gpio_num_t)pinA);

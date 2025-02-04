@@ -29,7 +29,7 @@ Spindle spindle(ELS_SPINDLE_ENCODER_A, ELS_SPINDLE_ENCODER_B);
 LeadscrewIOImpl leadscrewIOImpl;
 Leadscrew leadscrew(&spindle, &leadscrewIOImpl,
   LEADSCREW_INITIAL_PULSE_DELAY_US,
-  LEADSCREW_PULSE_DELAY_STEP_US, ELS_LEADSCREW_STEPPER_PPR * ELS_GEARBOX_RATIO,
+  LEADSCREW_PULSE_DELAY_STEP_US, ELS_LEADSCREW_STEPPER_PPR* ELS_GEARBOX_RATIO,
   ELS_LEADSCREW_PITCH_MM, ELS_SPINDLE_ENCODER_PPR);
 
 #ifdef ESP32  
@@ -39,10 +39,19 @@ ButtonPad keyPad(&spindle, &leadscrew, &keyArray);
 ButtonHandler keyPad(&spindle, &leadscrew);
 #endif
 Display display(&spindle, &leadscrew);
+//int64_t lastcycle;
+//int cyclecount;
 
 // have to handle the leadscrew updates in a timer callback so we can update the
 // screen independently without losing pulses
 void timerCallback() {
+  //cyclecount++;
+  //int64_t t = esp_timer_get_time();
+  //if (t - lastcycle > 1000000) {
+  //  Serial.printf("%d\n", cyclecount);
+  //  lastcycle = t;
+  //  cyclecount = 0;
+  //}
   spindle.update();
   leadscrew.update();
 }
@@ -52,7 +61,7 @@ void displayLoop() {
   keyPad.handle();
 
   static elapsedMicros lastPrint;
-  if (false){//lastPrint > 1000 * 500) {
+  if (false) {//lastPrint > 1000 * 500) {
     lastPrint = 0;
     globalState->printState();
     Serial.print("Micros: ");
@@ -90,6 +99,7 @@ void SpindleTask(void* parameter) {
 
 
 void setup() {
+
   // config - compile time checks for safety
   CHECK_BOUNDS(DEFAULT_METRIC_THREAD_PITCH_IDX, threadPitchMetric,
     "DEFAULT_METRIC_THREAD_PITCH_IDX out of bounds");
@@ -110,8 +120,8 @@ void setup() {
   pinMode(ELS_LEADSCREW_DIR, OUTPUT);  // direction output pin
 
 #ifdef ELS_UI_ENCODER
-//  pinMode(ELS_UI_ENCODER_A, INPUT); // encoder pin 1
-//  pinMode(ELS_UI_ENCODER_B, INPUT); // encoder pin 2
+  //  pinMode(ELS_UI_ENCODER_A, INPUT); // encoder pin 1
+  //  pinMode(ELS_UI_ENCODER_B, INPUT); // encoder pin 2
 
 #ifdef ELS_IND_GREEN
   pinMode(ELS_IND_GREEN, OUTPUT);

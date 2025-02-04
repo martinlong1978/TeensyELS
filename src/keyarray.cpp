@@ -74,6 +74,7 @@ void KeyArray::updateEncoderPos(int64_t pos) {
     GlobalButtonLock lockState = GlobalState::getInstance()->getButtonLock();
     if (lockState == GlobalButtonLock::LK_LOCKED) {
         Serial.println("Locked, ingoring rat inc");
+        encoderPos += pos;
         return;
     }
     int64_t p = pos;
