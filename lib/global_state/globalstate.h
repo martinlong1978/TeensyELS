@@ -4,6 +4,10 @@
 
 #pragma once
 
+
+enum EncoderColour { EC_NONE = 0, EC_RED = 1, EC_GREEN = 2, EC_YELLOW = 3 };
+
+
 // Major modes are the main modes of the application, like the feed or thread
 // The spindle acts the same way in both threading and feeding mode
 // this is just for the indicator on the screen

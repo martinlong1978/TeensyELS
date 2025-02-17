@@ -67,6 +67,7 @@ void Display::update() {
   drawSyncStatus();
 
   drawStopStatus();
+  writeLed();
 
 #if ELS_DISPLAY == SSD1306_128_64
   m_ssd1306.display();
@@ -248,7 +249,7 @@ void Display::drawEnabled() {
 #elif ELS_DISPLAY == ST7789_240_135
   if (mode == m_motionMode)return;
   m_motionMode = mode;
-  tft.fillRoundRect(52, 80, 40, 40, 4, TFT_WHITE);
+  tft.fillRoundRect(52, 80, 40, 40, 4, mode == GlobalMotionMode::MM_ENABLED ? TFT_GREEN : TFT_WHITE);
   uint8_t scaled[128];
   GlobalButtonLock lock = GlobalState::getInstance()->getButtonLock();
   switch (mode) {
@@ -273,6 +274,15 @@ void Display::drawEnabled() {
 }
 
 
+void Display::writeLed() {
+  int64_t time = esp_timer_get_time() / 500000;
+  EncoderColour c = time % 2 == 1 ? firstColour : secondColour;
+  digitalWrite(ELS_IND_GREEN, (c & 2) == 2);
+  digitalWrite(ELS_IND_RED, c & 1);
+
+}
+
+
 void Display::updateLed() {
 #ifdef ELS_IND_GREEN
 
@@ -282,17 +292,16 @@ void Display::updateLed() {
 
   switch (mode) {
   case GlobalMotionMode::MM_DISABLED:
-    digitalWrite(ELS_IND_GREEN, 0);
-    digitalWrite(ELS_IND_RED, lock == LK_LOCKED ? 1 : 0);
+    firstColour = lock == LK_LOCKED ? EC_RED : EC_NONE;
+    secondColour = lock == LK_LOCKED ? EC_RED : EC_NONE;
     break;
   case GlobalMotionMode::MM_JOG:
-    // todo bitmap for jogging
-    digitalWrite(ELS_IND_GREEN, 1);
-    digitalWrite(ELS_IND_RED, 1);
+    firstColour = EC_YELLOW;
+    secondColour = EC_YELLOW;
     break;
   case GlobalMotionMode::MM_ENABLED:
-    digitalWrite(ELS_IND_GREEN, 1);
-    digitalWrite(ELS_IND_RED, 0);
+    firstColour = lock == LK_LOCKED ? EC_RED : EC_GREEN;
+    secondColour = EC_GREEN;
     break;
   }
 #endif
@@ -315,7 +324,7 @@ void Display::drawLocked() {
   if (lock == m_locked)return;
   m_locked = lock;
 
-  tft.fillRoundRect(4, 80, 40, 40, 4, TFT_WHITE);
+  tft.fillRoundRect(4, 80, 40, 40, 4, lock == LK_LOCKED ? TFT_RED : TFT_GREEN);
   uint8_t scaled[128];
   switch (lock) {
   case GlobalButtonLock::LK_LOCKED:

@@ -31,6 +31,8 @@ private:
   Spindle* m_spindle;
   Leadscrew* m_leadscrew;
   GlobalState* m_globalState;
+  EncoderColour firstColour = EC_NONE;
+  EncoderColour secondColour = EC_NONE;
 #if ELS_DISPLAY == ST7789_240_135
   char m_rpmString[10];
   char m_pitchString[10];
@@ -69,4 +71,5 @@ protected:
   void drawStopStatus();
   void drawSyncStatus();
   void updateLed();
+  void writeLed();
 };
