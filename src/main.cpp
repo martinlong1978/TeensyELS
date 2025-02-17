@@ -82,11 +82,17 @@ void displayLoop() {
 
 #ifdef ESP32
 void DisplayTask(void* parameter) {
+  uint64_t m = 1;
   while (true) {
     displayLoop();
     esp_task_wdt_reset();
-    vTaskDelay(250);
-  }
+    uint64_t c = esp_timer_get_time();
+    uint64_t delay = (250000 - (c - m)) / 1000;
+    if (delay > 0) {
+      vTaskDelay((delay > 250 ? 250 : delay) / portTICK_PERIOD_MS);
+    }
+    m = c + 250000;
+  } 
 }
 
 void SpindleTask(void* parameter) {
@@ -129,8 +135,8 @@ void setup() {
 #endif
 #endif
 
-pinMode (ELS_STEPPER_ENA, OUTPUT);
-digitalWrite(ELS_STEPPER_ENA, 0);
+  pinMode(ELS_STEPPER_ENA, OUTPUT);
+  digitalWrite(ELS_STEPPER_ENA, 0);
 
 #ifdef ELS_USE_BUTTON_ARRAY
   keyArray.initPad();
