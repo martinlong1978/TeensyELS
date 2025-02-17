@@ -63,6 +63,8 @@
 #define ELS_LEADSCREW_STEP 25 
 #define ELS_LEADSCREW_DIR 26
 
+#define ELS_STEPPER_ENA 17
+
 #define ELS_IND_RED 22   
 #define ELS_IND_GREEN 21  
 

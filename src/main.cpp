@@ -129,6 +129,8 @@ void setup() {
 #endif
 #endif
 
+pinMode (ELS_STEPPER_ENA, OUTPUT);
+digitalWrite(ELS_STEPPER_ENA, 0);
 
 #ifdef ELS_USE_BUTTON_ARRAY
   keyArray.initPad();
