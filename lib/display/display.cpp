@@ -253,34 +253,50 @@ void Display::drawEnabled() {
   GlobalButtonLock lock = GlobalState::getInstance()->getButtonLock();
   switch (mode) {
   case GlobalMotionMode::MM_DISABLED:
-#ifdef ELS_IND_GREEN
-    digitalWrite(ELS_IND_GREEN, 0);
-    digitalWrite(ELS_IND_RED, lock == LK_LOCKED ? 1 : 0);
-#endif
     ScaleBMP(pauseSymbol, scaled, 16, 16);
     tft.drawBitmap(56, 84, scaled, 32, 32, TFT_BLACK);
     break;
   case GlobalMotionMode::MM_JOG:
     // todo bitmap for jogging
-#ifdef ELS_IND_GREEN
-    digitalWrite(ELS_IND_GREEN, 1);
-    digitalWrite(ELS_IND_RED, 1);
-#endif
     tft.setCursor(56, 84);
     tft.setTextSize(4);
     tft.setTextColor(TFT_BLACK);
     tft.print("J");
     break;
   case GlobalMotionMode::MM_ENABLED:
-#ifdef ELS_IND_GREEN
-    digitalWrite(ELS_IND_GREEN, 1);
-    digitalWrite(ELS_IND_RED, 0);
-#endif
     ScaleBMP(runSymbol, scaled, 16, 16);
     tft.drawBitmap(56, 84, scaled, 32, 32, TFT_BLACK);
     break;
   }
 #endif
+  updateLed();
+}
+
+
+void Display::updateLed() {
+#ifdef ELS_IND_GREEN
+
+  GlobalState* state = GlobalState::getInstance();
+  GlobalMotionMode mode = state->getMotionMode();
+  GlobalButtonLock lock = GlobalState::getInstance()->getButtonLock();
+
+  switch (mode) {
+  case GlobalMotionMode::MM_DISABLED:
+    digitalWrite(ELS_IND_GREEN, 0);
+    digitalWrite(ELS_IND_RED, lock == LK_LOCKED ? 1 : 0);
+    break;
+  case GlobalMotionMode::MM_JOG:
+    // todo bitmap for jogging
+    digitalWrite(ELS_IND_GREEN, 1);
+    digitalWrite(ELS_IND_RED, 1);
+    break;
+  case GlobalMotionMode::MM_ENABLED:
+    digitalWrite(ELS_IND_GREEN, 1);
+    digitalWrite(ELS_IND_RED, 0);
+    break;
+  }
+#endif
+
 }
 
 void Display::drawLocked() {
@@ -311,5 +327,6 @@ void Display::drawLocked() {
     tft.drawBitmap(8, 84, scaled, 32, 32, TFT_BLACK);
     break;
   }
+  updateLed();
 #endif
 }

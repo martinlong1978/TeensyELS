@@ -68,4 +68,5 @@ protected:
   void drawSpindleRpm();
   void drawStopStatus();
   void drawSyncStatus();
+  void updateLed();
 };
