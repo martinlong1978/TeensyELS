@@ -159,6 +159,11 @@ void Leadscrew::incrementCurrentPosition(int amount) {
 float Leadscrew::getAccumulatorUnit() { return getRatio() / leadscrewPitch; }
 
 bool Leadscrew::sendPulse() {
+
+#ifdef USE_RMT
+  rmtWrite(rmtObj, rmt_data, sizeof(rmt_data));
+  return true;
+#else
   uint8_t pinState = m_io->readStepPin();
 
   // Keep the pulse pin high as long as we're not scheduled to send a pulse
@@ -170,6 +175,7 @@ bool Leadscrew::sendPulse() {
   }
 
   return pinState == 1;
+#endif
 }
 
 /**
@@ -307,8 +313,8 @@ void Leadscrew::update() {
      * - the sync position was previously set and we are currently not synced with the spindle
      */
 #if ESP32
-    if ((esp_timer_get_time() - m_lastPulseTimestamp) < m_currentPulseDelay
-      || m_currentDirection == LeadscrewDirection::UNKNOWN
+    if (m_currentDirection == LeadscrewDirection::UNKNOWN
+      || (esp_timer_get_time() - m_lastPulseTimestamp) < m_currentPulseDelay
       || (m_syncPositionState != LeadscrewSpindleSyncPositionState::UNSET && globalState->getThreadSyncState() == SS_UNSYNC)) {
       break;
     }

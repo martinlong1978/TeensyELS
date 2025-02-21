@@ -9,6 +9,8 @@
 #undef ELS_INVERT_DIRECTION
 #endif
 
+#define NR_OF_ALL_BITS 24;
+
 /**
  * The state of the leadscrew stop position for either the left or right stop
  */
@@ -25,15 +27,21 @@ enum class LeadscrewDirection { LEFT = -1, RIGHT = 1, UNKNOWN = 0 };
  * The spindle sync position is a known position of the spindle that syncs with the current thread
  * Since the spindle is a "rotational" axis and the leadscrew is a "linear" axis, we need to know
  * an anchor point of where the spindle and the leadscrew are both in sync.
- * 
+ *
  * We reuse the endstop states for this, since they are similar in nature and keep the first one that is set
  */
 
-enum class LeadscrewSpindleSyncPositionState {LEFT, RIGHT, UNSET};
+enum class LeadscrewSpindleSyncPositionState { LEFT, RIGHT, UNSET };
 
 
 class Leadscrew : public LinearAxis, public DerivedAxis, public DrivenAxis {
- private:
+private:
+
+#ifdef USE_RMT
+  rmt_data_t rmt_data[24];
+  rmt_obj_t *rmtObj;
+#endif
+
   Spindle* m_spindle;
   LeadscrewIO* m_io;
 
@@ -58,7 +66,7 @@ class Leadscrew : public LinearAxis, public DerivedAxis, public DrivenAxis {
   // fine
   LeadscrewStopState m_leftStopState;
   int m_leftStopPosition;
-  
+
   LeadscrewStopState m_rightStopState;
   int m_rightStopPosition;
 
@@ -74,12 +82,22 @@ class Leadscrew : public LinearAxis, public DerivedAxis, public DrivenAxis {
   int getStoppingDistanceInPulses();
   void setStopPosition(LeadscrewStopPosition position, int stopPosition);
 
- public:
+public:
   Leadscrew(Spindle* spindle, LeadscrewIO* io, float initialPulseDelay,
-            float pulseDelayIncrement, int motorPulsePerRevolution,
-            float leadscrewPitch, int leadAxisPPR);
+    float pulseDelayIncrement, int motorPulsePerRevolution,
+    float leadscrewPitch, int leadAxisPPR);
   int getCurrentPosition();
   void resetCurrentPosition();
+  #ifdef USE_RMT
+  void setRMT(rmt_obj_t *rmtObj){
+    this->rmtObj = rmtObj;
+    rmt_data->duration0 = 2;
+    rmt_data->level0 = 1;
+    rmt_data->duration1 = 3;
+    rmt_data->level1 = 0;
+  
+  }
+  #endif
 
 
   void setStopPosition(LeadscrewStopPosition position);

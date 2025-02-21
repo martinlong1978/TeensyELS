@@ -92,7 +92,7 @@ void DisplayTask(void* parameter) {
       vTaskDelay((delay > 250 ? 250 : delay) / portTICK_PERIOD_MS);
     }
     m = c + 250000;
-  } 
+  }
 }
 
 void SpindleTask(void* parameter) {
@@ -122,7 +122,15 @@ void setup() {
 //  pinMode(ELS_SPINDLE_ENCODER_A, INPUT_PULLUP); // encoder pin 1
 //  pinMode(ELS_SPINDLE_ENCODER_B, INPUT_PULLUP); // encoder pin 2
 #endif
+
+#ifdef USE_RMT
+  rmt_obj_t* leadscreRMT = rmtInit(ELS_LEADSCREW_STEP, true, RMT_MEM_64);
+  leadscrew.setRMT(leadscreRMT);
+  rmtSetTick(leadscreRMT, 2500);
+
+#else
   pinMode(ELS_LEADSCREW_STEP, OUTPUT); // step output pin
+#endif
   pinMode(ELS_LEADSCREW_DIR, OUTPUT);  // direction output pin
 
 #ifdef ELS_UI_ENCODER

@@ -60,6 +60,7 @@
 #define ELS_JOG_RIGHT_BUTTON 25
 
 #elif defined(ESP32)
+#define USE_RMT
 #define ELS_LEADSCREW_STEP 25 
 #define ELS_LEADSCREW_DIR 26
 
