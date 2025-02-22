@@ -5,6 +5,8 @@
 
 #include <config.h>
 #include <globalstate.h>
+#include <HttpsOTAUpdate.h>
+#include "SECRETS.h"
 
 ButtonPad::ButtonPad(Spindle* spindle, Leadscrew* leadscrew, KeyArray* pad)
   : m_spindle(spindle),
@@ -82,6 +84,10 @@ void ButtonPad::halfNutHandler(ButtonInfo press) {
     return;
   }
 
+  if (press.buttonState == BS_HELD) {
+    GlobalState::getInstance()->setOTA();
+  }
+
   // honestly I don't know what this button should do after the refactor...
 
   /*if (event == Button::SINGLE_CLICKED_EVENT &&
@@ -157,7 +163,7 @@ void ButtonPad::modeCycleHandler(ButtonInfo press) {
     Serial.println("Locked, ingoring mode");
     return;
   }
-  
+
   // pressing mode button swaps between feed and thread
   if (press.buttonState == BS_CLICKED) {
     switch (GlobalState::getInstance()->getFeedMode()) {

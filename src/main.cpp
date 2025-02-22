@@ -8,6 +8,8 @@
 #include <leadscrew_io_impl.h>
 #include <spindle.h>
 
+#include "CommsManager.h"
+
 #include "buttons.h"
 #include "buttonpad.h"
 #include "config.h"
@@ -35,23 +37,24 @@ Leadscrew leadscrew(&spindle, &leadscrewIOImpl,
 #ifdef ESP32  
 KeyArray keyArray(&leadscrew);
 ButtonPad keyPad(&spindle, &leadscrew, &keyArray);
+CommsManager commsManager;
 #else
 ButtonHandler keyPad(&spindle, &leadscrew);
 #endif
 Display display(&spindle, &leadscrew);
-//int64_t lastcycle;
-//int cyclecount;
+int64_t lastcycle;
+int cyclecount;
 
 // have to handle the leadscrew updates in a timer callback so we can update the
 // screen independently without losing pulses
 void timerCallback() {
-  //cyclecount++;
-  //int64_t t = esp_timer_get_time();
-  //if (t - lastcycle > 1000000) {
-  //  Serial.printf("%d\n", cyclecount);
-  //  lastcycle = t;
-  //  cyclecount = 0;
-  //}
+  cyclecount++;
+  int64_t t = esp_timer_get_time();
+  if (t - lastcycle > 1000000) {
+    Serial.printf("%d\n", cyclecount);
+    lastcycle = t;
+    cyclecount = 0;
+  }
   spindle.update();
   leadscrew.update();
 }
@@ -103,6 +106,7 @@ void SpindleTask(void* parameter) {
 }
 #endif
 
+void comms_loop(void *parameters) { commsManager.loop(); }
 
 void setup() {
 
@@ -169,15 +173,20 @@ void setup() {
   display.update();
 
 #ifdef ESP32
+  commsManager.setup();
+
   TaskHandle_t spindleTask;
   TaskHandle_t displayTask;
+  TaskHandle_t commsTask;
   xTaskCreate(SpindleTask, "Spindle", 2048, NULL, 10, &spindleTask);
   xTaskCreate(DisplayTask, "Display", 8000, NULL, 1, &displayTask);
+  xTaskCreate(comms_loop, "Comms", 16000, NULL, 1, &commsTask);
   disableLoopWDT();
   esp_task_wdt_delete(xTaskGetHandle("IDLE0"));
   esp_task_wdt_delete(xTaskGetHandle("IDLE1"));
   esp_task_wdt_delete(spindleTask);
   esp_task_wdt_delete(displayTask);
+  esp_task_wdt_delete(commsTask);
 
 #else
   timer.begin(timerCallback, LEADSCREW_TIMER_US);

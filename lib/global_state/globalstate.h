@@ -45,6 +45,8 @@ enum GlobalButtonLock { LK_UNSET, LK_UNLOCKED, LK_LOCKED };
 class GlobalState {
  private:
   static GlobalState *m_instance;
+  volatile bool OTA = false;
+  volatile int OTAbytes = 0;
 
   GlobalFeedMode m_feedMode;
   GlobalMotionMode m_motionMode;
@@ -92,6 +94,13 @@ class GlobalState {
 
   void setButtonLock(GlobalButtonLock lock);
   GlobalButtonLock getButtonLock();
+
+  bool hasOTA(){return OTA;};
+  void setOTA(){OTA = true;};
+  void clearOTA(){OTA = false;};
+
+  void setOTABytes(int bytes){OTAbytes = bytes;}
+  int getOTABytes(){return OTAbytes;}
 
   void setFeedSelect(int select);
   int getFeedSelect();

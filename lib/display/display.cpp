@@ -59,14 +59,29 @@ void Display::update() {
   //  tft.fillScreen(TFT_BLACK); // Rely on localised blanking to avoid blink, for now.
 #endif
 
-  drawMode();
-  drawPitch();
-  drawLocked();
-  drawEnabled();
-  drawSpindleRpm();
-  drawSyncStatus();
+  int bytes = GlobalState::getInstance()->getOTABytes();
+  if (bytes > 0) {
+#if ELS_DISPLAY == ST7789_240_135
+    tft.fillRect(0, 0, 240, 135, TFT_BLACK);
+    tft.setCursor(10, 10);
+    tft.setTextSize(3);
+    tft.setTextColor(TFT_WHITE);
+    tft.print("UPDATING");
+    tft.setCursor(10, 40);
+    char bytesstring[10];
+    sprintf(bytesstring, "%db", bytes);
+    tft.print(bytesstring);
+#endif
+  } else {
+    drawMode();
+    drawPitch();
+    drawLocked();
+    drawEnabled();
+    drawSpindleRpm();
+    drawSyncStatus();
 
-  drawStopStatus();
+    drawStopStatus();
+  }
   writeLed();
 
 #if ELS_DISPLAY == SSD1306_128_64
@@ -217,7 +232,7 @@ void Display::drawPitch() {
 #elif ELS_DISPLAY == ST7789_240_135
   if (!strcmp(pitch, m_pitchString))return;
   strcpy(m_pitchString, pitch);
-  tft.fillRect(110, 32, 130, 20, TFT_BLACK);
+  tft.fillRect(110, 32, 130, 21, TFT_BLACK);
   tft.setCursor(110, 32);
   tft.setTextSize(3);
   tft.setTextColor(TFT_WHITE);
