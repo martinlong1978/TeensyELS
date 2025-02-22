@@ -47,7 +47,7 @@ void Display::init() {
   m_ssd1306.clearDisplay();
 #elif ELS_DISPLAY == ST7789_240_135
   tft.init();
-  tft.setRotation(1);
+  tft.setRotation(3);
   tft.fillScreen(TFT_BLACK);
 #endif
 }
