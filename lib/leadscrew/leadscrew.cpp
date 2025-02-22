@@ -333,9 +333,10 @@ void Leadscrew::update() {
        * If we've sent a pulse, we need to update the last pulse micros for velocity calculations
        */
 #ifdef ESP32
-      m_lastFullPulseDurationMicros =
-        min((uint32_t)(esp_timer_get_time() - m_lastPulseTimestamp), (uint32_t)initialPulseDelay);
-      m_lastPulseTimestamp = esp_timer_get_time();
+      int64_t tm =  esp_timer_get_time();
+      m_lastFullPulseDurationMicros = 
+        min((uint32_t)(tm - m_lastPulseTimestamp), (uint32_t)initialPulseDelay);
+      m_lastPulseTimestamp = tm;
 #else
       m_lastFullPulseDurationMicros =
         min((uint32_t)m_lastPulseMicros, (uint32_t)initialPulseDelay);

@@ -88,6 +88,7 @@ void Spindle::incrementCurrentPosition(int amount) {
 float Spindle::getEstimatedVelocityInRPM() {
 #ifdef ESP32
   if (m_lastRevMicros == 0)return 0;
+  if(esp_timer_get_time() - m_lastRevTimestamp > 1000000)return 0;
   return abs((m_lastRevSize * 60000000) / (m_lastRevMicros * ELS_SPINDLE_ENCODER_PPR));
 #else
   return (getEstimatedVelocityInPulsesPerSecond() * 60) / ELS_SPINDLE_ENCODER_PPR;

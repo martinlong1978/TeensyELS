@@ -19,8 +19,11 @@ class LeadscrewIOImpl : public LeadscrewIO {
 #endif
 
   inline void writeDirPin(uint8_t val) {
-#ifdef ESP32    
-    digitalWrite(ELS_LEADSCREW_DIR, val);
+#ifdef ESP32
+    if(val == 1)
+      REG_SET_BIT(GPIO_OUT_REG, ELS_LEADSCREW_DIR_BIT);
+    else
+      REG_CLR_BIT(GPIO_OUT_REG, ELS_LEADSCREW_DIR_BIT);
 #else
     digitalWriteFast(ELS_LEADSCREW_DIR, val);
 #endif
