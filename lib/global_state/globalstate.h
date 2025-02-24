@@ -47,6 +47,7 @@ class GlobalState {
   static GlobalState *m_instance;
   volatile bool OTA = false;
   volatile int OTAbytes = 0;
+  volatile int OTAlength = 0;
 
   GlobalFeedMode m_feedMode;
   GlobalMotionMode m_motionMode;
@@ -101,6 +102,8 @@ class GlobalState {
 
   void setOTABytes(int bytes){OTAbytes = bytes;}
   int getOTABytes(){return OTAbytes;}
+  int getOTALength(){return OTAlength;}
+  void setOTAContentLength(int length){OTAlength = length;}
 
   void setFeedSelect(int select);
   int getFeedSelect();

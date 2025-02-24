@@ -1,5 +1,5 @@
 // Libraries
-
+#include "telnet.h"
 #include <Arduino.h>
 #include <SPI.h>
 #include <Wire.h>
@@ -15,12 +15,16 @@
 #include "config.h"
 #include "display.h"
 #include "keyarray.h"
+#include "EscapeCodes.h"
 
 #ifdef ESP32
 #include <esp_task_wdt.h>
 #else
 IntervalTimer timer;
 #endif
+
+ESPTelnet telnet;
+EscapeCodes ansi;
 
 GlobalState* globalState = GlobalState::getInstance();
 #ifdef ELS_SPINDLE_DRIVEN
@@ -44,6 +48,7 @@ ButtonHandler keyPad(&spindle, &leadscrew);
 Display display(&spindle, &leadscrew);
 int64_t lastcycle;
 int cyclecount;
+int finalcyclecount;
 
 // have to handle the leadscrew updates in a timer callback so we can update the
 // screen independently without losing pulses
@@ -51,7 +56,7 @@ void timerCallback() {
   cyclecount++;
   int64_t t = esp_timer_get_time();
   if (t - lastcycle > 1000000) {
-    Serial.printf("%d\n", cyclecount);
+    finalcyclecount = cyclecount;
     lastcycle = t;
     cyclecount = 0;
   }
@@ -64,20 +69,18 @@ void displayLoop() {
   keyPad.handle();
 
   static elapsedMicros lastPrint;
-  if (false) {//lastPrint > 1000 * 500) {
+  if (lastPrint > 1000 * 1000) {
+    //telnet.print(ansi.cls());
+    telnet.print(ansi.home());
     lastPrint = 0;
     globalState->printState();
-    Serial.print("Micros: ");
-    Serial.println(micros());
+    DEBUG_F("Micros: %d\n", micros());
+    DEBUG_F("Cycle count: %d\n", finalcyclecount);
     leadscrew.printState();
-    Serial.print("Spindle position: ");
-    Serial.println(spindle.getCurrentPosition());
-    Serial.print("Spindle unconsumed:");
-    Serial.println(spindle.consumePosition());
-    Serial.print("Spindle velocity: ");
-    Serial.println(spindle.getEstimatedVelocityInRPM());
-    Serial.print("Spindle velocity pulses: ");
-    Serial.println(spindle.getEstimatedVelocityInPulsesPerSecond());
+    DEBUG_F("Spindle position: %d\n", spindle.getCurrentPosition());
+    DEBUG_F("Spindle unconsumed: %d\n", spindle.consumePosition());
+    DEBUG_F("Spindle velocity: %f\n", spindle.getEstimatedVelocityInRPM());
+    DEBUG_F("Spindle velocity pulses: %d\n", spindle.getEstimatedVelocityInPulsesPerSecond());
     keyPad.printState();
   }
   display.update();
@@ -168,7 +171,7 @@ void setup() {
 
   display.init();
 
-  leadscrew.setRatio(globalState->getCurrentFeedPitch());
+  leadscrew.setTargetPitchMM(globalState->getCurrentFeedPitch());
 
   display.update();
 
@@ -194,10 +197,6 @@ void setup() {
 
   delay(2000);
 
-  Serial.print("Initial pulse delay: ");
-  Serial.println(LEADSCREW_INITIAL_PULSE_DELAY_US);
-  Serial.print("Pulse delay step: ");
-  Serial.println(LEADSCREW_PULSE_DELAY_STEP_US);
 }
 
 void loop() {

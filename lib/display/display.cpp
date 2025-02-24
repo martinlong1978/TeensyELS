@@ -1,7 +1,7 @@
 #include <config.h>
 #include <display.h>
 #include <globalstate.h>
-
+#include "telnet.h"
 // Images
 #include <icons/feedSymbol.h>
 #include <icons/lockedSymbol.h>
@@ -59,18 +59,22 @@ void Display::update() {
   //  tft.fillScreen(TFT_BLACK); // Rely on localised blanking to avoid blink, for now.
 #endif
 
-  int bytes = GlobalState::getInstance()->getOTABytes();
-  if (bytes > 0) {
+int bytes = GlobalState::getInstance()->getOTABytes();
+int length = GlobalState::getInstance()->getOTALength();
+if (bytes > 0) {
 #if ELS_DISPLAY == ST7789_240_135
-    tft.fillRect(0, 0, 240, 135, TFT_BLACK);
-    tft.setCursor(10, 10);
-    tft.setTextSize(3);
-    tft.setTextColor(TFT_WHITE);
-    tft.print("UPDATING");
-    tft.setCursor(10, 40);
-    char bytesstring[10];
-    sprintf(bytesstring, "%db", bytes);
-    tft.print(bytesstring);
+    if(!updating){
+      tft.fillRect(0, 0, 240, 135, TFT_BLACK);
+      tft.setCursor(10, 10);
+      tft.setTextSize(3);
+      tft.setTextColor(TFT_WHITE);
+      tft.print("UPDATING");
+      updating = true;
+    }
+    tft.drawRect(0,70,240,40, TFT_WHITE);
+    int percent = (((float)(bytes * 240))/((float)length));
+    tft.fillRect(0,70,percent,40, TFT_WHITE);
+
 #endif
   } else {
     drawMode();

@@ -1,3 +1,4 @@
+#include "telnet.h"
 #include <config.h>
 #ifdef ELS_USE_BUTTON_ARRAY
 #include <keyarray.h>
@@ -45,7 +46,7 @@ void KeyArray::initPad() {
 
 void KeyArray::handleTimer() {
     timerStop(Timer0_Cfg);
-    Serial.println("Held");
+    //DEBUG_F("Held");
     int code = getCodeFromArray();
     if (buttonState.buttonState == ButtonState::BS_PRESSED && buttonState.button == code) {
         buttonState.buttonState = ButtonState::BS_HELD;
@@ -73,7 +74,7 @@ ButtonInfo KeyArray::consumeButton() {
 void KeyArray::updateEncoderPos(int64_t pos) {
     GlobalButtonLock lockState = GlobalState::getInstance()->getButtonLock();
     if (lockState == GlobalButtonLock::LK_LOCKED) {
-        Serial.println("Locked, ingoring rat inc");
+        //DEBUG_F("Locked, ingoring rat inc");
         encoderPos += pos;
         return;
     }
@@ -81,12 +82,12 @@ void KeyArray::updateEncoderPos(int64_t pos) {
     if (pos > 0) {
         while (p-- > 0) {
             GlobalState::getInstance()->nextFeedPitch();
-            m_leadscrew->setRatio(GlobalState::getInstance()->getCurrentFeedPitch());
+            m_leadscrew->setTargetPitchMM(GlobalState::getInstance()->getCurrentFeedPitch());
         }
     } else {
         while (p++ < 0) {
             GlobalState::getInstance()->prevFeedPitch();
-            m_leadscrew->setRatio(GlobalState::getInstance()->getCurrentFeedPitch());
+            m_leadscrew->setTargetPitchMM(GlobalState::getInstance()->getCurrentFeedPitch());
         }
     }
     encoderPos += pos;
@@ -125,7 +126,7 @@ void KeyArray::handle() {
             buttonState.buttonState = BS_CLICKED;
         }
     } else {
-        Serial.printf("Pressed %d\n", code);
+        //DEBUG_F("Pressed %d\n", code);
         buttonState.button = code;
         buttonState.buttonState = BS_PRESSED;
         keycodeMillis = time;

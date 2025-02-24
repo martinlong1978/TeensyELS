@@ -33,6 +33,7 @@ private:
   GlobalState* m_globalState;
   EncoderColour firstColour = EC_NONE;
   EncoderColour secondColour = EC_NONE;
+  bool updating = false;
 #if ELS_DISPLAY == ST7789_240_135
   char m_rpmString[10];
   char m_pitchString[10];

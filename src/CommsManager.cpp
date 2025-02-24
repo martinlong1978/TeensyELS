@@ -1,6 +1,6 @@
 #include "CommsManager.h"
+#include "telnet.h"
 
-#include <string>
 #include <globalstate.h>
 
 
@@ -11,27 +11,32 @@ void HttpEvent(HttpEvent_t *event) {
     GlobalState *gs =  GlobalState::getInstance();
     switch (event->event_id) {
         case HTTP_EVENT_ERROR:
-            DEBUGLN("Http Event Error");
+            DEBUG_F("Http Event Error");
             break;
         case HTTP_EVENT_ON_CONNECTED:
-            DEBUGLN("Http Event On Connected");
+            DEBUG_F("Http Event On Connected");
             break;
         case HTTP_EVENT_HEADER_SENT:
-            DEBUGLN("Http Event Header Sent");
+            DEBUG_F("Http Event Header Sent");
             break;
         case HTTP_EVENT_ON_HEADER:
-            DEBUGF("Http Event On Header, key=%s, value=%s\n",
+            DEBUG_F("Http Event On Header, key=%s, value=%s\n",
                    event->header_key, event->header_value);
+            if(!strcmp(event->header_key, "Content-Length")){
+                int length;
+                char * pEnd;
+                length = strtol(event->header_value, &pEnd, 10);
+                gs->setOTAContentLength(length);
+            }
             break;
         case HTTP_EVENT_ON_DATA:
             gs->setOTABytes(gs->getOTABytes() + event->data_len);
-            DEBUGF(".", event->data_len);
             break;
         case HTTP_EVENT_ON_FINISH:
-            DEBUGLN("Http Event On Finish");
+            DEBUG_F("Http Event On Finish");
             break;
         case HTTP_EVENT_DISCONNECTED:
-            DEBUGLN("Http Event Disconnected");
+            DEBUG_F("Http Event Disconnected");
             break;
     }
 }
@@ -42,22 +47,24 @@ CommsManager::~CommsManager() {}
 
 void CommsManager::wifiConnect() {
 
-    DEBUGLN("WIFI: Waiting for WiFi... ");
+    DEBUG_F("WIFI: Waiting for WiFi... ");
     while (WiFi.status() != WL_CONNECTED) {
         WiFi.begin(WIFI_AP_NAME, WIFI_PASSWORD);
-        DEBUGLN(".");
+        DEBUG_F(".");
         vTaskDelay(1500 / portTICK_PERIOD_MS);
     }
 
-    DEBUGLN("\nWIFI: WiFi connected");
-    DEBUGLN("WIFI: IP address: ");
-    DEBUGLN(WiFi.localIP());
+    DEBUG_F("\nWIFI: WiFi connected");
+    DEBUG_F("WIFI: IP address: ");
+    telnet.begin();
+    telnet.setNewlineCharacter('\r');
 }
 
 void CommsManager::loop() {
     wifiConnect();
     for (;;) {
         wifi_loop();
+        telnet.loop();
         if(GlobalState::getInstance()->hasOTA())
         {
             GlobalState::getInstance()->clearOTA();
@@ -66,21 +73,21 @@ void CommsManager::loop() {
         }
         otastatus = HttpsOTA.status();
         if (otastatus == HTTPS_OTA_SUCCESS) {
-            Serial.println("Firmware written successfully.");
+            DEBUG_F("Firmware written successfully.");
             ESP.restart();
         } else if (otastatus == HTTPS_OTA_FAIL) {
-            Serial.println("Firmware Upgrade Fail");
+            DEBUG_F("Firmware Upgrade Fail");
         }
     }
 }
 
 void CommsManager::wifi_loop() {
-    //DEBUGLN("wLOOP");
+    //DEBUG_F("wLOOP");
     if (WiFi.status() == WL_CONNECTED) {
         vTaskDelay(500 / portTICK_PERIOD_MS);
         return;
     }
-    DEBUGLN("WIFI: Wifi is not connecting... Try to connect");
+    DEBUG_F("WIFI: Wifi is not connecting... Try to connect");
     wifiConnect();
 }
 
@@ -89,6 +96,4 @@ void CommsManager::setup() {
 
     String mac = WiFi.macAddress();
     mac.replace(":", "");
-    //Serial.printf("Host is %s\n", host);
-   // Serial.printf("Running version %s\n", VERSION);
 }

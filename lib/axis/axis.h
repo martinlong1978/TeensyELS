@@ -74,7 +74,7 @@ public:
  */
 class DerivedAxis {
 public:
-  virtual void setRatio(float ratio) = 0;
+  virtual void setTargetPitchMM(float ratio) = 0;
   virtual float getRatio() = 0;
 };
 

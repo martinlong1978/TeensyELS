@@ -1,3 +1,4 @@
+#include "telnet.h"
 #include "buttons.h"
 
 #include <config.h>
@@ -45,40 +46,40 @@ void ButtonHandler::rateIncreaseHandler() {
 
   if (m_rateIncrease.resetSingleClicked()) {
     GlobalState::getInstance()->nextFeedPitch();
-    m_leadscrew->setRatio(GlobalState::getInstance()->getCurrentFeedPitch());
+    m_leadscrew->setTargetPitchMM(GlobalState::getInstance()->getCurrentFeedPitch());
   }
 }
 
 void ButtonHandler::printState() {
-  Serial.print("Enable: ");
+  DEBUG_F("Enable: ");
   if (m_enable.isHeld()) {
-    Serial.println("held");
+    DEBUG_F("held");
   } else if (m_enable.isPressed()) {
-    Serial.println("pressed");
+    DEBUG_F("pressed");
   } else if (m_enable.isDoubleClicked()) {
-    Serial.println("double clicked");
+    DEBUG_F("double clicked");
   } else {
-    Serial.println("released");
+    DEBUG_F("released");
   }
-  Serial.print("Left jog: ");
+  DEBUG_F("Left jog: ");
   if (m_jogLeft.isHeld()) {
-    Serial.println("held");
+    DEBUG_F("held");
   } else if (m_jogLeft.isPressed()) {
-    Serial.println("pressed");
+    DEBUG_F("pressed");
   } else if (m_jogLeft.isDoubleClicked()) {
-    Serial.println("double clicked");
+    DEBUG_F("double clicked");
   } else {
-    Serial.println("released");
+    DEBUG_F("released");
   }
-  Serial.print("Right jog: ");
+  DEBUG_F("Right jog: ");
   if (m_jogRight.isHeld()) {
-    Serial.println("held");
+    DEBUG_F("held");
   } else if (m_jogRight.isPressed()) {
-    Serial.println("pressed");
+    DEBUG_F("pressed");
   } else if (m_jogRight.isDoubleClicked()) {
-    Serial.println("double clicked");
+    DEBUG_F("double clicked");
   } else {
-    Serial.println("released");
+    DEBUG_F("released");
   }
 }
 
@@ -95,7 +96,7 @@ void ButtonHandler::rateDecreaseHandler() {
 
   if (m_rateDecrease.resetSingleClicked()) {
     GlobalState::getInstance()->prevFeedPitch();
-    m_leadscrew->setRatio(GlobalState::getInstance()->getCurrentFeedPitch());
+    m_leadscrew->setTargetPitchMM(GlobalState::getInstance()->getCurrentFeedPitch());
   }
 }
 
@@ -134,7 +135,7 @@ void ButtonHandler::enableHandler() {
   }
 
   if (m_enable.resetClicked()) {
-    Serial.println("Enable button clicked");
+    DEBUG_F("Enable button clicked");
     if (motionMode == GlobalMotionMode::MM_ENABLED) {
       GlobalState::getInstance()->setMotionMode(GlobalMotionMode::MM_DISABLED);
     }
@@ -204,7 +205,7 @@ void ButtonHandler::modeCycleHandler() {
         GlobalState::getInstance()->setFeedMode(GlobalFeedMode::FM_FEED);
         break;
     }
-    m_leadscrew->setRatio(globalState->getCurrentFeedPitch());
+    m_leadscrew->setTargetPitchMM(globalState->getCurrentFeedPitch());
   }
 
   // holding mode button swaps between metric and imperial
@@ -217,7 +218,7 @@ void ButtonHandler::modeCycleHandler() {
         GlobalState::getInstance()->setUnitMode(GlobalUnitMode::METRIC);
         break;
     }
-    m_leadscrew->setRatio(globalState->getCurrentFeedPitch());
+    m_leadscrew->setTargetPitchMM(globalState->getCurrentFeedPitch());
   }
 }
 

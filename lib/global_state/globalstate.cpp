@@ -1,6 +1,7 @@
 #ifndef PIO_UNIT_TESTING
 #include <Wire.h>
 #endif
+#include "telnet.h"
 #include <globalstate.h>
 
 GlobalState *GlobalState::m_instance = nullptr;
@@ -13,43 +14,43 @@ GlobalState *GlobalState::getInstance() {
 
 void GlobalState::printState() {
 #ifndef PIO_UNIT_TESTING
-  Serial.print("Drive Mode: ");
+  DEBUG_F("Drive Mode: ");
   switch (m_motionMode) {
     case MM_DISABLED:
-      Serial.println("DISABLED");
+      DEBUG_C("DISABLED\n");
       break;
     case MM_ENABLED:
-      Serial.println("ENABLED");
+      DEBUG_C("ENABLED\n");
       break;
     case MM_JOG:
-      Serial.println("JOG");
+      DEBUG_C("JOG\n");
       break;
   }
-  Serial.print("Feed Mode: ");
+  DEBUG_F("Feed Mode: ");
   switch (m_feedMode) {
     case FM_FEED:
-      Serial.println("FEED");
+      DEBUG_C("FEED\n");
       break;
     case FM_THREAD:
-      Serial.println("THREAD");
+      DEBUG_C("THREAD\n");
       break;
   }
-  Serial.print("Unit Mode: ");
+  DEBUG_F("Unit Mode: ");
   switch (m_unitMode) {
     case METRIC:
-      Serial.println("METRIC");
+      DEBUG_C("METRIC\n");
       break;
     case IMPERIAL:
-      Serial.println("IMPERIAL");
+      DEBUG_C("IMPERIAL\n");
       break;
   }
-  Serial.print("Thread Sync State: ");
+  DEBUG_F("Thread Sync State: ");
   switch (m_threadSyncState) {
     case SS_SYNC:
-      Serial.println("SYNC");
+      DEBUG_C("SYNC\n");
       break;
     case SS_UNSYNC:
-      Serial.println("UNSYNC");
+      DEBUG_C("UNSYNC\n");
       break;
   }
 #endif

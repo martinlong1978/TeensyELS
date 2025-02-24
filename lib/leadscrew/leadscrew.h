@@ -51,7 +51,7 @@ private:
   const int motorPulsePerRevolution;
   const float leadscrewPitch;
   // the number of pulses per revolution of the lead axis (spindle)
-  const int leadAxisPPR;
+  const int encoderPPR;
   float m_ratio;
 
   // The current delay between pulses in microseconds
@@ -85,7 +85,7 @@ private:
 public:
   Leadscrew(Spindle* spindle, LeadscrewIO* io, float initialPulseDelay,
     float pulseDelayIncrement, int motorPulsePerRevolution,
-    float leadscrewPitch, int leadAxisPPR);
+    float leadscrewPitch, int encoderPPR);
   int getCurrentPosition();
   void resetCurrentPosition();
   #ifdef USE_RMT
@@ -104,7 +104,7 @@ public:
   LeadscrewStopState getStopPositionState(LeadscrewStopPosition position);
   void unsetStopPosition(LeadscrewStopPosition position);
   int getStopPosition(LeadscrewStopPosition position);
-  void setRatio(float ratio);
+  void setTargetPitchMM(float ratio);
   float getRatio();
   float getExpectedPosition();
   void setExpectedPosition(float position);

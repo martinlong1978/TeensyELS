@@ -5,7 +5,7 @@
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
-
+#include "telnet.h"
 #include "leadscrew_io.h"
 using namespace std;
 
@@ -17,10 +17,10 @@ using namespace std;
 
 Leadscrew::Leadscrew(Spindle* spindle, LeadscrewIO* io, float initialPulseDelay,
   float pulseDelayIncrement, int motorPulsePerRevolution,
-  float leadscrewPitch, int leadAxisPPR)
+  float leadscrewPitch, int encoderPPR)
   : motorPulsePerRevolution(motorPulsePerRevolution),
   leadscrewPitch(leadscrewPitch),
-  leadAxisPPR(leadAxisPPR),
+  encoderPPR(encoderPPR),
   initialPulseDelay(initialPulseDelay),
   pulseDelayIncrement(pulseDelayIncrement),
   m_io(io),
@@ -32,7 +32,7 @@ Leadscrew::Leadscrew(Spindle* spindle, LeadscrewIO* io, float initialPulseDelay,
   m_leftStopPosition(INT32_MIN),
   m_rightStopPosition(INT32_MAX),
   m_currentPulseDelay(initialPulseDelay) {
-  setRatio(GlobalState::getInstance()->getCurrentFeedPitch());
+  setTargetPitchMM(GlobalState::getInstance()->getCurrentFeedPitch());
 #ifdef ESP32
   m_lastPulseTimestamp = esp_timer_get_time();
 #else
@@ -43,15 +43,15 @@ Leadscrew::Leadscrew(Spindle* spindle, LeadscrewIO* io, float initialPulseDelay,
   m_currentPosition = 0;
 }
 
-void Leadscrew::setRatio(float ratio) {
+void Leadscrew::setTargetPitchMM(float pitch) {
 
-  m_ratio = ratio;
+  m_ratio = pitch * (float)(((float)motorPulsePerRevolution) / ((float)encoderPPR * leadscrewPitch)); 
 
 }
 /**
  * Returns the ratio of one pulse on the spindle to one pulse on the leadscrew
  */
-float Leadscrew::getRatio() { return m_ratio * (float)(((float)motorPulsePerRevolution) / ((float)leadAxisPPR)); }
+float Leadscrew::getRatio() { return m_ratio; }
 
 float Leadscrew::getExpectedPosition() {
   return m_expectedPosition;
@@ -76,7 +76,7 @@ void Leadscrew::unsetStopPosition(LeadscrewStopPosition position) {
       m_syncPositionState = LeadscrewSpindleSyncPositionState::UNSET;
       // extrapolate the sync position to the other endstop if set
       if (m_rightStopState == LeadscrewStopState::SET) {
-        m_spindleSyncPosition = ((int)(static_cast<int>(m_syncPositionState) + (m_rightStopPosition - m_leftStopPosition) * getRatio())) % leadAxisPPR;
+        m_spindleSyncPosition = ((int)(static_cast<int>(m_syncPositionState) + (m_rightStopPosition - m_leftStopPosition) * getRatio())) % encoderPPR;
         m_syncPositionState = LeadscrewSpindleSyncPositionState::RIGHT;
       }
     }
@@ -85,7 +85,7 @@ void Leadscrew::unsetStopPosition(LeadscrewStopPosition position) {
     m_rightStopState = LeadscrewStopState::UNSET;
     m_rightStopPosition = INT32_MAX;
     if (m_syncPositionState == LeadscrewSpindleSyncPositionState::RIGHT) {
-      m_spindleSyncPosition = ((int)(static_cast<int>(m_syncPositionState) + (m_rightStopPosition - m_leftStopPosition) * getRatio())) % leadAxisPPR;
+      m_spindleSyncPosition = ((int)(static_cast<int>(m_syncPositionState) + (m_rightStopPosition - m_leftStopPosition) * getRatio())) % encoderPPR;
       m_syncPositionState = LeadscrewSpindleSyncPositionState::LEFT;
     }
     break;
@@ -156,7 +156,7 @@ void Leadscrew::incrementCurrentPosition(int amount) {
   m_currentPosition += amount;
 }
 
-float Leadscrew::getAccumulatorUnit() { return getRatio() / leadscrewPitch; }
+float Leadscrew::getAccumulatorUnit() { return getRatio(); }
 
 bool Leadscrew::sendPulse() {
 
@@ -217,12 +217,16 @@ void Leadscrew::update() {
     m_currentPosition >= m_rightStopPosition;
 
 
+  // Update expected position from any unconsumed spindle pulses
   setExpectedPosition(m_expectedPosition + (float)(((float)m_spindle->consumePosition()) * getRatio()));
 
+  // How far are we from the expected position
   float positionError = getPositionError();
-  if ((hitLeftEndstop || hitRightEndstop) && abs(positionError) > leadAxisPPR * getRatio()) {
+  if ((hitLeftEndstop || hitRightEndstop) && abs(positionError) > encoderPPR * getRatio()) {
     // if we've hit the endstop, keep the expected position within one spindle rotation of the endstop
     // we can assume that the current position will not move due to later logic
+
+    // if the position error is bigger than one rev worht of movement, reset the expected so that we don't move
 
     setExpectedPosition(m_currentPosition);
   }
@@ -293,13 +297,20 @@ void Leadscrew::update() {
       case LeadscrewSpindleSyncPositionState::RIGHT:
         syncPosition = m_rightStopPosition;
         break;
-      case LeadscrewSpindleSyncPositionState::UNSET:
+      case LeadscrewSpindleSyncPositionState::UNSET:  // Can we even hit this???
         // position does not matter
         syncPosition = m_currentPosition;
         break;
-      }
+      }                               
 
-      int expectedSyncPosition = (m_currentPosition - syncPosition) % ((int)(leadAxisPPR * getRatio())) + m_spindleSyncPosition;
+      // I think this is totally wrong. You can't sum spindle position with leadscrew position. 
+      //int expectedSyncPosition = (m_currentPosition - syncPosition) % ((int)(encoderPPR * getRatio())) + m_spindleSyncPosition;
+
+      // So, I think this is, how far we need to move, converted to spindle pulses, plus the spindle sync pos, mod the spindle PPM, to get the next revolution. 
+      int expectedSyncPosition = ((int)((m_currentPosition - syncPosition) / getRatio())  + m_spindleSyncPosition ) % encoderPPR;  
+      
+
+      // QUESTION: What if there are a bunch of pulses happening, and we keep skipping over the sync position?
       if (m_spindle->getCurrentPosition() == expectedSyncPosition) {
         globalState->setThreadSyncState(GlobalThreadSyncState::SS_SYNC);
       }
@@ -416,39 +427,28 @@ float Leadscrew::getEstimatedVelocityInMillimetersPerSecond() {
 
 void Leadscrew::printState() {
 #ifndef PIO_UNIT_TESTING
-  Serial.print("Leadscrew position: ");
-  Serial.println(getCurrentPosition());
-  Serial.print("Leadscrew expected position: ");
-  Serial.println(getExpectedPosition());
-  Serial.print("Leadscrew left stop position: ");
-  Serial.println(getStopPosition(LeadscrewStopPosition::LEFT));
-  Serial.print("Leadscrew right stop position: ");
-  Serial.println(getStopPosition(LeadscrewStopPosition::RIGHT));
-  Serial.print("Leadscrew ratio: ");
-  Serial.println(getRatio());
-  Serial.print("Leadscrew accumulator unit:");
-  Serial.println(getAccumulatorUnit());
-  Serial.print("Current leadscrew accumulator: ");
-  Serial.println(m_accumulator);
-  Serial.print("Leadscrew direction: ");
+  DEBUG_F("Leadscrew position: %d\n",getCurrentPosition());
+  DEBUG_F("Leadscrew expected position %f\n", getExpectedPosition());
+  DEBUG_F("Leadscrew left stop position: %d\n", getStopPosition(LeadscrewStopPosition::LEFT));
+  DEBUG_F("Leadscrew right stop position: %d\n", getStopPosition(LeadscrewStopPosition::RIGHT));
+  DEBUG_F("Leadscrew ratio: %f\n", getRatio());
+  DEBUG_F("Leadscrew accumulator unit: %f\n", getAccumulatorUnit());
+  DEBUG_F("Current leadscrew accumulator: %f\n", m_accumulator);
+  DEBUG_F("Leadscrew direction: " );
   switch (getCurrentDirection()) {
   case LeadscrewDirection::LEFT:
-    Serial.println("LEFT");
+    DEBUG_C("LEFT\n");
     break;
   case LeadscrewDirection::RIGHT:
-    Serial.println("RIGHT");
+    DEBUG_C("RIGHT\n");
     break;
   case LeadscrewDirection::UNKNOWN:
-    Serial.println("UNKNOWN");
+    DEBUG_C("UNKNOWN\n");
     break;
   }
-  Serial.print("Leadscrew current pulse delay: ");
-  Serial.println(m_currentPulseDelay);
-  Serial.print("Leadscrew position error: ");
-  Serial.println(getPositionError());
-  Serial.print("Leadscrew estimated velocity: ");
-  Serial.println(getEstimatedVelocityInMillimetersPerSecond());
-  Serial.print("Leadscrew pulses to stop: ");
-  Serial.println(getStoppingDistanceInPulses());
+  DEBUG_F("Leadscrew current pulse delay: %f\n", m_currentPulseDelay);
+  DEBUG_F("Leadscrew position error: %d\n", getPositionError());
+  DEBUG_F("Leadscrew estimated velocity: %f\n", getEstimatedVelocityInMillimetersPerSecond());
+  DEBUG_F("Leadscrew pulses to stop: %d\n", getStoppingDistanceInPulses());
 #endif
 }

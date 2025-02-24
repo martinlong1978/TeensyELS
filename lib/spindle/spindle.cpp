@@ -37,8 +37,6 @@ void Spindle::update() {
   // todo: we should keep the absolute position of the spindle, cbf right now
 #ifdef ESP32
   int64_t position = m_encoder.getAndClearCount();
-  //Serial.printf("Enc: %d\n", position);
-  //m_encoder.clearCount();
   incrementCurrentPosition(position);
 #else
   int position = m_encoder.read();
