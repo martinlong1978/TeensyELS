@@ -268,7 +268,7 @@ void Display::drawEnabled() {
 #elif ELS_DISPLAY == ST7789_240_135
   if (mode == m_motionMode)return;
   m_motionMode = mode;
-  tft.fillRoundRect(52, 80, 40, 40, 4, mode == GlobalMotionMode::MM_ENABLED ? TFT_GREEN : TFT_WHITE);
+  tft.fillRoundRect(52, 80, 40, 40, 4, mode == GlobalMotionMode::MM_ENABLED ? TFT_GREEN : (mode == GlobalMotionMode::MM_JOG ? TFT_YELLOW : TFT_WHITE));
   uint8_t scaled[128];
   GlobalButtonLock lock = GlobalState::getInstance()->getButtonLock();
   switch (mode) {
@@ -278,10 +278,10 @@ void Display::drawEnabled() {
     break;
   case GlobalMotionMode::MM_JOG:
     // todo bitmap for jogging
-    tft.setCursor(56, 84);
+    tft.setCursor(55, 88);
     tft.setTextSize(4);
     tft.setTextColor(TFT_BLACK);
-    tft.print("J");
+    tft.print("<>");
     break;
   case GlobalMotionMode::MM_ENABLED:
     ScaleBMP(runSymbol, scaled, 16, 16);
