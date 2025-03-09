@@ -1,7 +1,7 @@
 #include <config.h>
-#include "telnet.h"
 
 #ifdef ELS_USE_BUTTON_ARRAY
+#include "telnet.h"
 #include "buttonpad.h"
 
 #include <config.h>

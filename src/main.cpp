@@ -2,7 +2,7 @@
 #include "telnet.h"
 #include <Arduino.h>
 #include <SPI.h>
-#include <Wire.h>
+//#include <Wire.h>
 #include <globalstate.h>
 #include <leadscrew.h>
 #include <leadscrew_io_impl.h>
@@ -15,16 +15,16 @@
 #include "config.h"
 #include "display.h"
 #include "keyarray.h"
-#include "EscapeCodes.h"
+//#include "EscapeCodes.h"
 
 #ifdef ESP32
 #include <esp_task_wdt.h>
+ESPTelnet telnet;
+EscapeCodes ansi;
 #else
 IntervalTimer timer;
 #endif
 
-ESPTelnet telnet;
-EscapeCodes ansi;
 
 GlobalState* globalState = GlobalState::getInstance();
 #ifdef ELS_SPINDLE_DRIVEN
@@ -50,9 +50,11 @@ int64_t lastcycle;
 int cyclecount;
 int finalcyclecount;
 
+
 // have to handle the leadscrew updates in a timer callback so we can update the
 // screen independently without losing pulses
 void timerCallback() {
+#ifdef ESP32
   cyclecount++;
   int64_t t = esp_timer_get_time();
   if (t - lastcycle > 1000000) {
@@ -60,6 +62,7 @@ void timerCallback() {
     lastcycle = t;
     cyclecount = 0;
   }
+#endif
   spindle.update();
   leadscrew.update();
 }
@@ -71,7 +74,7 @@ void displayLoop() {
   static elapsedMicros lastPrint;
   if (lastPrint > 1000 * 1000) {
     //telnet.print(ansi.cls());
-    telnet.print(ansi.home());
+    DEBUG_HOME();
     lastPrint = 0;
     globalState->printState();
     DEBUG_F("Micros: %d\n", micros());
@@ -107,9 +110,11 @@ void SpindleTask(void* parameter) {
     esp_task_wdt_reset();
   }
 }
+
+void comms_loop(void* parameters) { commsManager.loop(); }
+
 #endif
 
-void comms_loop(void *parameters) { commsManager.loop(); }
 
 void setup() {
 

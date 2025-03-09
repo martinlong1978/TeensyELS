@@ -1,8 +1,20 @@
 #define DEBUG_ON 1
-#define DEBUG_USE_TELNET 1
-#include <string>
-#include "EscapeCodes.h"
-#include "ESPTelnet.h"
 
+#if !defined(PIO_UNIT_TESTING) && defined(ESP32)
+#define DEBUG_USE_TELNET 1
+#else
+#define DEBUG_USE_PRINTF 1
+#endif
+
+#include <string>
+#include "mydebugmacros.h"
+#include "myescapecodes.h"
+
+#ifndef PIO_UNIT_TESTING
+#ifdef ESP32
+#include "ESPTelnet.h"
 extern ESPTelnet telnet;
+#endif
+#endif
+
 extern EscapeCodes ansi;

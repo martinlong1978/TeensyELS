@@ -1,7 +1,7 @@
 #ifndef PIO_UNIT_TESTING
 #include <Wire.h>
-#endif
 #include "telnet.h"
+#endif
 #include <globalstate.h>
 
 GlobalState *GlobalState::m_instance = nullptr;
@@ -13,7 +13,6 @@ GlobalState *GlobalState::getInstance() {
 }
 
 void GlobalState::printState() {
-#ifndef PIO_UNIT_TESTING
   DEBUG_F("Drive Mode: ");
   switch (m_motionMode) {
     case MM_DISABLED:
@@ -56,7 +55,6 @@ void GlobalState::printState() {
       DEBUG_C("UNSYNC\n");
       break;
   }
-#endif
 }
 
 void GlobalState::setFeedMode(GlobalFeedMode mode) {

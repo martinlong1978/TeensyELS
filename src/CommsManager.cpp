@@ -1,3 +1,4 @@
+#ifdef ESP32
 #include "CommsManager.h"
 #include "telnet.h"
 
@@ -97,3 +98,4 @@ void CommsManager::setup() {
     String mac = WiFi.macAddress();
     mac.replace(":", "");
 }
+#endif

@@ -59,6 +59,11 @@
 #define ELS_JOG_LEFT_BUTTON 24
 #define ELS_JOG_RIGHT_BUTTON 25
 
+#define ELS_STEPPER_ENA 0
+#define ELS_IND_RED 0   
+#define ELS_IND_GREEN 0  
+
+
 #elif defined(ESP32)
 #define USE_RMT
 #define ELS_LEADSCREW_STEP 25 

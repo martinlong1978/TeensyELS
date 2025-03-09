@@ -1,3 +1,4 @@
+#ifdef ESP32
 #ifndef CommsManager_h
 #define CommsManager_h
 #include <Arduino.h>
@@ -42,4 +43,5 @@ public:
 
 
 
+#endif
 #endif

@@ -86,7 +86,9 @@ void Display::update() {
 
     drawStopStatus();
   }
+#ifdef ESP32
   writeLed();
+#endif
 
 #if ELS_DISPLAY == SSD1306_128_64
   m_ssd1306.display();
@@ -254,7 +256,8 @@ void Display::drawEnabled() {
   case GlobalMotionMode::MM_DISABLED:
     m_ssd1306.drawBitmap(28, 42, pauseSymbol, 16, 16, BLACK);
     break;
-  case GlobalMotionMode::MM_JOG:
+  case GlobalMotionMode::MM_JOG_LEFT:
+  case GlobalMotionMode::MM_JOG_RIGHT:
     // todo bitmap for jogging
     m_ssd1306.setCursor(28, 42);
     m_ssd1306.setTextSize(2);
@@ -293,7 +296,7 @@ void Display::drawEnabled() {
   updateLed();
 }
 
-
+#ifdef ESP32   // TODO Make portable
 void Display::writeLed() {
   int64_t time = esp_timer_get_time() / 250000;
   EncoderColour c = time % 2 == 1 ? firstColour : secondColour;
@@ -301,6 +304,7 @@ void Display::writeLed() {
   digitalWrite(ELS_IND_RED, c & 1);
 
 }
+#endif
 
 
 void Display::updateLed() {

@@ -209,7 +209,7 @@ void Leadscrew::update() {
   bool hitRightEndstop = m_rightStopState == LeadscrewStopState::SET &&
     m_currentPosition >= m_rightStopPosition;
 
-
+#ifdef ESP32
   if (mode == GlobalMotionMode::MM_JOG_LEFT) {
     uint64_t time = esp_timer_get_time();
     m_spindle->consumePosition(); // Consume the spindle position while we're jogging
@@ -228,7 +228,9 @@ void Leadscrew::update() {
     // Update expected position from any unconsumed spindle pulses
     setExpectedPosition(m_expectedPosition + (float)(((float)m_spindle->consumePosition()) * getRatio()));
   }
-
+#else
+  setExpectedPosition(m_expectedPosition + (float)(((float)m_spindle->consumePosition()) * getRatio()));
+#endif
   // How far are we from the expected position
   float positionError = getPositionError();
   if ((hitLeftEndstop || hitRightEndstop) && abs(positionError) > encoderPPR * getRatio()) {
@@ -331,7 +333,7 @@ void Leadscrew::update() {
       || (esp_timer_get_time() - m_lastPulseTimestamp) < m_currentPulseDelay
       || (m_syncPositionState != LeadscrewSpindleSyncPositionState::UNSET && globalState->getThreadSyncState() == SS_UNSYNC)) {
       break;
-    }
+  }
 #else
     if (m_lastPulseMicros < m_currentPulseDelay
       || m_currentDirection == LeadscrewDirection::UNKNOWN
@@ -412,7 +414,7 @@ void Leadscrew::update() {
     }
 
     break;
-  }
+}
 }
 
 int Leadscrew::getPositionError() {
@@ -429,7 +431,6 @@ float Leadscrew::getEstimatedVelocityInMillimetersPerSecond() {
 }
 
 void Leadscrew::printState() {
-#ifndef PIO_UNIT_TESTING
   DEBUG_F("Leadscrew position: %d\n", getCurrentPosition());
   DEBUG_F("Leadscrew expected position %f\n", getExpectedPosition());
   DEBUG_F("Leadscrew left stop position: %d\n", getStopPosition(LeadscrewStopPosition::LEFT));
@@ -453,5 +454,4 @@ void Leadscrew::printState() {
   DEBUG_F("Leadscrew position error: %d\n", getPositionError());
   DEBUG_F("Leadscrew estimated velocity: %f\n", getEstimatedVelocityInMillimetersPerSecond());
   DEBUG_F("Leadscrew pulses to stop: %d\n", getStoppingDistanceInPulses());
-#endif
 }
