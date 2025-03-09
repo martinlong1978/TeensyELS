@@ -31,8 +31,8 @@
 #define ELS_SPINDLE_DIR -1
 #else
 #ifdef ESP32
-#define ELS_SPINDLE_ENCODER_A 36
-#define ELS_SPINDLE_ENCODER_B 37
+#define ELS_SPINDLE_ENCODER_A 37
+#define ELS_SPINDLE_ENCODER_B 36
 #else
 #define ELS_SPINDLE_ENCODER_A 14 
 #define ELS_SPINDLE_ENCODER_B 15 
@@ -73,6 +73,10 @@
 //  36  20  12
 //  34  18  10
 //  33  17   9
+// --------------
+//   9  17  33
+//  10  18  34
+//  12  20  36
 #define ELS_RATE_INCREASE_BUTTON 17
 #define ELS_RATE_DECREASE_BUTTON 9
 #define ELS_MODE_CYCLE_BUTTON 33
@@ -116,12 +120,20 @@
 #define PIN_DISPLAY_RESET -1
 #endif
 
-#define ELS_SPINDLE_ENCODER_PPR 4800
+#define ELS_SPINDLE_ENCODER_PPR 1200
 #define ELS_LEADSCREW_STEPPER_PPR 400
 
 // uncomment this if your leadscrew direction is inverted to what is expected
 // i.e if setting right stop actually sets the left stop
 #define ELS_INVERT_DIRECTION
+
+#ifdef ELS_INVERT_DIRECTION
+#define ELS_DIR_RIGHT 0
+#define ELS_DIR_LEFT 1
+#else
+#define ELS_DIR_RIGHT 1
+#define ELS_DIR_LEFT 0
+#endif
 
 #define ELS_GEARBOX_RATIO 2
 #define ELS_LEADSCREW_PITCH_MM ((float)(25.4/10))
@@ -151,9 +163,9 @@
 // instantaneously start moving from 0
 // #define ACCEL_DISABLED
 #define LEADSCREW_JERK 0.25
-// The acceleration of the leadscrew in mm/s^2
 
-#define LEADSCREW_ACCEL 50
+// The acceleration of the leadscrew in mm/s^2
+#define LEADSCREW_ACCEL 20
 
 #define LEADSCREW_TIMER_US 4
 

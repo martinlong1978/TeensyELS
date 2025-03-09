@@ -17,7 +17,7 @@ enum GlobalFeedMode { FM_UNSET = -1, FM_FEED = 0, FM_THREAD = 1 };
 // Disabled: The leadscrew does not move when the spindle is moving
 // Jog: The leadscrew is moving independently of the spindle
 // Enabled: The leadscrew is moving in sync with the spindle
-enum GlobalMotionMode { MM_UNSET, MM_DISABLED, MM_JOG, MM_ENABLED };
+enum GlobalMotionMode { MM_UNSET, MM_DISABLED, MM_JOG_LEFT, MM_JOG_RIGHT, MM_ENABLED };
 
 /**
  * The unit mode of the application, usually for threading

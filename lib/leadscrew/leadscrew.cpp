@@ -44,10 +44,10 @@ Leadscrew::Leadscrew(Spindle* spindle, LeadscrewIO* io, float initialPulseDelay,
 }
 
 void Leadscrew::setTargetPitchMM(float pitch) {
-
-  m_ratio = pitch * (float)(((float)motorPulsePerRevolution) / ((float)encoderPPR * leadscrewPitch)); 
-
+  // Calculate the ratio one, when the pitch is set. No need to calculate this every cycle
+  m_ratio = (pitch * (float)motorPulsePerRevolution) / ( leadscrewPitch * (float)encoderPPR);
 }
+
 /**
  * Returns the ratio of one pulse on the spindle to one pulse on the leadscrew
  */
@@ -62,10 +62,6 @@ void Leadscrew::setExpectedPosition(float position) {
 }
 
 int Leadscrew::getCurrentPosition() { return m_currentPosition; }
-
-void Leadscrew::resetCurrentPosition() {
-  m_currentPosition = m_expectedPosition;
-}
 
 void Leadscrew::unsetStopPosition(LeadscrewStopPosition position) {
   switch (position) {
@@ -152,10 +148,6 @@ void Leadscrew::setCurrentPosition(int position) {
   m_currentPosition = position;
 }
 
-void Leadscrew::incrementCurrentPosition(int amount) {
-  m_currentPosition += amount;
-}
-
 float Leadscrew::getAccumulatorUnit() { return getRatio(); }
 
 bool Leadscrew::sendPulse() {
@@ -209,6 +201,7 @@ int Leadscrew::getStoppingDistanceInPulses() {
 
 void Leadscrew::update() {
   GlobalState* globalState = GlobalState::getInstance();
+  GlobalMotionMode mode = globalState->getMotionMode();
 
   bool hitLeftEndstop = m_leftStopState == LeadscrewStopState::SET &&
     m_currentPosition <= m_leftStopPosition;
@@ -217,8 +210,24 @@ void Leadscrew::update() {
     m_currentPosition >= m_rightStopPosition;
 
 
-  // Update expected position from any unconsumed spindle pulses
-  setExpectedPosition(m_expectedPosition + (float)(((float)m_spindle->consumePosition()) * getRatio()));
+  if (mode == GlobalMotionMode::MM_JOG_LEFT) {
+    uint64_t time = esp_timer_get_time();
+    m_spindle->consumePosition(); // Consume the spindle position while we're jogging
+    if (time - this->jogMicros > JOG_PULSE_DELAY) { // TODO: Revist this delay - we probably want some accelleration
+      setExpectedPosition(m_currentPosition - 1);
+      this->jogMicros = time;
+    }
+  } else if (mode == GlobalMotionMode::MM_JOG_RIGHT) {
+    uint64_t time = esp_timer_get_time();
+    m_spindle->consumePosition(); // Consume the spindle position while we're jogging
+    if (time - this->jogMicros > JOG_PULSE_DELAY) { // TODO: Revist this delay - we probably want some accelleration
+      setExpectedPosition(m_currentPosition + 1);
+      this->jogMicros = time;
+    }
+  } else {
+    // Update expected position from any unconsumed spindle pulses
+    setExpectedPosition(m_expectedPosition + (float)(((float)m_spindle->consumePosition()) * getRatio()));
+  }
 
   // How far are we from the expected position
   float positionError = getPositionError();
@@ -229,6 +238,9 @@ void Leadscrew::update() {
     // if the position error is bigger than one rev worht of movement, reset the expected so that we don't move
 
     setExpectedPosition(m_currentPosition);
+    if (mode == GlobalMotionMode::MM_JOG_LEFT || mode == GlobalMotionMode::MM_JOG_RIGHT) {
+      globalState->setMotionMode(GlobalMotionMode::MM_DISABLED);
+    }
   }
 
 
@@ -238,7 +250,8 @@ void Leadscrew::update() {
     // consume position but don't move
     m_spindle->consumePosition();
     break;
-  case GlobalMotionMode::MM_JOG:
+  case GlobalMotionMode::MM_JOG_LEFT:
+  case GlobalMotionMode::MM_JOG_RIGHT:
   case GlobalMotionMode::MM_ENABLED:
     LeadscrewDirection nextDirection = LeadscrewDirection::UNKNOWN;
 
@@ -257,11 +270,7 @@ void Leadscrew::update() {
         m_currentDirection = LeadscrewDirection::UNKNOWN;
       }
       if (m_currentDirection == LeadscrewDirection::UNKNOWN) {
-#ifdef ELS_INVERT_DIRECTION
-        m_io->writeDirPin(0);
-#else
-        m_io->writeDirPin(1);
-#endif
+        m_io->writeDirPin(ELS_DIR_RIGHT);
         m_currentDirection = LeadscrewDirection::RIGHT;
         m_accumulator = static_cast<int>(m_currentDirection) * getAccumulatorUnit();
       }
@@ -272,11 +281,7 @@ void Leadscrew::update() {
         m_currentDirection = LeadscrewDirection::UNKNOWN;
       }
       if (m_currentDirection == LeadscrewDirection::UNKNOWN) {
-#ifdef ELS_INVERT_DIRECTION
-        m_io->writeDirPin(1);
-#else
-        m_io->writeDirPin(0);
-#endif
+        m_io->writeDirPin(ELS_DIR_LEFT);
         m_currentDirection = LeadscrewDirection::LEFT;
         m_accumulator = static_cast<int>(m_currentDirection) * getAccumulatorUnit();
       }
@@ -301,14 +306,14 @@ void Leadscrew::update() {
         // position does not matter
         syncPosition = m_currentPosition;
         break;
-      }                               
+      }
 
       // I think this is totally wrong. You can't sum spindle position with leadscrew position. 
       //int expectedSyncPosition = (m_currentPosition - syncPosition) % ((int)(encoderPPR * getRatio())) + m_spindleSyncPosition;
 
       // So, I think this is, how far we need to move, converted to spindle pulses, plus the spindle sync pos, mod the spindle PPM, to get the next revolution. 
-      int expectedSyncPosition = ((int)((m_currentPosition - syncPosition) / getRatio())  + m_spindleSyncPosition ) % encoderPPR;  
-      
+      int expectedSyncPosition = ((int)((m_currentPosition - syncPosition) / getRatio()) + m_spindleSyncPosition) % encoderPPR;
+
 
       // QUESTION: What if there are a bunch of pulses happening, and we keep skipping over the sync position?
       if (m_spindle->getCurrentPosition() == expectedSyncPosition) {
@@ -344,8 +349,8 @@ void Leadscrew::update() {
        * If we've sent a pulse, we need to update the last pulse micros for velocity calculations
        */
 #ifdef ESP32
-      int64_t tm =  esp_timer_get_time();
-      m_lastFullPulseDurationMicros = 
+      int64_t tm = esp_timer_get_time();
+      m_lastFullPulseDurationMicros =
         min((uint32_t)(tm - m_lastPulseTimestamp), (uint32_t)initialPulseDelay);
       m_lastPulseTimestamp = tm;
 #else
@@ -427,14 +432,14 @@ float Leadscrew::getEstimatedVelocityInMillimetersPerSecond() {
 
 void Leadscrew::printState() {
 #ifndef PIO_UNIT_TESTING
-  DEBUG_F("Leadscrew position: %d\n",getCurrentPosition());
+  DEBUG_F("Leadscrew position: %d\n", getCurrentPosition());
   DEBUG_F("Leadscrew expected position %f\n", getExpectedPosition());
   DEBUG_F("Leadscrew left stop position: %d\n", getStopPosition(LeadscrewStopPosition::LEFT));
   DEBUG_F("Leadscrew right stop position: %d\n", getStopPosition(LeadscrewStopPosition::RIGHT));
   DEBUG_F("Leadscrew ratio: %f\n", getRatio());
   DEBUG_F("Leadscrew accumulator unit: %f\n", getAccumulatorUnit());
   DEBUG_F("Current leadscrew accumulator: %f\n", m_accumulator);
-  DEBUG_F("Leadscrew direction: " );
+  DEBUG_F("Leadscrew direction: ");
   switch (getCurrentDirection()) {
   case LeadscrewDirection::LEFT:
     DEBUG_C("LEFT\n");

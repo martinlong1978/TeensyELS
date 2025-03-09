@@ -81,13 +81,13 @@ private:
   bool sendPulse();
   int getStoppingDistanceInPulses();
   void setStopPosition(LeadscrewStopPosition position, int stopPosition);
+  uint64_t jogMicros;
 
 public:
   Leadscrew(Spindle* spindle, LeadscrewIO* io, float initialPulseDelay,
     float pulseDelayIncrement, int motorPulsePerRevolution,
     float leadscrewPitch, int encoderPPR);
   int getCurrentPosition();
-  void resetCurrentPosition();
   #ifdef USE_RMT
   void setRMT(rmt_obj_t *rmtObj){
     this->rmtObj = rmtObj;
@@ -109,7 +109,6 @@ public:
   float getExpectedPosition();
   void setExpectedPosition(float position);
   void setCurrentPosition(int position);
-  void incrementCurrentPosition(int amount);
   void update();
   int getPositionError();
   LeadscrewDirection getCurrentDirection();

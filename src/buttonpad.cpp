@@ -210,13 +210,15 @@ void ButtonPad::jogDirectionHandler(ButtonInfo press) {
     case ELS_JOG_LEFT_BUTTON:
       if (m_leadscrew->getStopPositionState(LeadscrewStopPosition::LEFT) != LeadscrewStopState::UNSET) {
         m_leadscrew->setExpectedPosition(m_leadscrew->getStopPosition(LeadscrewStopPosition::LEFT));
-        globalState->setThreadSyncState(GlobalThreadSyncState::SS_UNSYNC);
+        globalState->setMotionMode(GlobalMotionMode::MM_JOG_LEFT);
+        globalState->setThreadSyncState(GlobalThreadSyncState::SS_SYNC);
       }
       break;
     case ELS_JOG_RIGHT_BUTTON:
       if (m_leadscrew->getStopPositionState(LeadscrewStopPosition::RIGHT) != LeadscrewStopState::UNSET) {
         m_leadscrew->setExpectedPosition(m_leadscrew->getStopPosition(LeadscrewStopPosition::RIGHT));
-        globalState->setThreadSyncState(GlobalThreadSyncState::SS_SYNC);
+        globalState->setMotionMode(GlobalMotionMode::MM_JOG_RIGHT);
+        globalState->setThreadSyncState(GlobalThreadSyncState::SS_UNSYNC);
       }
       break;
     }
@@ -255,10 +257,10 @@ void ButtonPad::jogHandler(ButtonInfo press) {
 
   // common jog functionality
   // if neither jog button is held, reset the motion mode
-  if (press.buttonState == BS_RELEASED &&
-    motionMode == GlobalMotionMode::MM_JOG) {
-    GlobalState::getInstance()->setMotionMode(GlobalMotionMode::MM_DISABLED);
-  }
+//  if (press.buttonState == BS_RELEASED &&
+//    motionMode == GlobalMotionMode::MM_JOG) {
+//    GlobalState::getInstance()->setMotionMode(GlobalMotionMode::MM_DISABLED);
+//  }
 }
 
 void ButtonPad::printState(){
