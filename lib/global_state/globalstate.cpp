@@ -1,7 +1,7 @@
 #ifndef PIO_UNIT_TESTING
 #include <Wire.h>
-#include "telnet.h"
 #endif
+#include "../telnet/telnet.h"
 #include <globalstate.h>
 
 GlobalState *GlobalState::m_instance = nullptr;

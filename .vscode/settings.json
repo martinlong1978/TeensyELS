@@ -7,6 +7,7 @@
         "utility": "cpp",
         "*.tcc": "cpp",
         "istream": "cpp",
-        "algorithm": "cpp"
+        "algorithm": "cpp",
+        "vector": "cpp"
     }
 }

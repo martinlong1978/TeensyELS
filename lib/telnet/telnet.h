@@ -8,13 +8,13 @@
 
 #include <string>
 #include "mydebugmacros.h"
-#include "myescapecodes.h"
 
 #ifndef PIO_UNIT_TESTING
+#include "./myescapecodes.h"
 #ifdef ESP32
 #include "ESPTelnet.h"
 extern ESPTelnet telnet;
 #endif
+extern EscapeCodes ansi;
 #endif
 
-extern EscapeCodes ansi;

@@ -3,12 +3,17 @@
                           // classes
 #endif
 
+#include <cmath>
+#include <cstdint>
+#include <cstdio>
+
+
 #include <config.h>
 #include <els_elapsedMillis.h>
 #include <globalstate.h>
 #include <gmock/gmock.h>
+#include "TestSpindle.h"
 #include <leadscrew.h>
-#include <spindle.h>
 
 #include <cstdint>
 #include <vector>
@@ -34,11 +39,12 @@ TEST(PositionTest, TestInitialPulseDelay) {
 
   LeadscrewIOMock leadscrewIOMock;
   Spindle spindle;
-  Leadscrew leadscrew(&spindle, &leadscrewIOMock, 100, 5, 0.1, 100, 1, 1);
+
+  Leadscrew leadscrew(&spindle, &leadscrewIOMock, 100, 0.1, 100, 1, 1);
   // test data
   // define the time and the expected position of the leadscrew
 
-  globalState->setMotionMode(GlobalMotionMode::ENABLED);
+  globalState->setMotionMode(GlobalMotionMode::MM_ENABLED);
   spindle.setCurrentPosition(100);
 
   vector<position> expectedStepPositions = {
@@ -91,12 +97,12 @@ TEST(PositionTest, TestAccumulator) {
   LeadscrewIOMock leadscrewIOMock;
   Spindle spindle;
   // no accel - only positioning
-  Leadscrew leadscrew(&spindle, &leadscrewIOMock, 0, 0, 0, 100, 1, 1);
+  Leadscrew leadscrew(&spindle, &leadscrewIOMock, 0, 0, 100, 1, 1);
   // test data
   // define the time and the expected position of the leadscrew
 
-  globalState->setMotionMode(GlobalMotionMode::ENABLED);
-  leadscrew.setRatio(6);
+  globalState->setMotionMode(GlobalMotionMode::MM_ENABLED);
+  leadscrew.setTargetPitchMM(6);
 
   spindle.setCurrentPosition(1);
 

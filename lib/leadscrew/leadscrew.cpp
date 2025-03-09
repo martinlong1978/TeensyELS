@@ -5,7 +5,7 @@
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
-#include "telnet.h"
+#include "../telnet/telnet.h"
 #include "leadscrew_io.h"
 using namespace std;
 

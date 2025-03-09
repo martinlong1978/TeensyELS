@@ -55,7 +55,7 @@
     //#define DEBUG_TEL_MSG(x)    DEBUG_TELNET.print(DEBUG_PREFIX); DEBUG_TELNET.println(x)
     #define DEBUG_TEL_F(...)    DEBUG_TELNET.print(ansi.clearLine()); DEBUG_TELNET.printf(__VA_ARGS__)
     #define DEBUG_TEL_C(...)    DEBUG_TELNET.printf(__VA_ARGS__)
-    #define DEBUG_TEL_HOME()    DEBUG_TELNET.printf(ansi.home())
+    #define DEBUG_TEL_HOME()    DEBUG_TELNET.print(ansi.home())
     //#define DEBUG_TEL_VAR(...)  DEBUG_TELNET.print(DEBUG_PREFIX); DEBUG_TELNET.print(F(#__VA_ARGS__  " = ")); telnet.println(String(__VA_ARGS__))
     #define DEBUG_TEL_WHERE     DEBUG_TELNET.print(DEBUG_PREFIX); DEBUG_TELNET.print(F(__FILE__ " - ")); DEBUG_TELNET.print(__PRETTY_FUNCTION__); DEBUG_TELNET.print(": "); DEBUG_TELNET.println(String(__LINE__))
   #else
