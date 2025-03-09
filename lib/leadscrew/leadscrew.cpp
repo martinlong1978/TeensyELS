@@ -238,7 +238,7 @@ void Leadscrew::update() {
     // if the position error is bigger than one rev worht of movement, reset the expected so that we don't move
 
     setExpectedPosition(m_currentPosition);
-    if (mode == GlobalMotionMode::MM_JOG_LEFT || mode == GlobalMotionMode::MM_JOG_RIGHT) {
+    if (mode == GlobalMotionMode::MM_JOG_LEFT || mode == GlobalMotionMode::MM_JOG_RIGHT || mode == GlobalMotionMode::MM_ENABLED) {
       globalState->setMotionMode(GlobalMotionMode::MM_DISABLED);
     }
   }
