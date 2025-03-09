@@ -56,6 +56,7 @@ int main(int argc, char **argv) {
   leadscrew.setStopPosition(LeadscrewStopPosition::LEFT, 0);
   leadscrew.setStopPosition(LeadscrewStopPosition::RIGHT, 10000); 
   leadscrew.setCurrentPosition(10000);
+  leadscrew.setTargetPitchMM(0.25);
   GlobalState::getInstance()->setMotionMode(GlobalMotionMode::MM_ENABLED); 
   GlobalState::getInstance()->setThreadSyncState(GlobalThreadSyncState::SS_SYNC); 
 
@@ -63,9 +64,9 @@ int main(int argc, char **argv) {
   micros.setMicros(0);
   millis.setMillis(0);
 
-  for(int i = 0; i < 500; i++){
-    micros.incrementMicros(5000);
-    millis.incrementMillis(5);
+  for(int i = 0; i < 5000; i++){
+    micros.incrementMicros(100);
+    millis.incrementMillis(1);
     leadscrew.update();
   }
 

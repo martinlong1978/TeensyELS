@@ -397,12 +397,13 @@ void Leadscrew::update() {
 
       // if this is true we should start decelerating to stop at the
       // correct position
-      bool shouldStop = abs(positionError) <= pulsesToStop ||
+      bool shouldStop = abs(positionError) <= 3 ||
         nextDirection != m_currentDirection ||
         goingToHitLeftEndstop || goingToHitRightEndstop;
 
       float accelChange = pulseDelayIncrement * m_lastFullPulseDurationMicros;
 
+      DEBUG_F("Should stop %d %f %d\n", shouldStop, positionError, pulsesToStop);
       if (shouldStop) {
         m_currentPulseDelay += accelChange;
       } else {

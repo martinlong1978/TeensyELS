@@ -40,6 +40,6 @@ float Spindle::getEstimatedVelocityInRPM() {
 }
 
 int Spindle::consumePosition() {
-  return -5;
+  return -1;
 }
 #endif
