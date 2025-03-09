@@ -10,7 +10,7 @@
 #include "mydebugmacros.h"
 
 #ifndef PIO_UNIT_TESTING
-#include "./myescapecodes.h"
+#include "myescapecodes.h"
 #ifdef ESP32
 #include "ESPTelnet.h"
 extern ESPTelnet telnet;

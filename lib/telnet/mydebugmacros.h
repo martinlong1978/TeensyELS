@@ -1,14 +1,3 @@
-/* ------------------------------------------------- */
-/*
- * heavily inspired by 
- *  https://github.com/jerabaul29/ArduinoDebugMacros/
- *  https://forum.arduino.cc/index.php?topic=46900.0
- *  https://forum.arduino.cc/index.php?topic=215334.0
-*/
-/* ------------------------------------------------- */
-
-#pragma once
-
 #ifndef DebugMacros_h
 #define DebugMacros_h
 
@@ -68,13 +57,31 @@
     #define DEBUG_TEL_WHERE
   #endif
 
-  #define DEBUG_INFO            DEBUG_SER_INFO; DEBUG_TEL_INFO
+  #if DEBUG_USE_PRINTF
+  #define DEBUG_PRN_INFO      printf(DEBUG_PREFIX); printf("Compiled " __DATE__ ", " __TIME__)
+//#define DEBUG_PRN_MSG(x)    print(DEBUG_PREFIX); println(x)
+  #define DEBUG_PRN_F(...)    printf(__VA_ARGS__)
+  #define DEBUG_PRN_C(...)    printf(__VA_ARGS__)
+  #define DEBUG_PRN_HOME()    printf(ansi.home())
+//#define DEBUG_PRN_VAR(...)  print(DEBUG_PREFIX); print(F(#__VA_ARGS__  " = ")); println(String(__VA_ARGS__))
+  #define DEBUG_PRN_WHERE     printf(DEBUG_PREFIX); printf(F(__FILE__ " - ")); printf(__PRETTY_FUNCTION__); printf(": "); printf(String(__LINE__))
+#else
+  #define DEBUG_PRN_INFO
+  #define DEBUG_PRN_MSG(x)
+  #define DEBUG_PRN_VAR(...)
+  #define DEBUG_PRN_F(...)
+  #define DEBUG_PRN_C(...)
+  #define DEBUG_PRN_HOME()
+  #define DEBUG_PRN_WHERE
+#endif
+
+  #define DEBUG_INFO            DEBUG_SER_INFO; DEBUG_TEL_INFO; DEBUG_PRN_INFO
 //  #define DEBUG_MSG(x)          DEBUG_SER_MSG(x); DEBUG_TEL_MSG(x)
 //  #define DEBUG_VAR(...)        DEBUG_SER_VAR(__VA_ARGS__); DEBUG_TEL_VAR(__VA_ARGS__)
-#define DEBUG_F(...)          DEBUG_SER_F(__VA_ARGS__); DEBUG_TEL_F(__VA_ARGS__)
-#define DEBUG_C(...)          DEBUG_SER_C(__VA_ARGS__); DEBUG_TEL_C(__VA_ARGS__)
-#define DEBUG_WHERE           DEBUG_SER_WHERE; DEBUG_TEL_WHERE
-#define DEBUG_HOME()          DEBUG_SER_HOME(); DEBUG_TEL_HOME()
+#define DEBUG_F(...)          DEBUG_SER_F(__VA_ARGS__); DEBUG_TEL_F(__VA_ARGS__); DEBUG_PRN_F(__VA_ARGS__)
+#define DEBUG_C(...)          DEBUG_SER_C(__VA_ARGS__); DEBUG_TEL_C(__VA_ARGS__); DEBUG_PRN_C(__VA_ARGS__)
+#define DEBUG_WHERE           DEBUG_SER_WHERE; DEBUG_TEL_WHERE; DEBUG_PRN_WHERE
+#define DEBUG_HOME()          DEBUG_SER_HOME(); DEBUG_TEL_HOME(); DEBUG_PRN_HOME()
 #endif
 
 /* ------------------------------------------------- */

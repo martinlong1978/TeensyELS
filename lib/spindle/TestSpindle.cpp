@@ -9,6 +9,8 @@ Spindle::Spindle() {
   m_unconsumedPosition = 0;
   m_lastFullPulseDurationMicros = 0;
   m_currentPosition = 0;
+
+  
 }
 
 void Spindle::update() {
@@ -38,8 +40,6 @@ float Spindle::getEstimatedVelocityInRPM() {
 }
 
 int Spindle::consumePosition() {
-  int position = m_unconsumedPosition;
-  m_unconsumedPosition = 0;
-  return position;
+  return -5;
 }
 #endif

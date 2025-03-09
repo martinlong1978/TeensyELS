@@ -8,6 +8,7 @@
         "*.tcc": "cpp",
         "istream": "cpp",
         "algorithm": "cpp",
-        "vector": "cpp"
+        "vector": "cpp",
+        "ostream": "cpp"
     }
 }

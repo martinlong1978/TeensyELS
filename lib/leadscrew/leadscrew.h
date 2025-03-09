@@ -82,7 +82,6 @@ private:
   float getAccumulatorUnit();
   bool sendPulse();
   int getStoppingDistanceInPulses();
-  void setStopPosition(LeadscrewStopPosition position, int stopPosition);
   uint64_t jogMicros;
 
 public:
@@ -103,6 +102,7 @@ public:
 
 
   void setStopPosition(LeadscrewStopPosition position);
+  void setStopPosition(LeadscrewStopPosition position, int stopPosition);
   LeadscrewStopState getStopPositionState(LeadscrewStopPosition position);
   void unsetStopPosition(LeadscrewStopPosition position);
   int getStopPosition(LeadscrewStopPosition position);

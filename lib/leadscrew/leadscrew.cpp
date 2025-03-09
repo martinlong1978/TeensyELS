@@ -5,7 +5,7 @@
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
-#include "../telnet/telnet.h"
+#include <../telnet/telnet.h>
 #include "leadscrew_io.h"
 using namespace std;
 
@@ -234,13 +234,14 @@ void Leadscrew::update() {
   // How far are we from the expected position
   float positionError = getPositionError();
   if ((hitLeftEndstop || hitRightEndstop) && abs(positionError) > encoderPPR * getRatio()) {
+    DEBUG_F("Hit end stop %d %d %d %d %f %d %d %d\n", hitLeftEndstop, hitRightEndstop, positionError, encoderPPR, getRatio(), m_currentPosition, m_leftStopPosition, m_rightStopPosition);
     // if we've hit the endstop, keep the expected position within one spindle rotation of the endstop
     // we can assume that the current position will not actually move due to later logic
 
     // if the position error is bigger than one rev worht of movement, reset the expected so that we don't move
 
     setExpectedPosition(m_currentPosition);
-    if (mode == GlobalMotionMode::MM_JOG_LEFT || mode == GlobalMotionMode::MM_JOG_RIGHT || mode == GlobalMotionMode::MM_ENABLED) {
+    if ((mode == GlobalMotionMode::MM_JOG_LEFT && hitLeftEndstop) || (mode == GlobalMotionMode::MM_JOG_RIGHT && hitRightEndstop)) {
       globalState->setMotionMode(GlobalMotionMode::MM_DISABLED);
     }
   }
@@ -265,7 +266,7 @@ void Leadscrew::update() {
      * If the next direction is different from the current direction, we
      * should start decelerating to move in the intended direction
      */
-    if (positionError > 1 && !hitRightEndstop) {
+    if (positionError > 0 && !hitRightEndstop) {
       nextDirection = LeadscrewDirection::RIGHT;
       if (m_currentDirection == LeadscrewDirection::LEFT && m_currentPulseDelay == initialPulseDelay) {
         m_currentDirection = LeadscrewDirection::UNKNOWN;
@@ -275,7 +276,7 @@ void Leadscrew::update() {
         m_currentDirection = LeadscrewDirection::RIGHT;
         m_accumulator = static_cast<int>(m_currentDirection) * getAccumulatorUnit();
       }
-    } else if (positionError < -1 && !hitLeftEndstop) {
+    } else if (positionError < 0 && !hitLeftEndstop) {
       nextDirection = LeadscrewDirection::LEFT;
       if (m_currentDirection == LeadscrewDirection::RIGHT && m_currentPulseDelay == initialPulseDelay) {
         m_currentDirection = LeadscrewDirection::UNKNOWN;
@@ -286,8 +287,10 @@ void Leadscrew::update() {
         m_accumulator = static_cast<int>(m_currentDirection) * getAccumulatorUnit();
       }
     } else {
+      DEBUG_F("direction unknown\n");
       m_currentDirection = LeadscrewDirection::UNKNOWN;
     }
+
 
     /**
      * If we are not in sync with the thread, if not, figure out where we should restart based on
@@ -321,6 +324,10 @@ void Leadscrew::update() {
       }
     }
 
+    int mic = m_lastPulseMicros;
+
+    DEBUG_F("%d %f %f %d %d %d %d\n", m_currentPosition, m_expectedPosition, m_currentPulseDelay, nextDirection, m_currentDirection, mic, globalState->getMotionMode());
+
     /**
      * determine if we should even be bothering to send a pulse
      * we know that we can short circuit this if:
@@ -333,7 +340,7 @@ void Leadscrew::update() {
       || (esp_timer_get_time() - m_lastPulseTimestamp) < m_currentPulseDelay
       || (m_syncPositionState != LeadscrewSpindleSyncPositionState::UNSET && globalState->getThreadSyncState() == SS_UNSYNC)) {
       break;
-  }
+    }
 #else
     if (m_lastPulseMicros < m_currentPulseDelay
       || m_currentDirection == LeadscrewDirection::UNKNOWN
@@ -348,6 +355,7 @@ void Leadscrew::update() {
       /**
        * If we've sent a pulse, we need to update the last pulse micros for velocity calculations
        */
+      DEBUG_F("Sent pulse\n");
 #ifdef ESP32
       int64_t tm = esp_timer_get_time();
       m_lastFullPulseDurationMicros =
@@ -414,7 +422,7 @@ void Leadscrew::update() {
     }
 
     break;
-}
+  }
 }
 
 int Leadscrew::getPositionError() {
