@@ -231,7 +231,7 @@ void Leadscrew::update() {
 
   // How far are we from the expected position
   float positionError = getPositionError();
-  if ((hitLeftEndstop || hitRightEndstop) && abs(positionError) > encoderPPR * getRatio()) {
+  if (hitLeftEndstop || hitRightEndstop) {
     // if we've hit the endstop, keep the expected position within one spindle rotation of the endstop
     // we can assume that the current position will not move due to later logic
 
@@ -265,8 +265,7 @@ void Leadscrew::update() {
      */
     if (positionError > 1 && !hitRightEndstop) {
       nextDirection = LeadscrewDirection::RIGHT;
-      if (m_currentDirection == LeadscrewDirection::LEFT &&
-        m_currentPulseDelay == initialPulseDelay) {
+      if (m_currentDirection == LeadscrewDirection::LEFT && m_currentPulseDelay == initialPulseDelay) {
         m_currentDirection = LeadscrewDirection::UNKNOWN;
       }
       if (m_currentDirection == LeadscrewDirection::UNKNOWN) {
@@ -276,8 +275,7 @@ void Leadscrew::update() {
       }
     } else if (positionError < -1 && !hitLeftEndstop) {
       nextDirection = LeadscrewDirection::LEFT;
-      if (m_currentDirection == LeadscrewDirection::RIGHT &&
-        m_currentPulseDelay == initialPulseDelay) {
+      if (m_currentDirection == LeadscrewDirection::RIGHT && m_currentPulseDelay == initialPulseDelay) {
         m_currentDirection = LeadscrewDirection::UNKNOWN;
       }
       if (m_currentDirection == LeadscrewDirection::UNKNOWN) {
