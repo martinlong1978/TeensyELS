@@ -233,7 +233,7 @@ void Leadscrew::update() {
   float positionError = getPositionError();
   if ((hitLeftEndstop || hitRightEndstop) && abs(positionError) > encoderPPR * getRatio()) {
     // if we've hit the endstop, keep the expected position within one spindle rotation of the endstop
-    // we can assume that the current position will not move due to later logic
+    // we can assume that the current position will not actually move due to later logic
 
     // if the position error is bigger than one rev worht of movement, reset the expected so that we don't move
 
