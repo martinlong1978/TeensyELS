@@ -22,8 +22,11 @@ void GlobalState::printState() {
     case MM_ENABLED:
       DEBUG_C("ENABLED\n");
       break;
-    case MM_JOG:
-      DEBUG_C("JOG\n");
+      case MM_JOG_LEFT:
+      DEBUG_C("JOG LEFT\n");
+      break;
+      case MM_JOG_RIGHT:
+      DEBUG_C("JOG RIGHT\n");
       break;
   }
   DEBUG_F("Feed Mode: ");

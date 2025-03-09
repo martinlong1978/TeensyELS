@@ -59,11 +59,11 @@ void Display::update() {
   //  tft.fillScreen(TFT_BLACK); // Rely on localised blanking to avoid blink, for now.
 #endif
 
-int bytes = GlobalState::getInstance()->getOTABytes();
-int length = GlobalState::getInstance()->getOTALength();
-if (bytes > 0) {
+  int bytes = GlobalState::getInstance()->getOTABytes();
+  int length = GlobalState::getInstance()->getOTALength();
+  if (bytes > 0) {
 #if ELS_DISPLAY == ST7789_240_135
-    if(!updating){
+    if (!updating) {
       tft.fillRect(0, 0, 240, 135, TFT_BLACK);
       tft.setCursor(10, 10);
       tft.setTextSize(3);
@@ -71,9 +71,9 @@ if (bytes > 0) {
       tft.print("UPDATING");
       updating = true;
     }
-    tft.drawRect(0,70,240,40, TFT_WHITE);
-    int percent = (((float)(bytes * 240))/((float)length));
-    tft.fillRect(0,70,percent,40, TFT_WHITE);
+    tft.drawRect(0, 70, 240, 40, TFT_WHITE);
+    int percent = (((float)(bytes * 240)) / ((float)length));
+    tft.fillRect(0, 70, percent, 40, TFT_WHITE);
 
 #endif
   } else {
@@ -268,7 +268,7 @@ void Display::drawEnabled() {
 #elif ELS_DISPLAY == ST7789_240_135
   if (mode == m_motionMode)return;
   m_motionMode = mode;
-  tft.fillRoundRect(52, 80, 40, 40, 4, mode == GlobalMotionMode::MM_ENABLED ? TFT_GREEN : (mode == GlobalMotionMode::MM_JOG ? TFT_YELLOW : TFT_WHITE));
+  tft.fillRoundRect(52, 80, 40, 40, 4, mode == GlobalMotionMode::MM_ENABLED ? TFT_GREEN : ((mode == GlobalMotionMode::MM_JOG_LEFT || mode == GlobalMotionMode::MM_JOG_RIGHT) ? TFT_YELLOW : TFT_WHITE));
   uint8_t scaled[128];
   GlobalButtonLock lock = GlobalState::getInstance()->getButtonLock();
   switch (mode) {
@@ -276,7 +276,8 @@ void Display::drawEnabled() {
     ScaleBMP(pauseSymbol, scaled, 16, 16);
     tft.drawBitmap(56, 84, scaled, 32, 32, TFT_BLACK);
     break;
-  case GlobalMotionMode::MM_JOG:
+  case GlobalMotionMode::MM_JOG_LEFT:
+  case GlobalMotionMode::MM_JOG_RIGHT:
     // todo bitmap for jogging
     tft.setCursor(55, 88);
     tft.setTextSize(4);
@@ -314,7 +315,8 @@ void Display::updateLed() {
     firstColour = lock == LK_LOCKED ? EC_RED : EC_NONE;
     secondColour = lock == LK_LOCKED ? EC_RED : EC_NONE;
     break;
-  case GlobalMotionMode::MM_JOG:
+  case GlobalMotionMode::MM_JOG_LEFT:
+  case GlobalMotionMode::MM_JOG_RIGHT:
     firstColour = EC_YELLOW;
     secondColour = EC_YELLOW;
     break;

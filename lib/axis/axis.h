@@ -37,7 +37,6 @@ public:
     m_currentPosition = 0;
   }
   virtual int getCurrentPosition() { return m_currentPosition; }
-  virtual void resetCurrentPosition() { m_currentPosition = 0; }
   virtual uint32_t getEstimatedVelocityInPulsesPerSecond() {
     // ensure that we're not in some ridiculous state where the spindle has
     // stopped for a long time
