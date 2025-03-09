@@ -45,7 +45,7 @@ Leadscrew::Leadscrew(Spindle* spindle, LeadscrewIO* io, float initialPulseDelay,
 
 void Leadscrew::setTargetPitchMM(float pitch) {
   // Calculate the ratio one, when the pitch is set. No need to calculate this every cycle
-  m_ratio = (pitch * (float)motorPulsePerRevolution) / ( leadscrewPitch * (float)encoderPPR);
+  m_ratio = (pitch * (float)motorPulsePerRevolution) / (leadscrewPitch * (float)encoderPPR);
 }
 
 /**
