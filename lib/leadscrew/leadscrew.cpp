@@ -52,10 +52,6 @@ void Leadscrew::setTargetPitchMM(float pitch) {
 }
 
 
-void Leadscrew::setExpectedPosition(float position) {
-  m_expectedPosition = position;
-}
-
 void Leadscrew::unsetStopPosition(LeadscrewStopPosition position) {
   switch (position) {
   case LeadscrewStopPosition::LEFT:
@@ -141,7 +137,6 @@ void Leadscrew::setCurrentPosition(int position) {
   m_currentPosition = position;
 }
 
-float Leadscrew::getAccumulatorUnit() { return m_ratio; }
 
 bool Leadscrew::sendPulse() {
 
@@ -170,26 +165,6 @@ bool Leadscrew::sendPulse() {
  * from a given pulse delay
  */
 int Leadscrew::getStoppingDistanceInPulses() {
-  // Calculate the discriminant
-  // float discriminant = m_currentPulseDelay * m_currentPulseDelay -
-  //   4 * (pulseDelayIncrement / 2.0) * (-initialPulseDelay);
-
-  // // Ensure the discriminant is non-negative for real roots
-  // if (discriminant >= 0) {
-  //   // Calculate the square root of the discriminant
-  //   float sqrtDiscriminant = sqrt(discriminant);
-
-  //   // Calculate the positive root using the quadratic formula
-  //   float n =
-  //     (-m_currentPulseDelay + sqrtDiscriminant) / (2 * pulseDelayIncrement);
-
-  //   // Round up to the nearest integer because pulses must be whole numbers
-  //   return abs((int)ceil(n));
-  // } else {
-  //   // If the discriminant is negative, return 0 as a fallback (no real
-  //   // solution)
-  //   return 0;
-  // }
   float time = m_leadscrewSpeed / m_leadscrewAccel;
   return m_leadscrewSpeed * time / 2;
 }
@@ -210,22 +185,22 @@ void Leadscrew::update() {
 #ifdef ESP32
   if (mode == GlobalMotionMode::MM_JOG_LEFT) {
     m_spindle->consumePosition(); // Consume the spindle position while we're jogging
-    if (tm - this->jogMicros > JOG_PULSE_DELAY) { // TODO: Revist this delay - we probably want some accelleration
-      setExpectedPosition(m_currentPosition - 1500);
+    if (tm - this->jogMicros > JOG_PULSE_DELAY) { 
+      m_expectedPosition = m_currentPosition - 1500;
       this->jogMicros = tm;
     }
   } else if (mode == GlobalMotionMode::MM_JOG_RIGHT) {
     m_spindle->consumePosition(); // Consume the spindle position while we're jogging
-    if (tm - this->jogMicros > JOG_PULSE_DELAY) { // TODO: Revist this delay - we probably want some accelleration
-      setExpectedPosition(m_currentPosition + 1500);
+    if (tm - this->jogMicros > JOG_PULSE_DELAY) { 
+      m_expectedPosition = (m_currentPosition + 1500);
       this->jogMicros = tm;
     }
   } else {
     // Update expected position from any unconsumed spindle pulses
-    setExpectedPosition(m_expectedPosition + (float)(((float)m_spindle->consumePosition()) * m_ratio));
+    m_expectedPosition = (m_expectedPosition + (float)(((float)m_spindle->consumePosition()) * m_ratio));
   }
 #else
-  setExpectedPosition(m_expectedPosition + (float)(((float)m_spindle->consumePosition()) * m_ratio));
+m_expectedPosition = (m_expectedPosition + (float)(((float)m_spindle->consumePosition()) * m_ratio));
 #endif
   // How far are we from the expected position
   float positionError = getPositionError();
@@ -236,7 +211,7 @@ void Leadscrew::update() {
 
     // if the position error is bigger than one rev worht of movement, reset the expected so that we don't move
 
-    setExpectedPosition(m_currentPosition);
+    m_expectedPosition = (m_currentPosition);
     if ((mode == GlobalMotionMode::MM_JOG_LEFT && hitLeftEndstop) || (mode == GlobalMotionMode::MM_JOG_RIGHT && hitRightEndstop)) {
       globalState->setMotionMode(GlobalMotionMode::MM_DISABLED);
     }
@@ -247,7 +222,7 @@ void Leadscrew::update() {
   switch (globalState->getMotionMode()) {
   case GlobalMotionMode::MM_DISABLED:
     // consume position but don't move
-    setExpectedPosition(m_currentPosition);
+    m_expectedPosition = (m_currentPosition);
     m_spindle->consumePosition();
     break;
   case GlobalMotionMode::MM_JOG_LEFT:
@@ -271,7 +246,6 @@ void Leadscrew::update() {
       if (m_currentDirection == LeadscrewDirection::UNKNOWN) {
         m_io->writeDirPin(ELS_DIR_RIGHT);
         m_currentDirection = LeadscrewDirection::RIGHT;
-        //m_accumulator = static_cast<int>(m_currentDirection) * getAccumulatorUnit();
       }
     } else if (positionError < 1 && !hitLeftEndstop) {
       nextDirection = LeadscrewDirection::LEFT;
@@ -281,7 +255,6 @@ void Leadscrew::update() {
       if (m_currentDirection == LeadscrewDirection::UNKNOWN) {
         m_io->writeDirPin(ELS_DIR_LEFT);
         m_currentDirection = LeadscrewDirection::LEFT;
-        //m_accumulator = static_cast<int>(m_currentDirection) * getAccumulatorUnit();
       }
     } else {
       m_currentDirection = LeadscrewDirection::UNKNOWN;
@@ -365,13 +338,7 @@ void Leadscrew::update() {
       /**
        * If the pulse was sent, we need to update the accumulator to keep track of the position
        */
-       //if (m_accumulator > 1 || m_accumulator < -1) {
-       //  m_accumulator -= static_cast<int>(m_currentDirection);
-       //} else {
       m_currentPosition += static_cast<int>(m_currentDirection);
-      //  m_accumulator += static_cast<int>(m_currentDirection) * getAccumulatorUnit();
-      //}
-
       /**
        * We need to determine if we need to start decelerating to stop at the designated position
        *
@@ -405,9 +372,9 @@ void Leadscrew::update() {
         m_currentPulseDelay = m_leadscrewSpeed == 0 ? initialPulseDelay : US_PER_SECOND / m_leadscrewSpeed;
       }
 
-      GlobalThreadSyncState tss = GlobalState::getInstance()->getThreadSyncState();
+      GlobalThreadSyncState tss = globalState->getThreadSyncState();
 
-      if (debugPulseCount == 0 && GlobalState::getInstance()->getDebugMode()) {
+      if (debugPulseCount == 0 && globalState->getDebugMode()) {
         DEBUG_F("%d,%d,%f,%d,%f,%d,%f,%f,%f,%d,%s\n", (int)tm,
             m_lastFullPulseDurationMicros, 
             positionError,pulsesToStop,

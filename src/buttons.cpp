@@ -244,14 +244,12 @@ void ButtonHandler::jogDirectionHandler(JogDirection direction) {
     switch (direction) {
     case JogDirection::LEFT:
       if (m_leadscrew->getStopPositionState(LeadscrewStopPosition::LEFT) != LeadscrewStopState::UNSET) {
-        m_leadscrew->setExpectedPosition(m_leadscrew->getStopPosition(LeadscrewStopPosition::LEFT));
         globalState->setMotionMode(GlobalMotionMode::MM_JOG_LEFT);
         globalState->setThreadSyncState(GlobalThreadSyncState::SS_UNSYNC);
       }
       break;
     case JogDirection::RIGHT:
       if (m_leadscrew->getStopPositionState(LeadscrewStopPosition::RIGHT) != LeadscrewStopState::UNSET) {
-        m_leadscrew->setExpectedPosition(m_leadscrew->getStopPosition(LeadscrewStopPosition::RIGHT));
         globalState->setMotionMode(GlobalMotionMode::MM_JOG_RIGHT);
         globalState->setThreadSyncState(GlobalThreadSyncState::SS_SYNC);
       }

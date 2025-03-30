@@ -80,7 +80,6 @@ private:
    * This gets the "unit" of the accumulator, i.e the amount the accumulator
    * increased by when the leadscrew position increases by 1
    */
-  float getAccumulatorUnit();
   bool sendPulse();
   int getStoppingDistanceInPulses();
   uint64_t jogMicros;
@@ -111,7 +110,6 @@ public:
   void unsetStopPosition(LeadscrewStopPosition position);
   int getStopPosition(LeadscrewStopPosition position);
   void setTargetPitchMM(float ratio);
-  void setExpectedPosition(float position);
   void setCurrentPosition(int position);
   void update();
   int getPositionError();

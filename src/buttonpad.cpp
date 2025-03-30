@@ -218,7 +218,6 @@ void ButtonPad::jogDirectionHandler(ButtonInfo press) {
         break;
       }
       if (m_leadscrew->getStopPositionState(LeadscrewStopPosition::LEFT) != LeadscrewStopState::UNSET) {
-        m_leadscrew->setExpectedPosition(m_leadscrew->getStopPosition(LeadscrewStopPosition::LEFT));
         globalState->setMotionMode(GlobalMotionMode::MM_JOG_LEFT);
         globalState->setThreadSyncState(GlobalThreadSyncState::SS_SYNC);
       }
@@ -229,7 +228,6 @@ void ButtonPad::jogDirectionHandler(ButtonInfo press) {
       break;
     }
     if (m_leadscrew->getStopPositionState(LeadscrewStopPosition::RIGHT) != LeadscrewStopState::UNSET) {
-        m_leadscrew->setExpectedPosition(m_leadscrew->getStopPosition(LeadscrewStopPosition::RIGHT));
         globalState->setMotionMode(GlobalMotionMode::MM_JOG_RIGHT);
         globalState->setThreadSyncState(GlobalThreadSyncState::SS_UNSYNC);
       }
