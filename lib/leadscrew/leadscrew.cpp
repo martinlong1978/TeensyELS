@@ -375,7 +375,7 @@ m_expectedPosition = (m_expectedPosition + (float)(((float)m_spindle->consumePos
       GlobalThreadSyncState tss = globalState->getThreadSyncState();
 
       if (debugPulseCount == 0 && globalState->getDebugMode()) {
-        DEBUG_F("%d,%d,%f,%d,%f,%d,%f,%f,%f,%d,%s\n", (int)tm,
+        DEBUG_F("%d,%d,%f,%d,%f,%d,%f,%f,%f,%d,%s,%d\n", (int)tm,
             m_lastFullPulseDurationMicros, 
             positionError,pulsesToStop,
             m_currentPulseDelay, 
@@ -384,7 +384,8 @@ m_expectedPosition = (m_expectedPosition + (float)(((float)m_spindle->consumePos
             m_leadscrewAccel,
             initialPulseDelay,
             expectedSyncPosition,
-             tss == GlobalThreadSyncState::SS_SYNC ? "SYNC" : tss == GlobalThreadSyncState::SS_UNSYNC ? "UNSYNC" : "UNSET"
+             tss == GlobalThreadSyncState::SS_SYNC ? "SYNC" : tss == GlobalThreadSyncState::SS_UNSYNC ? "UNSYNC" : "UNSET",
+             m_spindle->getCurrentPosition()
           );
       }
       if(++debugPulseCount > 20){
@@ -427,7 +428,6 @@ void Leadscrew::printState() {
   DEBUG_F("Leadscrew left stop position: %d\n", getStopPosition(LeadscrewStopPosition::LEFT));
   DEBUG_F("Leadscrew right stop position: %d\n", getStopPosition(LeadscrewStopPosition::RIGHT));
   DEBUG_F("Leadscrew ratio: %f\n", m_ratio);
-  DEBUG_F("Leadscrew accumulator unit: %f\n", getAccumulatorUnit());
   //DEBUG_F("Current leadscrew accumulator: %f\n", m_accumulator);
   DEBUG_F("Leadscrew direction: ");
   switch (getCurrentDirection()) {
