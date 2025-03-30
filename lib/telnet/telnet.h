@@ -1,7 +1,8 @@
 #define DEBUG_ON 1
 
 #if !defined(PIO_UNIT_TESTING) && defined(ESP32)
-#define DEBUG_USE_TELNET 1
+//#define DEBUG_USE_TELNET 1
+#define DEBUG_USE_SERIAL 1
 #else
 #define DEBUG_USE_PRINTF 1
 #endif

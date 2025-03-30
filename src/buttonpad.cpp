@@ -89,6 +89,11 @@ void ButtonPad::halfNutHandler(ButtonInfo press) {
     GlobalState::getInstance()->setOTA();
   }
 
+  if(press.buttonState == BS_CLICKED){
+    GlobalState *gs = GlobalState::getInstance();
+    gs->setDebugMode(!gs->getDebugMode());
+  }
+
   // honestly I don't know what this button should do after the refactor...
 
   /*if (event == Button::SINGLE_CLICKED_EVENT &&
@@ -208,6 +213,10 @@ void ButtonPad::jogDirectionHandler(ButtonInfo press) {
   if (press.buttonState == BS_CLICKED) {
     switch (press.button) {
     case ELS_JOG_LEFT_BUTTON:
+      if(globalState->getMotionMode() == GlobalMotionMode::MM_JOG_LEFT){
+        globalState->setMotionMode(GlobalMotionMode::MM_DISABLED);
+        break;
+      }
       if (m_leadscrew->getStopPositionState(LeadscrewStopPosition::LEFT) != LeadscrewStopState::UNSET) {
         m_leadscrew->setExpectedPosition(m_leadscrew->getStopPosition(LeadscrewStopPosition::LEFT));
         globalState->setMotionMode(GlobalMotionMode::MM_JOG_LEFT);
@@ -215,7 +224,11 @@ void ButtonPad::jogDirectionHandler(ButtonInfo press) {
       }
       break;
     case ELS_JOG_RIGHT_BUTTON:
-      if (m_leadscrew->getStopPositionState(LeadscrewStopPosition::RIGHT) != LeadscrewStopState::UNSET) {
+    if(globalState->getMotionMode() == GlobalMotionMode::MM_JOG_RIGHT){
+      globalState->setMotionMode(GlobalMotionMode::MM_DISABLED);
+      break;
+    }
+    if (m_leadscrew->getStopPositionState(LeadscrewStopPosition::RIGHT) != LeadscrewStopState::UNSET) {
         m_leadscrew->setExpectedPosition(m_leadscrew->getStopPosition(LeadscrewStopPosition::RIGHT));
         globalState->setMotionMode(GlobalMotionMode::MM_JOG_RIGHT);
         globalState->setThreadSyncState(GlobalThreadSyncState::SS_UNSYNC);

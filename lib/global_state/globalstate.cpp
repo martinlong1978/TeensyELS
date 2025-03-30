@@ -12,6 +12,14 @@ GlobalState *GlobalState::getInstance() {
   return m_instance;
 }
 
+bool GlobalState::getDebugMode(){
+  return m_debugMode;
+}
+
+void GlobalState::setDebugMode(bool mode){
+  m_debugMode = mode;
+}
+
 void GlobalState::printState() {
   DEBUG_F("Drive Mode: ");
   switch (m_motionMode) {

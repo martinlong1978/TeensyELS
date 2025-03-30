@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
   micros.setMicros(0);
   millis.setMillis(0);
 
-  for(int i = 0; i < 5000; i++){
+  for(int i = 0; i < 10000; i++){
     micros.incrementMicros(100);
     millis.incrementMillis(1);
     leadscrew.update();

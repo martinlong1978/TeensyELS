@@ -17,6 +17,7 @@
 #include "keyarray.h"
 //#include "EscapeCodes.h"
 
+//#define FULLMONITOR
 #ifdef ESP32
 #include <esp_task_wdt.h>
 ESPTelnet telnet;
@@ -33,9 +34,11 @@ Spindle spindle;
 Spindle spindle(ELS_SPINDLE_ENCODER_A, ELS_SPINDLE_ENCODER_B);
 #endif
 LeadscrewIOImpl leadscrewIOImpl;
-Leadscrew leadscrew(&spindle, &leadscrewIOImpl,
+Leadscrew leadscrew(&spindle,
+  &leadscrewIOImpl,
+  ACCEL_PULSE_SEC,
   LEADSCREW_INITIAL_PULSE_DELAY_US,
-  LEADSCREW_PULSE_DELAY_STEP_US, ELS_LEADSCREW_STEPPER_PPR* ELS_GEARBOX_RATIO,
+  ELS_LEADSCREW_STEPPER_PPR, 
   ELS_LEADSCREW_PITCH_MM, ELS_SPINDLE_ENCODER_PPR);
 
 #ifdef ESP32  
@@ -55,13 +58,13 @@ int finalcyclecount;
 // screen independently without losing pulses
 void timerCallback() {
 #ifdef ESP32
-  cyclecount++;
-  int64_t t = esp_timer_get_time();
-  if (t - lastcycle > 1000000) {
-    finalcyclecount = cyclecount;
-    lastcycle = t;
-    cyclecount = 0;
-  }
+  //cyclecount++;
+ // int64_t t = esp_timer_get_time();
+  //if (t - lastcycle > 1000000) {
+  //  finalcyclecount = cyclecount;
+  //  lastcycle = t;
+  //  cyclecount = 0;
+ // }
 #endif
   spindle.update();
   leadscrew.update();
@@ -71,6 +74,7 @@ void timerCallback() {
 void displayLoop() {
   keyPad.handle();
 
+  #ifdef FULLMONITOR
   static elapsedMicros lastPrint;
   if (lastPrint > 1000 * 1000) {
     //telnet.print(ansi.cls());
@@ -86,6 +90,7 @@ void displayLoop() {
     DEBUG_F("Spindle velocity pulses: %d\n", spindle.getEstimatedVelocityInPulsesPerSecond());
     keyPad.printState();
   }
+  #endif
   display.update();
 }
 
@@ -186,9 +191,9 @@ void setup() {
   TaskHandle_t spindleTask;
   TaskHandle_t displayTask;
   TaskHandle_t commsTask;
-  xTaskCreate(SpindleTask, "Spindle", 2048, NULL, 10, &spindleTask);
-  xTaskCreate(DisplayTask, "Display", 8000, NULL, 1, &displayTask);
-  xTaskCreate(comms_loop, "Comms", 16000, NULL, 1, &commsTask);
+  xTaskCreatePinnedToCore(SpindleTask, "Spindle", 2048, NULL, 24 | portPRIVILEGE_BIT, &spindleTask, 0);
+  xTaskCreatePinnedToCore(DisplayTask, "Display", 8000, NULL, 1, &displayTask, 1);
+  xTaskCreatePinnedToCore(comms_loop, "Comms", 16000, NULL, 1, &commsTask, 1);
   disableLoopWDT();
   esp_task_wdt_delete(xTaskGetHandle("IDLE0"));
   esp_task_wdt_delete(xTaskGetHandle("IDLE1"));

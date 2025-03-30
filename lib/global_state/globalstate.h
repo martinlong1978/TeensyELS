@@ -55,6 +55,8 @@ class GlobalState {
   GlobalThreadSyncState m_threadSyncState;
   GlobalButtonLock m_buttonLock;
 
+  volatile bool m_debugMode = false;
+
   int m_feedSelect;
 
   // the position at which the spindle will be back in sync with the leadscrew
@@ -89,6 +91,9 @@ class GlobalState {
 
   void setUnitMode(GlobalUnitMode mode);
   GlobalUnitMode getUnitMode();
+
+  bool getDebugMode();
+  void setDebugMode(bool mode);
 
   void setThreadSyncState(GlobalThreadSyncState state);
   GlobalThreadSyncState getThreadSyncState();

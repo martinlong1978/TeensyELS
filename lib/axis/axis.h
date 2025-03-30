@@ -21,6 +21,7 @@ protected:
   int64_t m_lastRevMicros;
 #else
   elapsedMicros m_lastPulseMicros;
+  elapsedMicros m_beginMicros;
 #endif
 
   // the elapsed time for the last full pulse duration
@@ -32,6 +33,7 @@ public:
     m_lastPulseTimestamp = esp_timer_get_time();
 #else
     m_lastPulseMicros = 0;
+    m_beginMicros = 0;
 #endif
     m_lastFullPulseDurationMicros = 0;
     m_currentPosition = 0;
@@ -74,7 +76,6 @@ public:
 class DerivedAxis {
 public:
   virtual void setTargetPitchMM(float ratio) = 0;
-  virtual float getRatio() = 0;
 };
 
 /**
@@ -85,7 +86,6 @@ public:
  */
 class DrivenAxis {
 public:
-  virtual float getExpectedPosition() = 0;
   virtual void update() = 0;
   virtual int getPositionError() = 0;
 };

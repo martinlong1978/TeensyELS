@@ -1,15 +1,16 @@
+#ifdef PIO_UNIT_TESTING
 #include <axis.h>
 
 #pragma once
 
-class Spindle : public RotationalAxis {
+class TestSpindle : public RotationalAxis {
  private:
   // the unconsumed position is the position that has been read from the encoder
   // but hasn't been used to update the current position of any driven axes
   int m_unconsumedPosition;
 
  public:
-  Spindle();
+  TestSpindle();
 
   void update();
   void setCurrentPosition(int position);
@@ -21,3 +22,4 @@ class Spindle : public RotationalAxis {
   int consumePosition();
   float getEstimatedVelocityInRPM();
 };
+#endif

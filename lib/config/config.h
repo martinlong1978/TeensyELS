@@ -67,6 +67,7 @@
 #elif defined(ESP32)
 #define USE_RMT
 #define ELS_LEADSCREW_STEP 25 
+#define ELS_LEADSCREW_STEP_BIT BIT25
 #define ELS_LEADSCREW_DIR 26
 #define ELS_LEADSCREW_DIR_BIT BIT26
 
@@ -148,7 +149,7 @@
 
 // extra config options
 // jog speed in mm/s
-#define JOG_SPEED 25
+#define JOG_SPEED 250
 
 #define JOG_PULSE_DELAY   \
   ((float)US_PER_SECOND / \
@@ -167,10 +168,10 @@
 // this is the maximum allowable speed (in mm/s) for the leadscrew to
 // instantaneously start moving from 0
 // #define ACCEL_DISABLED
-#define LEADSCREW_JERK 0.25
+#define LEADSCREW_JERK 0.5
 
 // The acceleration of the leadscrew in mm/s^2
-#define LEADSCREW_ACCEL 20
+#define LEADSCREW_ACCEL 40
 
 #define LEADSCREW_TIMER_US 4
 
@@ -179,19 +180,20 @@
 // speed look at the jerk value
 #ifdef ACCEL_DISABLED
 #define LEADSCREW_INITIAL_PULSE_DELAY_US 0
+#define ACCEL_PULSE_SEC
 #else
+#define ACCEL_PULSE_SEC LEADSCREW_ACCEL * ELS_LEADSCREW_STEPS_PER_MM
 #define LEADSCREW_INITIAL_PULSE_DELAY_US \
-  ((float)US_PER_SECOND /                \
-   ((float)LEADSCREW_JERK * (float)ELS_LEADSCREW_STEPS_PER_MM))
+  ((float)US_PER_SECOND / ((float)LEADSCREW_JERK * (float)ELS_LEADSCREW_STEPS_PER_MM))
 #endif
 
 // The amount of time to increment/decrement the pulse delay by in microseconds
 // for the leadscrew This is calculated based on the acceleration value
 #ifdef ACCEL_DISABLED
-#define LEADSCREW_PULSE_DELAY_STEP_US 0
+//#define LEADSCREW_PULSE_DELAY_STEP_US 0
 #else
-#define LEADSCREW_PULSE_DELAY_STEP_US \
-  ((float)LEADSCREW_ACCEL / ((float)ELS_LEADSCREW_STEPS_PER_MM))
+//#define LEADSCREW_PULSE_DELAY_STEP_US \
+//  ((float)LEADSCREW_ACCEL / ((float)ELS_LEADSCREW_STEPS_PER_MM))
 #endif
 
 // metric thread pitch is defined as mm/rev

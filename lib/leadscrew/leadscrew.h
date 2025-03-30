@@ -58,11 +58,12 @@ private:
 
   // The current delay between pulses in microseconds
   const float initialPulseDelay;
-  const float pulseDelayIncrement;
   float m_currentPulseDelay;
+  float m_leadscrewSpeed;
+  const float m_leadscrewAccel;
   LeadscrewDirection m_currentDirection;
 
-  float m_accumulator;
+  //float m_accumulator;
 
   // we may want more sophisticated control over positions, but for now this is
   // fine
@@ -84,17 +85,20 @@ private:
   int getStoppingDistanceInPulses();
   uint64_t jogMicros;
 
+  int debugPulseCount;
+  bool initPos;
+
 public:
-  Leadscrew(Spindle* spindle, LeadscrewIO* io, float initialPulseDelay,
-    float pulseDelayIncrement, int motorPulsePerRevolution,
+  Leadscrew(Spindle* spindle, LeadscrewIO* io,
+    float leadscrewAccel, float initialPulseDelay, 
+    int motorPulsePerRevolution,
     float leadscrewPitch, int encoderPPR);
-  int getCurrentPosition();
   #ifdef USE_RMT
   void setRMT(rmt_obj_t *rmtObj){
     this->rmtObj = rmtObj;
-    rmt_data->duration0 = 2;
+    rmt_data->duration0 = 8;
     rmt_data->level0 = 1;
-    rmt_data->duration1 = 3;
+    rmt_data->duration1 = 8;
     rmt_data->level1 = 0;
   
   }
@@ -107,8 +111,6 @@ public:
   void unsetStopPosition(LeadscrewStopPosition position);
   int getStopPosition(LeadscrewStopPosition position);
   void setTargetPitchMM(float ratio);
-  float getRatio();
-  float getExpectedPosition();
   void setExpectedPosition(float position);
   void setCurrentPosition(int position);
   void update();
