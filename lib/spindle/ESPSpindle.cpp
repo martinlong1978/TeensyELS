@@ -15,7 +15,7 @@ Spindle::Spindle() {
   gpio_pullup_en((gpio_num_t)pinB);
 
   m_unconsumedPosition = 0;
-  m_lastPulseTimestamp = esp_timer_get_time();
+  m_lastPulseTimestamp = micros();
   m_lastFullPulseDurationMicros = 0;
   m_currentPosition = 0;
 }
@@ -37,7 +37,7 @@ void Spindle::setCurrentPosition(int position) {
 }
 
 void Spindle::incrementCurrentPosition(int amount) {
-  int64_t t = esp_timer_get_time();
+  int64_t t = micros();
   int pos = getCurrentPosition() + amount;
   setCurrentPosition(pos);
   int newpos = getCurrentPosition();
@@ -59,14 +59,14 @@ void Spindle::incrementCurrentPosition(int amount) {
 
 float Spindle::getEstimatedVelocityInPPS() {
   if (m_lastRevMicros == 0)return 0;
-  if(esp_timer_get_time() - m_lastRevTimestamp > 1000000)return 0;
+  if(micros() - m_lastRevTimestamp > 1000000)return 0;
   return abs((m_lastRevSize * US_PER_SECOND) / (m_lastRevMicros));
 }
 
 
 float Spindle::getEstimatedVelocityInRPM() {
   if (m_lastRevMicros == 0)return 0;
-  if(esp_timer_get_time() - m_lastRevTimestamp > 1000000)return 0;
+  if(micros() - m_lastRevTimestamp > 1000000)return 0;
   return abs((m_lastRevSize * 60000000) / (m_lastRevMicros * ELS_SPINDLE_ENCODER_PPR));
 }
 

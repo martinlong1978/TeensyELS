@@ -297,7 +297,7 @@ void Display::drawEnabled() {
 
 #ifdef ESP32   // TODO Make portable
 void Display::writeLed() {
-  int64_t time = esp_timer_get_time() / 250000;
+  int64_t time = micros() / 250000;
   EncoderColour c = time % 2 == 1 ? firstColour : secondColour;
   digitalWrite(ELS_IND_GREEN, (c & 2) == 2);
   digitalWrite(ELS_IND_RED, c & 1);

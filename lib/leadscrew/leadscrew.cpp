@@ -35,11 +35,7 @@ Leadscrew::Leadscrew(Spindle* spindle, LeadscrewIO* io,
   initialPulseDelay(initialPulseDelay),
   m_currentPulseDelay(initialPulseDelay) {
   setTargetPitchMM(GlobalState::getInstance()->getCurrentFeedPitch());
-#ifdef ESP32
-  m_lastPulseTimestamp = esp_timer_get_time();
-#else
-  m_lastPulseMicros = 0;
-#endif
+  m_lastPulseTimestamp = micros();
   m_lastFullPulseDurationMicros = 0;
   m_expectedPosition = 0;
   m_currentPosition = 0;
@@ -113,6 +109,7 @@ LeadscrewStopState Leadscrew::getStopPositionState(LeadscrewStopPosition positio
   case LeadscrewStopPosition::RIGHT:
     return m_rightStopState;
   }
+  return m_rightStopState;
 }
 
 int Leadscrew::getStopPosition(LeadscrewStopPosition position) {
@@ -176,7 +173,7 @@ int Leadscrew::getTargetSpeedDistanceInPulses() {
 
 void Leadscrew::update() {
 
-  int64_t tm = esp_timer_get_time();
+  int64_t tm = micros();
 
   GlobalState* globalState = GlobalState::getInstance();
   GlobalMotionMode mode = globalState->getMotionMode();
@@ -187,7 +184,6 @@ void Leadscrew::update() {
   bool hitRightEndstop = m_rightStopState == LeadscrewStopState::SET &&
     m_currentPosition >= m_rightStopPosition;
 
-#ifdef ESP32
   if (mode == GlobalMotionMode::MM_JOG_LEFT) {
     m_spindle->consumePosition(); // Consume the spindle position while we're jogging
     if (tm - this->jogMicros > JOG_PULSE_DELAY) {
@@ -204,9 +200,7 @@ void Leadscrew::update() {
     // Update expected position from any unconsumed spindle pulses
     m_expectedPosition = (m_expectedPosition + (float)(((float)m_spindle->consumePosition()) * m_ratio));
   }
-#else
-  m_expectedPosition = (m_expectedPosition + (float)(((float)m_spindle->consumePosition()) * m_ratio));
-#endif
+
   // How far are we from the expected position
   float positionError = getPositionError();
   if ((hitLeftEndstop || hitRightEndstop) && abs(positionError) > encoderPPR * m_ratio) {
@@ -312,19 +306,11 @@ void Leadscrew::update() {
      * - The last pulse was sent recently i.e: less than the current pulse delay
      * - the sync position was previously set and we are currently not synced with the spindle
      */
-#if ESP32
     if (m_currentDirection == LeadscrewDirection::UNKNOWN
       || (tm - m_lastPulseTimestamp) < m_currentPulseDelay
       || (m_syncPositionState != LeadscrewSpindleSyncPositionState::UNSET && globalState->getThreadSyncState() == SS_UNSYNC)) {
       break;
     }
-#else
-    if (m_lastPulseMicros < m_currentPulseDelay
-      || m_currentDirection == LeadscrewDirection::UNKNOWN
-      || (m_syncPositionState != LeadscrewSpindleSyncPositionState::UNSET && globalState->getThreadSyncState() == SS_UNSYNC)) {
-      break;
-    }
-#endif
 
     // attempt to keep in sync with the leadscrew
     // if sendPulse returns true, we've actually sent a pulse
@@ -332,14 +318,8 @@ void Leadscrew::update() {
       /**
        * If we've sent a pulse, we need to update the last pulse micros for velocity calculations
        */
-#ifdef ESP32
       m_lastFullPulseDurationMicros = (uint32_t)(tm - m_lastPulseTimestamp);
       m_lastPulseTimestamp = tm;
-#else
-      m_lastFullPulseDurationMicros =
-        min((uint32_t)m_lastPulseMicros, (uint32_t)initialPulseDelay);
-      m_lastPulseMicros = 0;
-#endif
 
       /**
        * If the pulse was sent, we need to update the accumulator to keep track of the position

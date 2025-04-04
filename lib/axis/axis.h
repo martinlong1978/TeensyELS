@@ -13,28 +13,18 @@ protected:
   volatile int m_currentPosition;
 
   // the timestamp of the last pulse
-#ifdef ESP32
   int64_t m_lastPulseTimestamp;
   int64_t m_lastRevTimestamp;
   int64_t m_lastRevPosition;
   int64_t m_lastRevSize;
   int64_t m_lastRevMicros;
-#else
-  elapsedMicros m_lastPulseMicros;
-  elapsedMicros m_beginMicros;
-#endif
 
   // the elapsed time for the last full pulse duration
   uint32_t m_lastFullPulseDurationMicros;
 
 public:
   Axis() {
-#ifdef ESP32
-    m_lastPulseTimestamp = esp_timer_get_time();
-#else
-    m_lastPulseMicros = 0;
-    m_beginMicros = 0;
-#endif
+    m_lastPulseTimestamp = micros();
     m_lastFullPulseDurationMicros = 0;
     m_currentPosition = 0;
   }

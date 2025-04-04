@@ -14,7 +14,6 @@
 #include "config.h"
 #include "display.h"
 #include "keyarray.h"
-//#include "EscapeCodes.h"
 
 //#define FULLMONITOR
 #ifdef ESP32
@@ -54,15 +53,6 @@ int finalcyclecount;
 // have to handle the leadscrew updates in a timer callback so we can update the
 // screen independently without losing pulses
 void timerCallback() {
-#ifdef ESP32
-  //cyclecount++;
- // int64_t t = esp_timer_get_time();
-  //if (t - lastcycle > 1000000) {
-  //  finalcyclecount = cyclecount;
-  //  lastcycle = t;
-  //  cyclecount = 0;
- // }
-#endif
   spindle.update();
   leadscrew.update();
 }
@@ -97,7 +87,7 @@ void DisplayTask(void* parameter) {
   while (true) {
     displayLoop();
     esp_task_wdt_reset();
-    uint64_t c = esp_timer_get_time();
+    uint64_t c = micros();
     uint64_t delay = (250000 - (c - m)) / 1000;
     if (delay > 0) {
       vTaskDelay((delay > 250 ? 250 : delay) / portTICK_PERIOD_MS);
