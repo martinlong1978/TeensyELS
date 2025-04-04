@@ -4,7 +4,6 @@
 //#include <Wire.h>
 #include <globalstate.h>
 #include <leadscrew.h>
-#include <leadscrew_io_impl.h>
 #include <spindle.h>
 
 #include "CommsManager.h"
@@ -18,7 +17,9 @@
 //#define FULLMONITOR
 #ifdef ESP32
 #include <esp_task_wdt.h>
+#include <leadscrew_io_esp.h>
 #else
+#include <leadscrew_io_teensy.h>
 IntervalTimer timer;
 #endif
 
@@ -29,7 +30,13 @@ Spindle spindle;
 #else
 Spindle spindle(ELS_SPINDLE_ENCODER_A, ELS_SPINDLE_ENCODER_B);
 #endif
-LeadscrewIOImpl leadscrewIOImpl;
+
+#ifdef ESP32
+LeadscrewIOESP leadscrewIOImpl;
+#else
+LeadscrewIOTeensy leadscrewIOImpl;
+#endif
+
 Leadscrew leadscrew(&spindle,
   &leadscrewIOImpl,
   ACCEL_PULSE_SEC,
