@@ -9,7 +9,6 @@
 
 
 #include <config.h>
-#include <els_elapsedMillis.h>
 #include <globalstate.h>
 #include <gmock/gmock.h>
 #include "TestSpindle.h"

@@ -4,7 +4,6 @@
 #endif 
 
 #include <gmock/gmock.h>
-#include "els_elapsedMillis.h"
 #include <globalstate.h>
 #include "TestSpindle.h"
 #include <leadscrew.h>

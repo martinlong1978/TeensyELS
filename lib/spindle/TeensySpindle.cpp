@@ -2,7 +2,6 @@
 #include "TeensySpindle.h"
 
 #include <config.h>
-#include <els_elapsedMillis.h>
 #include <math.h>
 
 #ifndef ELS_SPINDLE_DRIVEN
