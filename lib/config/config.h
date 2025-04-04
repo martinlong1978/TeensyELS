@@ -127,6 +127,7 @@
 #endif
 
 #define ELS_SPINDLE_ENCODER_PPR 1200
+#define SPEED_COUNTS 10
 #define ELS_LEADSCREW_STEPPER_PPR 400
 
 // uncomment this if your leadscrew direction is inverted to what is expected
@@ -171,7 +172,10 @@
 #define LEADSCREW_JERK 0.5
 
 // The acceleration of the leadscrew in mm/s^2
-#define LEADSCREW_ACCEL 40
+#define LEADSCREW_ACCEL 90
+#define LEADSCREW_MAX_SPEED 40
+#define LEADSCREW_MAX_SPEED_PPS  LEADSCREW_MAX_SPEED * ELS_LEADSCREW_STEPS_PER_MM
+
 
 #define LEADSCREW_TIMER_US 4
 

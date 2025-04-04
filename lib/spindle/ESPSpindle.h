@@ -28,5 +28,6 @@ class Spindle : public RotationalAxis {
    */
   int consumePosition();
   float getEstimatedVelocityInRPM();
+  float getEstimatedVelocityInPPS();
 };
 #endif

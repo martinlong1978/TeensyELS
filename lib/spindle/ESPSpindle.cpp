@@ -35,7 +35,7 @@ void Spindle::setCurrentPosition(int position) {
   int positionDelta = position - m_currentPosition;
   m_unconsumedPosition += positionDelta;
 
-  m_currentPosition = position % ELS_SPINDLE_ENCODER_PPR;
+  m_currentPosition = (position + ELS_SPINDLE_ENCODER_PPR) % ELS_SPINDLE_ENCODER_PPR;
 }
 
 void Spindle::incrementCurrentPosition(int amount) {
@@ -49,7 +49,7 @@ void Spindle::incrementCurrentPosition(int amount) {
   }
   if (amount != 0) {
     m_lastPulseTimestamp = t;
-    if (abs(newpos - m_lastRevPosition) > ELS_SPINDLE_ENCODER_PPR) {
+    if (abs(newpos - m_lastRevPosition) > SPEED_COUNTS) {
       // Update stats for last full revolution. 
       m_lastRevSize = newpos - m_lastRevPosition;
       m_lastRevPosition = newpos;
@@ -58,6 +58,13 @@ void Spindle::incrementCurrentPosition(int amount) {
     }
   }
 }
+
+float Spindle::getEstimatedVelocityInPPS() {
+  if (m_lastRevMicros == 0)return 0;
+  if(esp_timer_get_time() - m_lastRevTimestamp > 1000000)return 0;
+  return abs((m_lastRevSize * US_PER_SECOND) / (m_lastRevMicros));
+}
+
 
 float Spindle::getEstimatedVelocityInRPM() {
   if (m_lastRevMicros == 0)return 0;

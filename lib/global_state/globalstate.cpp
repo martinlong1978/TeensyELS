@@ -4,64 +4,88 @@
 #include "../telnet/telnet.h"
 #include <globalstate.h>
 
-GlobalState *GlobalState::m_instance = nullptr;
-GlobalState *GlobalState::getInstance() {
+GlobalState* GlobalState::m_instance = nullptr;
+GlobalState* GlobalState::getInstance() {
   if (m_instance == nullptr) {
     m_instance = new GlobalState();
   }
   return m_instance;
 }
 
-bool GlobalState::getDebugMode(){
+bool GlobalState::getDebugMode() {
   return m_debugMode;
 }
 
-void GlobalState::setDebugMode(bool mode){
+void GlobalState::setDebugMode(bool mode) {
+  if (mode) {
+    Serial.printf("Heap: %d PSRam %d \n", ESP.getFreeHeap(), ESP.getFreePsram());
+    debugBuffer = (DebugData*)malloc(100000);
+    debugInit = (DebugData*)debugBuffer;
+  } else {
+    DEBUG_F("Bytes found %d\n", debugBuffer - debugInit);
+    int count = (debugBuffer - debugInit);
+    debugBuffer = debugInit;
+    for (int i = 0; i < count; i++) {
+      
+      DEBUG_F("%d,%d,%f,%d,%d,%f,%d,%f,%d,%f,%d\n", debugBuffer->tm,
+        debugBuffer->m_lastFullPulseDurationMicros,
+        debugBuffer->positionError, debugBuffer->pulsesToStop, debugBuffer->pulsesToTargetSpeed,
+        debugBuffer->m_currentPulseDelay,
+        debugBuffer->m_currentPosition,
+        debugBuffer->m_leadscrewSpeed,
+        debugBuffer->spindlePos,
+        debugBuffer->targetSpeed,
+        debugBuffer->timeToTarget
+      );
+      debugBuffer++;
+    }
+    free(debugInit);
+  }
   m_debugMode = mode;
 }
 
 void GlobalState::printState() {
   DEBUG_F("Drive Mode: ");
   switch (m_motionMode) {
-    case MM_DISABLED:
-      DEBUG_C("DISABLED\n");
-      break;
-    case MM_ENABLED:
-      DEBUG_C("ENABLED\n");
-      break;
-      case MM_JOG_LEFT:
-      DEBUG_C("JOG LEFT\n");
-      break;
-      case MM_JOG_RIGHT:
-      DEBUG_C("JOG RIGHT\n");
-      break;
+  case MM_DISABLED:
+    DEBUG_C("DISABLED\n");
+    break;
+  case MM_ENABLED:
+    DEBUG_C("ENABLED\n");
+    break;
+  case MM_JOG_LEFT:
+    DEBUG_C("JOG LEFT\n");
+    break;
+  case MM_JOG_RIGHT:
+    DEBUG_C("JOG RIGHT\n");
+    break;
   }
   DEBUG_F("Feed Mode: ");
   switch (m_feedMode) {
-    case FM_FEED:
-      DEBUG_C("FEED\n");
-      break;
-    case FM_THREAD:
-      DEBUG_C("THREAD\n");
-      break;
+  case FM_FEED:
+    DEBUG_C("FEED\n");
+    break;
+  case FM_THREAD:
+    DEBUG_C("THREAD\n");
+    break;
   }
   DEBUG_F("Unit Mode: ");
   switch (m_unitMode) {
-    case METRIC:
-      DEBUG_C("METRIC\n");
-      break;
-    case IMPERIAL:
-      DEBUG_C("IMPERIAL\n");
-      break;
+  case METRIC:
+    DEBUG_C("METRIC\n");
+    break;
+  case IMPERIAL:
+    DEBUG_C("IMPERIAL\n");
+    break;
   }
   DEBUG_F("Thread Sync State: ");
   switch (m_threadSyncState) {
-    case SS_SYNC:
-      DEBUG_C("SYNC\n");
-      break;
-    case SS_UNSYNC:
-      DEBUG_C("UNSYNC\n");
-      break;
+  case SS_SYNC:
+    DEBUG_C("SYNC\n");
+    break;
+  case SS_UNSYNC:
+    DEBUG_C("UNSYNC\n");
+    break;
   }
 }
 

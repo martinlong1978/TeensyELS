@@ -82,6 +82,7 @@ private:
    */
   bool sendPulse();
   int getStoppingDistanceInPulses();
+  int getTargetSpeedDistanceInPulses();
   uint64_t jogMicros;
 
   int debugPulseCount;

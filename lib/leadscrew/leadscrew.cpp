@@ -16,7 +16,7 @@ using namespace std;
  */
 
 Leadscrew::Leadscrew(Spindle* spindle, LeadscrewIO* io,
-  float leadscrewAccel, float initialPulseDelay, 
+  float leadscrewAccel, float initialPulseDelay,
   int motorPulsePerRevolution,
   float leadscrewPitch, int encoderPPR)
   : motorPulsePerRevolution(motorPulsePerRevolution),
@@ -169,6 +169,12 @@ int Leadscrew::getStoppingDistanceInPulses() {
   return m_leadscrewSpeed * time / 2;
 }
 
+int Leadscrew::getTargetSpeedDistanceInPulses() {
+  float targetSpeed = m_spindle->getEstimatedVelocityInPPS() * m_ratio;
+  float time = abs(m_leadscrewSpeed - targetSpeed) / m_leadscrewAccel;
+  return ((m_leadscrewSpeed - targetSpeed) * time / 2);
+}
+
 void Leadscrew::update() {
 
   int64_t tm = esp_timer_get_time();
@@ -185,13 +191,13 @@ void Leadscrew::update() {
 #ifdef ESP32
   if (mode == GlobalMotionMode::MM_JOG_LEFT) {
     m_spindle->consumePosition(); // Consume the spindle position while we're jogging
-    if (tm - this->jogMicros > JOG_PULSE_DELAY) { 
+    if (tm - this->jogMicros > JOG_PULSE_DELAY) {
       m_expectedPosition = m_currentPosition - 1500;
       this->jogMicros = tm;
     }
   } else if (mode == GlobalMotionMode::MM_JOG_RIGHT) {
     m_spindle->consumePosition(); // Consume the spindle position while we're jogging
-    if (tm - this->jogMicros > JOG_PULSE_DELAY) { 
+    if (tm - this->jogMicros > JOG_PULSE_DELAY) {
       m_expectedPosition = (m_currentPosition + 1500);
       this->jogMicros = tm;
     }
@@ -200,7 +206,7 @@ void Leadscrew::update() {
     m_expectedPosition = (m_expectedPosition + (float)(((float)m_spindle->consumePosition()) * m_ratio));
   }
 #else
-m_expectedPosition = (m_expectedPosition + (float)(((float)m_spindle->consumePosition()) * m_ratio));
+  m_expectedPosition = (m_expectedPosition + (float)(((float)m_spindle->consumePosition()) * m_ratio));
 #endif
   // How far are we from the expected position
   float positionError = getPositionError();
@@ -212,8 +218,11 @@ m_expectedPosition = (m_expectedPosition + (float)(((float)m_spindle->consumePos
     // if the position error is bigger than one rev worht of movement, reset the expected so that we don't move
 
     m_expectedPosition = (m_currentPosition);
-    if ((mode == GlobalMotionMode::MM_JOG_LEFT && hitLeftEndstop) || (mode == GlobalMotionMode::MM_JOG_RIGHT && hitRightEndstop)) {
+    if ((mode == GlobalMotionMode::MM_JOG_LEFT && hitLeftEndstop)
+      || (mode == GlobalMotionMode::MM_JOG_RIGHT && hitRightEndstop)
+      || (mode == GlobalMotionMode::MM_ENABLED && hitLeftEndstop)) {
       globalState->setMotionMode(GlobalMotionMode::MM_DISABLED);
+      globalState->setThreadSyncState(GlobalThreadSyncState::SS_UNSYNC);
     }
   }
 
@@ -266,6 +275,8 @@ m_expectedPosition = (m_expectedPosition + (float)(((float)m_spindle->consumePos
      * If we are not in sync with the thread, if not, figure out where we should restart based on
      * the difference in position between the sync point and the current position
      */
+     // if(globalState->getThreadSyncState() == SS_UNSYNC)DEBUG_F("Currently unsynced %s\n",
+       //  m_syncPositionState == LeadscrewSpindleSyncPositionState::UNSET ? "UNSET" :  m_syncPositionState == LeadscrewSpindleSyncPositionState::LEFT ? "LEFT" : "RIGHT")
     if (m_syncPositionState != LeadscrewSpindleSyncPositionState::UNSET && globalState->getThreadSyncState() == SS_UNSYNC) {
       int syncPosition = 0;
       switch (m_syncPositionState) {
@@ -281,22 +292,19 @@ m_expectedPosition = (m_expectedPosition + (float)(((float)m_spindle->consumePos
         break;
       }
 
-      // I think this is totally wrong. You can't sum spindle position with leadscrew position. 
-      //int expectedSyncPosition = (m_currentPosition - syncPosition) % ((int)(encoderPPR * m_ratio)) + m_spindleSyncPosition;
+      int currentpos = m_spindle->getCurrentPosition();
 
       // So, I think this is, how far we need to move, converted to spindle pulses, plus the spindle sync pos, mod the spindle PPM, to get the next revolution. 
-      expectedSyncPosition = ((int)((m_currentPosition - syncPosition) / m_ratio) + m_spindleSyncPosition) % encoderPPR;
+      expectedSyncPosition = ((int)((m_currentPosition - syncPosition) / m_ratio) + m_spindleSyncPosition) % encoderPPR
 
 
-      // QUESTION: What if there are a bunch of pulses happening, and we keep skipping over the sync position?
-      if (m_spindle->getCurrentPosition() == expectedSyncPosition) {
+      if (currentpos == expectedSyncPosition && globalState->getThreadSyncState() != SS_SYNC) {
+        // DEBUG_F("Set expectedSyncPosition to %d\n");
+        m_expectedPosition = m_currentPosition; // Ensure these are aligned at the sync point. 
         globalState->setThreadSyncState(GlobalThreadSyncState::SS_SYNC);
       }
     }
 
-    //int mic = m_lastPulseMicros;
-
-    //DEBUG_F("%d %f %f %d %d %d %d\n", m_currentPosition, m_expectedPosition, m_currentPulseDelay, nextDirection, m_currentDirection, mic, globalState->getMotionMode());
 
     /**
      * determine if we should even be bothering to send a pulse
@@ -325,7 +333,6 @@ m_expectedPosition = (m_expectedPosition + (float)(((float)m_spindle->consumePos
       /**
        * If we've sent a pulse, we need to update the last pulse micros for velocity calculations
        */
-       //DEBUG_F("Sent pulse\n");
 #ifdef ESP32
       m_lastFullPulseDurationMicros = (uint32_t)(tm - m_lastPulseTimestamp);
       m_lastPulseTimestamp = tm;
@@ -351,6 +358,7 @@ m_expectedPosition = (m_expectedPosition + (float)(((float)m_spindle->consumePos
        * the stopping distance based on the current speed and acceleration and cant plan ahead much further than this
        */
       int pulsesToStop = getStoppingDistanceInPulses();
+      int pulsesToTargetSpeed = getTargetSpeedDistanceInPulses();
 
       bool goingToHitLeftEndstop = m_leftStopState == LeadscrewStopState::SET &&
         m_currentPosition - pulsesToStop <= m_leftStopPosition;
@@ -359,39 +367,41 @@ m_expectedPosition = (m_expectedPosition + (float)(((float)m_spindle->consumePos
 
       // if this is true we should start decelerating to stop at the
       // correct position
-      bool shouldStop = abs(positionError) <= pulsesToStop ||
+      bool shouldStop =  ((int)m_currentDirection * positionError) < pulsesToTargetSpeed   ||
         nextDirection != m_currentDirection ||
         goingToHitLeftEndstop || goingToHitRightEndstop;
 
+
       if (shouldStop) {
-        m_leadscrewSpeed -= m_leadscrewAccel * min(m_currentPulseDelay, initialPulseDelay) /  US_PER_SECOND;
+        m_leadscrewSpeed -= m_leadscrewAccel * min(m_currentPulseDelay, initialPulseDelay) / US_PER_SECOND;
         m_leadscrewSpeed = max(m_leadscrewSpeed, (float)0); // don't let this go below zero 
-        m_currentPulseDelay = m_leadscrewSpeed == 0 ? initialPulseDelay  : US_PER_SECOND / m_leadscrewSpeed;
+        m_currentPulseDelay = m_leadscrewSpeed == 0 ? initialPulseDelay : US_PER_SECOND / m_leadscrewSpeed;
       } else {
-        m_leadscrewSpeed += m_leadscrewAccel * min(m_currentPulseDelay, initialPulseDelay) /  US_PER_SECOND;
+        m_leadscrewSpeed += m_leadscrewAccel * min(m_currentPulseDelay, initialPulseDelay) / US_PER_SECOND;
+        m_leadscrewSpeed = min(m_leadscrewSpeed, LEADSCREW_MAX_SPEED_PPS);
         m_currentPulseDelay = m_leadscrewSpeed == 0 ? initialPulseDelay : US_PER_SECOND / m_leadscrewSpeed;
       }
 
       GlobalThreadSyncState tss = globalState->getThreadSyncState();
 
       if (debugPulseCount == 0 && globalState->getDebugMode()) {
-        DEBUG_F("%d,%d,%f,%d,%f,%d,%f,%f,%f,%d,%s,%d\n", (int)tm,
-            m_lastFullPulseDurationMicros, 
-            positionError,pulsesToStop,
-            m_currentPulseDelay, 
-            m_currentPosition,
-            m_leadscrewSpeed, 
-            m_leadscrewAccel,
-            initialPulseDelay,
-            expectedSyncPosition,
-             tss == GlobalThreadSyncState::SS_SYNC ? "SYNC" : tss == GlobalThreadSyncState::SS_UNSYNC ? "UNSYNC" : "UNSET",
-             m_spindle->getCurrentPosition()
-          );
+        globalState->debugBuffer->tm = (int)tm;
+          globalState->debugBuffer->m_lastFullPulseDurationMicros = m_lastFullPulseDurationMicros;
+          globalState->debugBuffer->positionError = positionError;
+          globalState->debugBuffer->pulsesToStop = pulsesToStop;
+          globalState->debugBuffer->pulsesToTargetSpeed = pulsesToTargetSpeed;
+          globalState->debugBuffer->m_currentPulseDelay = m_currentPulseDelay;
+          globalState->debugBuffer->m_currentPosition = m_currentPosition;
+          globalState->debugBuffer->m_leadscrewSpeed = m_leadscrewSpeed;
+          globalState->debugBuffer->spindlePos = m_spindle->getCurrentPosition();
+          globalState->debugBuffer->targetSpeed = m_spindle->getEstimatedVelocityInPPS() * m_ratio;
+          globalState->debugBuffer->timeToTarget = abs(m_leadscrewSpeed - globalState->debugBuffer->targetSpeed) / m_leadscrewAccel;
+          globalState->debugBuffer++;
       }
-      if(++debugPulseCount > 20){
+      if (++debugPulseCount > 10) {
         debugPulseCount = 0;
       }
-
+    
 
       /**
        * Ensure that the pulse delay is within the bounds
