@@ -5,7 +5,6 @@
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
-#include <../telnet/telnet.h>
 #include "leadscrew_io.h"
 using namespace std;
 
@@ -295,7 +294,7 @@ void Leadscrew::update() {
       int currentpos = m_spindle->getCurrentPosition();
 
       // So, I think this is, how far we need to move, converted to spindle pulses, plus the spindle sync pos, mod the spindle PPM, to get the next revolution. 
-      expectedSyncPosition = ((int)((m_currentPosition - syncPosition) / m_ratio) + m_spindleSyncPosition) % encoderPPR
+      expectedSyncPosition = ((int)((m_currentPosition - syncPosition) / m_ratio) + m_spindleSyncPosition) % encoderPPR;
 
 
       if (currentpos == expectedSyncPosition && globalState->getThreadSyncState() != SS_SYNC) {
@@ -382,27 +381,6 @@ void Leadscrew::update() {
         m_currentPulseDelay = m_leadscrewSpeed == 0 ? initialPulseDelay : US_PER_SECOND / m_leadscrewSpeed;
       }
 
-      GlobalThreadSyncState tss = globalState->getThreadSyncState();
-
-      if (debugPulseCount == 0 && globalState->getDebugMode()) {
-        globalState->debugBuffer->tm = (int)tm;
-          globalState->debugBuffer->m_lastFullPulseDurationMicros = m_lastFullPulseDurationMicros;
-          globalState->debugBuffer->positionError = positionError;
-          globalState->debugBuffer->pulsesToStop = pulsesToStop;
-          globalState->debugBuffer->pulsesToTargetSpeed = pulsesToTargetSpeed;
-          globalState->debugBuffer->m_currentPulseDelay = m_currentPulseDelay;
-          globalState->debugBuffer->m_currentPosition = m_currentPosition;
-          globalState->debugBuffer->m_leadscrewSpeed = m_leadscrewSpeed;
-          globalState->debugBuffer->spindlePos = m_spindle->getCurrentPosition();
-          globalState->debugBuffer->targetSpeed = m_spindle->getEstimatedVelocityInPPS() * m_ratio;
-          globalState->debugBuffer->timeToTarget = abs(m_leadscrewSpeed - globalState->debugBuffer->targetSpeed) / m_leadscrewAccel;
-          globalState->debugBuffer++;
-      }
-      if (++debugPulseCount > 10) {
-        debugPulseCount = 0;
-      }
-    
-
       /**
        * Ensure that the pulse delay is within the bounds
        * of the initial pulse delay (i.e the pulse delay when moving from zero) and 0
@@ -432,27 +410,27 @@ float Leadscrew::getEstimatedVelocityInMillimetersPerSecond() {
     motorPulsePerRevolution;
 }
 
-void Leadscrew::printState() {
-  DEBUG_F("Leadscrew position: %d\n", m_currentPosition);
-  DEBUG_F("Leadscrew expected position %f\n", m_expectedPosition);
-  DEBUG_F("Leadscrew left stop position: %d\n", getStopPosition(LeadscrewStopPosition::LEFT));
-  DEBUG_F("Leadscrew right stop position: %d\n", getStopPosition(LeadscrewStopPosition::RIGHT));
-  DEBUG_F("Leadscrew ratio: %f\n", m_ratio);
-  //DEBUG_F("Current leadscrew accumulator: %f\n", m_accumulator);
-  DEBUG_F("Leadscrew direction: ");
-  switch (getCurrentDirection()) {
-  case LeadscrewDirection::LEFT:
-    DEBUG_C("LEFT\n");
-    break;
-  case LeadscrewDirection::RIGHT:
-    DEBUG_C("RIGHT\n");
-    break;
-  case LeadscrewDirection::UNKNOWN:
-    DEBUG_C("UNKNOWN\n");
-    break;
-  }
-  DEBUG_F("Leadscrew current pulse delay: %f\n", m_currentPulseDelay);
-  DEBUG_F("Leadscrew position error: %d\n", getPositionError());
-  DEBUG_F("Leadscrew estimated velocity: %f\n", getEstimatedVelocityInMillimetersPerSecond());
-  DEBUG_F("Leadscrew pulses to stop: %d\n", getStoppingDistanceInPulses());
-}
+// void Leadscrew::printState() {
+//   DEBUG_F("Leadscrew position: %d\n", m_currentPosition);
+//   DEBUG_F("Leadscrew expected position %f\n", m_expectedPosition);
+//   DEBUG_F("Leadscrew left stop position: %d\n", getStopPosition(LeadscrewStopPosition::LEFT));
+//   DEBUG_F("Leadscrew right stop position: %d\n", getStopPosition(LeadscrewStopPosition::RIGHT));
+//   DEBUG_F("Leadscrew ratio: %f\n", m_ratio);
+//   //DEBUG_F("Current leadscrew accumulator: %f\n", m_accumulator);
+//   DEBUG_F("Leadscrew direction: ");
+//   switch (getCurrentDirection()) {
+//   case LeadscrewDirection::LEFT:
+//     DEBUG_C("LEFT\n");
+//     break;
+//   case LeadscrewDirection::RIGHT:
+//     DEBUG_C("RIGHT\n");
+//     break;
+//   case LeadscrewDirection::UNKNOWN:
+//     DEBUG_C("UNKNOWN\n");
+//     break;
+//   }
+//   DEBUG_F("Leadscrew current pulse delay: %f\n", m_currentPulseDelay);
+//   DEBUG_F("Leadscrew position error: %d\n", getPositionError());
+//   DEBUG_F("Leadscrew estimated velocity: %f\n", getEstimatedVelocityInMillimetersPerSecond());
+//   DEBUG_F("Leadscrew pulses to stop: %d\n", getStoppingDistanceInPulses());
+// }

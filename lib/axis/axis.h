@@ -1,6 +1,6 @@
-#include <els_elapsedMillis.h>
 
 #include <cstdint>
+#include <Arduino.h>
 
 #pragma once
 

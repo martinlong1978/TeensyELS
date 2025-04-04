@@ -1,5 +1,4 @@
 // Libraries
-#include "telnet.h"
 #include <Arduino.h>
 #include <SPI.h>
 //#include <Wire.h>
@@ -20,8 +19,6 @@
 //#define FULLMONITOR
 #ifdef ESP32
 #include <esp_task_wdt.h>
-ESPTelnet telnet;
-EscapeCodes ansi;
 #else
 IntervalTimer timer;
 #endif

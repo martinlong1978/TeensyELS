@@ -2,7 +2,7 @@
 #ifndef KEYARRAY_H
 #define KEYARRAY_H
 
-
+#include <Arduino.h>
 #include <leadscrew.h>
 #include <spindle.h>
 #include <ESP32Encoder.h>

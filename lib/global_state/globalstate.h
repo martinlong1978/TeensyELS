@@ -41,21 +41,6 @@ enum GlobalThreadSyncState { SS_UNSET, SS_SYNC, SS_UNSYNC };
 enum GlobalButtonLock { LK_UNSET, LK_UNLOCKED, LK_LOCKED };
 
 
-typedef struct DebugData {
-  int tm;
-  uint32_t m_lastFullPulseDurationMicros;
-  float positionError; 
-  int pulsesToStop; 
-  int pulsesToTargetSpeed;
-  float m_currentPulseDelay;
-  int m_currentPosition;
-  float m_leadscrewSpeed;
-  int spindlePos;
-  float timeToTarget;
-  float targetSpeed;
-} DebugData;
-
-
 // this is a singleton class - we don't want more than one of these existing at
 // a time!
 class GlobalState {
@@ -64,8 +49,6 @@ class GlobalState {
   volatile bool OTA = false;
   volatile int OTAbytes = 0;
   volatile int OTAlength = 0;
-
-  DebugData * debugInit;
 
   GlobalFeedMode m_feedMode;
   GlobalMotionMode m_motionMode;
@@ -94,7 +77,6 @@ class GlobalState {
   }
 
  public:
-  DebugData * volatile debugBuffer;
 
   // singleton stuff, no cloning and no copying
   GlobalState(GlobalState const &) = delete;
@@ -111,9 +93,6 @@ class GlobalState {
 
   void setUnitMode(GlobalUnitMode mode);
   GlobalUnitMode getUnitMode();
-
-  bool getDebugMode();
-  void setDebugMode(bool mode);
 
   void setThreadSyncState(GlobalThreadSyncState state);
   GlobalThreadSyncState getThreadSyncState();

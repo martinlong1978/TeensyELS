@@ -1,7 +1,6 @@
 #include <config.h>
 
 #ifdef ELS_USE_BUTTON_ARRAY
-#include "telnet.h"
 #include "buttonpad.h"
 
 #include <config.h>
@@ -53,7 +52,6 @@ void ButtonPad::rateIncreaseHandler(ButtonInfo press) {
 
   GlobalButtonLock lockState = GlobalState::getInstance()->getButtonLock();
   if (lockState == GlobalButtonLock::LK_LOCKED) {
-    DEBUG_F("Locked, ingoring rat inc\n");
     return;
   }
 
@@ -67,7 +65,6 @@ void ButtonPad::rateDecreaseHandler(ButtonInfo press) {
 
   GlobalButtonLock lockState = GlobalState::getInstance()->getButtonLock();
   if (lockState == GlobalButtonLock::LK_LOCKED) {
-    DEBUG_F("Locked, ingoring rat dec\n");
     return;
   }
 
@@ -81,17 +78,11 @@ void ButtonPad::halfNutHandler(ButtonInfo press) {
 
   GlobalButtonLock lockState = GlobalState::getInstance()->getButtonLock();
   if (lockState == GlobalButtonLock::LK_LOCKED) {
-    DEBUG_F("Locked, ingoring halfnut\n");
     return;
   }
 
   if (press.buttonState == BS_HELD) {
     GlobalState::getInstance()->setOTA();
-  }
-
-  if(press.buttonState == BS_CLICKED){
-    GlobalState *gs = GlobalState::getInstance();
-    gs->setDebugMode(!gs->getDebugMode());
   }
 
   // honestly I don't know what this button should do after the refactor...
@@ -109,17 +100,14 @@ void ButtonPad::enableHandler(ButtonInfo press) {
   GlobalButtonLock lockState = GlobalState::getInstance()->getButtonLock();
   GlobalMotionMode motionMode = GlobalState::getInstance()->getMotionMode();
   if (lockState == GlobalButtonLock::LK_LOCKED) {
-    DEBUG_F("Locked, ingoring enable\n");
     return;
   }
 
   if (press.buttonState == BS_CLICKED) {
     if (motionMode == GlobalMotionMode::MM_ENABLED) {
-      DEBUG_F("Enable button clicked, disabling\n");
       GlobalState::getInstance()->setMotionMode(GlobalMotionMode::MM_DISABLED);
     }
     if (motionMode == GlobalMotionMode::MM_DISABLED) {
-      DEBUG_F("Enable button clicked, enabling\n");
       GlobalState::getInstance()->setMotionMode(GlobalMotionMode::MM_ENABLED);
     }
   }
@@ -130,10 +118,8 @@ void ButtonPad::lockHandler(ButtonInfo press) {
 
   if (press.buttonState == BS_CLICKED) {
     if (globalState->getButtonLock() == GlobalButtonLock::LK_LOCKED) {
-      DEBUG_F("Unlocking\n");
       globalState->setButtonLock(GlobalButtonLock::LK_UNLOCKED);
     } else {
-      DEBUG_F("Locking\n");
       globalState->setButtonLock(GlobalButtonLock::LK_LOCKED);
     }
   }
@@ -142,18 +128,15 @@ void ButtonPad::lockHandler(ButtonInfo press) {
 void ButtonPad::threadSyncHandler(ButtonInfo press) {
   GlobalButtonLock lockState = GlobalState::getInstance()->getButtonLock();
   if (lockState == GlobalButtonLock::LK_LOCKED) {
-    DEBUG_F("Locked, ingoring thread sync\n");
     return;
   }
 
   if (press.buttonState == BS_CLICKED) {
     if (GlobalState::getInstance()->getMotionMode() ==
       GlobalMotionMode::MM_ENABLED) {
-      DEBUG_F("Sync button clicked, enabled, unsyncing\n");
       GlobalState::getInstance()->setThreadSyncState(
         GlobalThreadSyncState::SS_UNSYNC);
     } else {
-      DEBUG_F("Sync button clicked, disabled, syncing\n");
       GlobalState::getInstance()->setThreadSyncState(
         GlobalThreadSyncState::SS_SYNC);
     }
@@ -166,7 +149,6 @@ void ButtonPad::modeCycleHandler(ButtonInfo press) {
   GlobalButtonLock lockState = globalState->getButtonLock();
 
   if (lockState == GlobalButtonLock::LK_LOCKED) {
-    DEBUG_F("Locked, ingoring mode\n");
     return;
   }
 
@@ -205,7 +187,6 @@ void ButtonPad::jogDirectionHandler(ButtonInfo press) {
   // no jogging functionality allowed during lock or enable
   if (lockState == GlobalButtonLock::LK_LOCKED ||
     motionMode == GlobalMotionMode::MM_ENABLED) {
-    DEBUG_F("Locked, ingoring jog\n");
     return;
   }
 

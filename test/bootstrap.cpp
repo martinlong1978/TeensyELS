@@ -5,7 +5,6 @@
 
 #include <gmock/gmock.h>
 #include "els_elapsedMillis.h"
-#include "../lib/telnet/telnet.h"
 #include <globalstate.h>
 #include "TestSpindle.h"
 #include <leadscrew.h>

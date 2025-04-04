@@ -1,7 +1,6 @@
 #include <config.h>
 #include <display.h>
 #include <globalstate.h>
-#include "telnet.h"
 // Images
 #include <icons/feedSymbol.h>
 #include <icons/lockedSymbol.h>
