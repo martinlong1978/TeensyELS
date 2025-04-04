@@ -116,5 +116,4 @@ public:
   LeadscrewDirection getCurrentDirection();
   float getEstimatedVelocityInMillimetersPerSecond();
 
-  void printState();
 };

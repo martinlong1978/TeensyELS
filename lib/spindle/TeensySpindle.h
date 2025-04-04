@@ -1,7 +1,6 @@
 #ifdef CORE_TEENSY
 #include <Encoder.h>
 #include <axis.h>
-#include <els_elapsedMillis.h>
 
 #pragma once
 
@@ -29,5 +28,6 @@ class Spindle : public RotationalAxis {
    */
   int consumePosition();
   float getEstimatedVelocityInRPM();
+  float getEstimatedVelocityInPPS();
 };
 #endif

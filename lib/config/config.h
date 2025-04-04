@@ -20,13 +20,13 @@
  * to your spindle
  * TODO: Implement this for real
  */
-// #define ELS_SPINDLE_DRIVEN
+ // #define ELS_SPINDLE_DRIVEN
 
-/**
- * IO Pins
- */
+ /**
+  * IO Pins
+  */
 #ifdef ELS_SPINDLE_DRIVEN
-// set your spindle driver pins here
+  // set your spindle driver pins here
 #define ELS_SPINDLE_STEP -1
 #define ELS_SPINDLE_DIR -1
 #else
@@ -76,13 +76,13 @@
 #define ELS_IND_RED 22   
 #define ELS_IND_GREEN 21  
 
-//  36  20  12
-//  34  18  10
-//  33  17   9
-// --------------
-//   9  17  33
-//  10  18  34
-//  12  20  36
+  //  36  20  12
+  //  34  18  10
+  //  33  17   9
+  // --------------
+  //   9  17  33
+  //  10  18  34
+  //  12  20  36
 #define ELS_RATE_INCREASE_BUTTON 17
 #define ELS_RATE_DECREASE_BUTTON 9
 #define ELS_MODE_CYCLE_BUTTON 33
@@ -115,6 +115,10 @@
  *   SSD1306_128_64: 128x64 oled
  *   ST7789_240_135
  */
+
+#define SSD1306_128_64 0
+#define ST7789_240_135 1
+
 #if defined(ESP32)
 #define ELS_DISPLAY ST7789_240_135
 #else
@@ -122,7 +126,7 @@
 #endif
 
 #if ELS_DISPLAY == SSD1306_128_64
-// define this if you have a dedicated pin for the oled reset
+ // define this if you have a dedicated pin for the oled reset
 #define PIN_DISPLAY_RESET -1
 #endif
 
@@ -165,10 +169,10 @@
 #define DEFAULT_UNIT_MODE GlobalUnitMode::METRIC
 #define DEFAULT_FEED_MODE GlobalFeedMode::FM_FEED
 
-// The default starting speed for leadscrew in mm/s
-// this is the maximum allowable speed (in mm/s) for the leadscrew to
-// instantaneously start moving from 0
-// #define ACCEL_DISABLED
+ // The default starting speed for leadscrew in mm/s
+ // this is the maximum allowable speed (in mm/s) for the leadscrew to
+ // instantaneously start moving from 0
+ // #define ACCEL_DISABLED
 #define LEADSCREW_JERK 0.5
 
 // The acceleration of the leadscrew in mm/s^2
@@ -191,36 +195,28 @@
   ((float)US_PER_SECOND / ((float)LEADSCREW_JERK * (float)ELS_LEADSCREW_STEPS_PER_MM))
 #endif
 
-// The amount of time to increment/decrement the pulse delay by in microseconds
-// for the leadscrew This is calculated based on the acceleration value
-#ifdef ACCEL_DISABLED
-//#define LEADSCREW_PULSE_DELAY_STEP_US 0
-#else
-//#define LEADSCREW_PULSE_DELAY_STEP_US \
-//  ((float)LEADSCREW_ACCEL / ((float)ELS_LEADSCREW_STEPS_PER_MM))
-#endif
 
 // metric thread pitch is defined as mm/rev
-const float threadPitchMetric[] = {0.35, 0.40, 0.45, 0.50, 0.60, 0.70, 0.80,
+const float threadPitchMetric[] = { 0.35, 0.40, 0.45, 0.50, 0.60, 0.70, 0.80,
                                    1.00, 1.25, 1.50, 1.75, 2.00, 2.50, 3.00,
-                                   3.50, 4.00, 4.50, 5.00, 5.50, 6.00};
+                                   3.50, 4.00, 4.50, 5.00, 5.50, 6.00 };
 #define DEFAULT_METRIC_THREAD_PITCH_IDX 8
 
 // defined as mm/rev
-const float feedPitchMetric[] = {0.05, 0.08, 0.10, 0.12, 0.15, 0.18, 0.20,
+const float feedPitchMetric[] = { 0.05, 0.08, 0.10, 0.12, 0.15, 0.18, 0.20,
                                  0.23, 0.25, 0.28, 0.30, 0.35, 0.40, 0.45,
-                                 0.50, 0.55, 0.60, 0.65, 0.70, 0.75};
+                                 0.50, 0.55, 0.60, 0.65, 0.70, 0.75 };
 #define DEFAULT_METRIC_FEED_PITCH_IDX 8
 
 // for convenience these are defined as TPI - retained as float to allow for
 // partial TPI for whatever reason
-const float threadPitchImperial[] = {80, 72, 64, 56, 48, 44, 40, 36, 32, 28,
-                                     24, 20, 18, 16, 14, 13, 12, 11, 10, 9};
+const float threadPitchImperial[] = { 80, 72, 64, 56, 48, 44, 40, 36, 32, 28,
+                                     24, 20, 18, 16, 14, 13, 12, 11, 10, 9 };
 #define DEFAULT_IMPERIAL_THREAD_PITCH_IDX 8
 // defined as thou/rev
 const float feedPitchImperial[] = {
     0.002, 0.003, 0.004, 0.005, 0.006, 0.007, 0.008, 0.009, 0.010, 0.011,
-    0.012, 0.014, 0.016, 0.018, 0.020, 0.022, 0.024, 0.026, 0.028, 0.030};
+    0.012, 0.014, 0.016, 0.018, 0.020, 0.022, 0.024, 0.026, 0.028, 0.030 };
 #define DEFAULT_IMPERIAL_FEED_PITCH_IDX 8
 
 #endif

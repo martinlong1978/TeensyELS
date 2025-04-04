@@ -27,6 +27,5 @@ class ButtonPad {
 
   volatile int keycode;
   void handle();
-  void printState();
 };
 #endif

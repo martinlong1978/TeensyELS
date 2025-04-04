@@ -4,8 +4,6 @@
 #include <leadscrew.h>
 #include <spindle.h>
 
-#define SSD1306_128_64 0
-#define ST7789_240_135 1
 
 #if ELS_DISPLAY == SSD1306_128_64
 

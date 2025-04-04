@@ -12,37 +12,6 @@ GlobalState* GlobalState::getInstance() {
 }
 
 
-void GlobalState::printState() {
-  switch (m_motionMode) {
-  case MM_DISABLED:
-    break;
-  case MM_ENABLED:
-    break;
-  case MM_JOG_LEFT:
-    break;
-  case MM_JOG_RIGHT:
-    break;
-  }
-  switch (m_feedMode) {
-  case FM_FEED:
-    break;
-  case FM_THREAD:
-    break;
-  }
-  switch (m_unitMode) {
-  case METRIC:
-    break;
-  case IMPERIAL:
-    break;
-  }
-  switch (m_threadSyncState) {
-  case SS_SYNC:
-    break;
-  case SS_UNSYNC:
-    break;
-  }
-}
-
 void GlobalState::setFeedMode(GlobalFeedMode mode) {
   m_feedMode = mode;
 

@@ -389,28 +389,3 @@ float Leadscrew::getEstimatedVelocityInMillimetersPerSecond() {
   return (getEstimatedVelocityInPulsesPerSecond() * leadscrewPitch) /
     motorPulsePerRevolution;
 }
-
-// void Leadscrew::printState() {
-//   DEBUG_F("Leadscrew position: %d\n", m_currentPosition);
-//   DEBUG_F("Leadscrew expected position %f\n", m_expectedPosition);
-//   DEBUG_F("Leadscrew left stop position: %d\n", getStopPosition(LeadscrewStopPosition::LEFT));
-//   DEBUG_F("Leadscrew right stop position: %d\n", getStopPosition(LeadscrewStopPosition::RIGHT));
-//   DEBUG_F("Leadscrew ratio: %f\n", m_ratio);
-//   //DEBUG_F("Current leadscrew accumulator: %f\n", m_accumulator);
-//   DEBUG_F("Leadscrew direction: ");
-//   switch (getCurrentDirection()) {
-//   case LeadscrewDirection::LEFT:
-//     DEBUG_C("LEFT\n");
-//     break;
-//   case LeadscrewDirection::RIGHT:
-//     DEBUG_C("RIGHT\n");
-//     break;
-//   case LeadscrewDirection::UNKNOWN:
-//     DEBUG_C("UNKNOWN\n");
-//     break;
-//   }
-//   DEBUG_F("Leadscrew current pulse delay: %f\n", m_currentPulseDelay);
-//   DEBUG_F("Leadscrew position error: %d\n", getPositionError());
-//   DEBUG_F("Leadscrew estimated velocity: %f\n", getEstimatedVelocityInMillimetersPerSecond());
-//   DEBUG_F("Leadscrew pulses to stop: %d\n", getStoppingDistanceInPulses());
-// }

@@ -38,5 +38,4 @@ class ButtonHandler {
 
   volatile int keycode;
   void handle();
-  void printState();
 };

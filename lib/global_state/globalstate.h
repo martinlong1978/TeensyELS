@@ -83,7 +83,6 @@ class GlobalState {
   void operator=(GlobalState const &) = delete;
 
   static GlobalState *getInstance();
-  void printState();
 
   void setFeedMode(GlobalFeedMode mode);
   GlobalFeedMode getFeedMode();

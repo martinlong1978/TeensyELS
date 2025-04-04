@@ -255,8 +255,5 @@ void ButtonPad::jogHandler(ButtonInfo press) {
 //  }
 }
 
-void ButtonPad::printState(){
-
-}
 
 #endif

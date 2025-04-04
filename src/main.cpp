@@ -68,24 +68,7 @@ void timerCallback() {
 void displayLoop() {
   keyPad.handle();
 
-  #ifdef FULLMONITOR
-  static elapsedMicros lastPrint;
-  if (lastPrint > 1000 * 1000) {
-    //telnet.print(ansi.cls());
-    DEBUG_HOME();
-    lastPrint = 0;
-    globalState->printState();
-    DEBUG_F("Micros: %d\n", micros());
-    DEBUG_F("Cycle count: %d\n", finalcyclecount);
-    leadscrew.printState();
-    DEBUG_F("Spindle position: %d\n", spindle.getCurrentPosition());
-    DEBUG_F("Spindle unconsumed: %d\n", spindle.consumePosition());
-    DEBUG_F("Spindle velocity: %f\n", spindle.getEstimatedVelocityInRPM());
-    DEBUG_F("Spindle velocity pulses: %d\n", spindle.getEstimatedVelocityInPulsesPerSecond());
-    keyPad.printState();
-  }
-  #endif
-  display.update();
+   display.update();
 }
 
 #ifdef ESP32

@@ -49,39 +49,6 @@ void ButtonHandler::rateIncreaseHandler() {
   }
 }
 
-// void ButtonHandler::printState() {
-//   DEBUG_F("Enable: ");
-//   if (m_enable.isHeld()) {
-//     DEBUG_F("held");
-//   } else if (m_enable.isPressed()) {
-//     DEBUG_F("pressed");
-//   } else if (m_enable.isDoubleClicked()) {
-//     DEBUG_F("double clicked");
-//   } else {
-//     DEBUG_F("released");
-//   }
-//   DEBUG_F("Left jog: ");
-//   if (m_jogLeft.isHeld()) {
-//     DEBUG_F("held");
-//   } else if (m_jogLeft.isPressed()) {
-//     DEBUG_F("pressed");
-//   } else if (m_jogLeft.isDoubleClicked()) {
-//     DEBUG_F("double clicked");
-//   } else {
-//     DEBUG_F("released");
-//   }
-//   DEBUG_F("Right jog: ");
-//   if (m_jogRight.isHeld()) {
-//     DEBUG_F("held");
-//   } else if (m_jogRight.isPressed()) {
-//     DEBUG_F("pressed");
-//   } else if (m_jogRight.isDoubleClicked()) {
-//     DEBUG_F("double clicked");
-//   } else {
-//     DEBUG_F("released");
-//   }
-// }
-
 void ButtonHandler::rateDecreaseHandler() {
   m_rateDecrease.handle();
 
