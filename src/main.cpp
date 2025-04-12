@@ -73,6 +73,8 @@ void displayLoop() {
 
 #ifdef ESP32
 void DisplayTask(void* parameter) {
+  // Ensure interrupts are initialised on the right core. 
+  keyArray.initPad();
   uint64_t m = 1;
   while (true) {
     displayLoop();
@@ -142,7 +144,6 @@ void setup() {
   digitalWrite(ELS_STEPPER_ENA, 0);
 
 #ifdef ELS_USE_BUTTON_ARRAY
-  keyArray.initPad();
 #else
   pinMode(ELS_RATE_INCREASE_BUTTON, INPUT_PULLUP);  // rate Inc
   pinMode(ELS_RATE_DECREASE_BUTTON, INPUT_PULLUP);  // rate Dec

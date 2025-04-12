@@ -174,7 +174,7 @@ int Leadscrew::getStoppingDistanceInPulses() {
 int Leadscrew::getTargetSpeedDistanceInPulses() {
   float targetSpeed = m_spindle->getEstimatedVelocityInPPS() * m_ratio;
   float time = abs(m_leadscrewSpeed - targetSpeed) / m_leadscrewAccel;
-  return ((m_leadscrewSpeed - targetSpeed) * time / 2);
+  return ((m_leadscrewSpeed - targetSpeed) * time / 2); 
 }
 
 void Leadscrew::update() {
@@ -292,14 +292,23 @@ void Leadscrew::update() {
 
       int currentpos = m_spindle->getCurrentPosition();
 
-      if (globalState->getThreadSyncState() != SS_SYNC) {
+      if (globalState->getThreadSyncState() != SS_SYNC) { // check this first. We don't need all this logic once we've started. 
         int pulsesToTargetSpeed = getTargetSpeedDistanceInPulses();
         // So, I think this is, how far we need to move, converted to spindle pulses, plus the spindle sync pos, mod the spindle PPM, to get the next revolution. 
-        int expectedSyncPosition = ((int)((m_currentPosition - syncPosition) / m_ratio) + m_spindleSyncPosition) % encoderPPR;
+        // We correct this by pulsesToTargetSpeed to find the sync position at the point in the future when we reach target speed. 
+        int expectedSyncPosition = ((int)((m_currentPosition + pulsesToTargetSpeed - syncPosition) / m_ratio) + m_spindleSyncPosition) % encoderPPR;
+
+        // Work back from the expected sync position to where we need to start now. We double this, because the spindle is already at full speed, so the 
+        // graph is not a triangle. 
+        int nowSyncPosition = (int)(expectedSyncPosition - (pulsesToTargetSpeed * 2 / m_ratio) + encoderPPR) % encoderPPR;
+
+        Serial.printf("%d,%d,%d,%d\n", pulsesToTargetSpeed, expectedSyncPosition, nowSyncPosition, currentpos);
 
 
-        if (currentpos == expectedSyncPosition) {
-          m_expectedPosition = m_currentPosition; // Ensure these are aligned at the sync point. 
+        if (currentpos == nowSyncPosition) {
+           // Ensure these become aligned at the sync point.
+           // Remember we actually need to be ahead of sync which we start, so that we slip into sync as we reach speed. 
+          m_expectedPosition = 0 - pulsesToTargetSpeed; 
           globalState->setThreadSyncState(GlobalThreadSyncState::SS_SYNC);
         }
 
@@ -316,7 +325,10 @@ void Leadscrew::update() {
      */
     if (m_currentDirection == LeadscrewDirection::UNKNOWN
       || (tm - m_lastPulseTimestamp) < m_currentPulseDelay
-      || (m_syncPositionState != LeadscrewSpindleSyncPositionState::UNSET && globalState->getThreadSyncState() == SS_UNSYNC)) {
+      || (m_syncPositionState != LeadscrewSpindleSyncPositionState::UNSET 
+        && globalState->getThreadSyncState() == SS_UNSYNC 
+        && globalState->getMotionMode() != GlobalMotionMode::MM_JOG_LEFT
+         && globalState->getMotionMode() != GlobalMotionMode::MM_JOG_RIGHT)) {
       break;
     }
 
