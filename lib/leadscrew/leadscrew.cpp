@@ -265,7 +265,6 @@ void Leadscrew::update() {
       m_currentDirection = LeadscrewDirection::UNKNOWN;
     }
 
-    int expectedSyncPosition = 0;
 
     /**
      * If we are not in sync with the thread, if not, figure out where we should restart based on
@@ -290,14 +289,17 @@ void Leadscrew::update() {
 
       int currentpos = m_spindle->getCurrentPosition();
 
-      // So, I think this is, how far we need to move, converted to spindle pulses, plus the spindle sync pos, mod the spindle PPM, to get the next revolution. 
-      expectedSyncPosition = ((int)((m_currentPosition - syncPosition) / m_ratio) + m_spindleSyncPosition) % encoderPPR;
+      if (globalState->getThreadSyncState() != SS_SYNC) {
+        int pulsesToTargetSpeed = getTargetSpeedDistanceInPulses();
+        // So, I think this is, how far we need to move, converted to spindle pulses, plus the spindle sync pos, mod the spindle PPM, to get the next revolution. 
+        int expectedSyncPosition = ((int)((m_currentPosition - syncPosition) / m_ratio) + m_spindleSyncPosition) % encoderPPR;
 
 
-      if (currentpos == expectedSyncPosition && globalState->getThreadSyncState() != SS_SYNC) {
-        // DEBUG_F("Set expectedSyncPosition to %d\n");
-        m_expectedPosition = m_currentPosition; // Ensure these are aligned at the sync point. 
-        globalState->setThreadSyncState(GlobalThreadSyncState::SS_SYNC);
+        if (currentpos == expectedSyncPosition) {
+          m_expectedPosition = m_currentPosition; // Ensure these are aligned at the sync point. 
+          globalState->setThreadSyncState(GlobalThreadSyncState::SS_SYNC);
+        }
+
       }
     }
 
