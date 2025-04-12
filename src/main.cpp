@@ -99,6 +99,7 @@ void comms_loop(void* parameters) { commsManager.loop(); }
 
 
 void setup() {
+  Serial.begin(921600);
 
   // config - compile time checks for safety
   CHECK_BOUNDS(DEFAULT_METRIC_THREAD_PITCH_IDX, threadPitchMetric,
@@ -170,7 +171,7 @@ void setup() {
   TaskHandle_t commsTask;
   xTaskCreatePinnedToCore(SpindleTask, "Spindle", 2048, NULL, 24 | portPRIVILEGE_BIT, &spindleTask, 0);
   xTaskCreatePinnedToCore(DisplayTask, "Display", 8000, NULL, 1, &displayTask, 1);
-  xTaskCreatePinnedToCore(comms_loop, "Comms", 16000, NULL, 1, &commsTask, 1);
+  xTaskCreatePinnedToCore(comms_loop, "Comms", 16000, NULL, 10, &commsTask, 1);
   disableLoopWDT();
   esp_task_wdt_delete(xTaskGetHandle("IDLE0"));
   esp_task_wdt_delete(xTaskGetHandle("IDLE1"));

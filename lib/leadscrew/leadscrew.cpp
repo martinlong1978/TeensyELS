@@ -165,6 +165,9 @@ int Leadscrew::getStoppingDistanceInPulses() {
   return m_leadscrewSpeed * time / 2;
 }
 
+/**
+ * This will be positive for decceleration, negative for accelleration
+ */
 int Leadscrew::getTargetSpeedDistanceInPulses() {
   float targetSpeed = m_spindle->getEstimatedVelocityInPPS() * m_ratio;
   float time = abs(m_leadscrewSpeed - targetSpeed) / m_leadscrewAccel;
@@ -346,7 +349,7 @@ void Leadscrew::update() {
 
       // if this is true we should start decelerating to stop at the
       // correct position
-      bool shouldStop =  ((int)m_currentDirection * positionError) < pulsesToTargetSpeed   ||
+      bool shouldStop = ((int)m_currentDirection * positionError) < pulsesToTargetSpeed ||
         nextDirection != m_currentDirection ||
         goingToHitLeftEndstop || goingToHitRightEndstop;
 
