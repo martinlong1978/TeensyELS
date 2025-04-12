@@ -166,7 +166,10 @@ int Leadscrew::getStoppingDistanceInPulses() {
 }
 
 /**
- * This will be positive for decceleration, negative for accelleration
+ * This will be positive for decceleration, negative for accelleration.
+ * 
+ * This is not the absolute number of pulses, but the number of pulses gained/lost during the
+ * accelleration/decelleration process. 
  */
 int Leadscrew::getTargetSpeedDistanceInPulses() {
   float targetSpeed = m_spindle->getEstimatedVelocityInPPS() * m_ratio;

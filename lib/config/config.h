@@ -131,7 +131,7 @@
 #endif
 
 #define ELS_SPINDLE_ENCODER_PPR 1200
-#define SPEED_COUNTS 10
+#define SPEED_COUNTS 300
 #define ELS_LEADSCREW_STEPPER_PPR 400
 
 // uncomment this if your leadscrew direction is inverted to what is expected
