@@ -10,33 +10,6 @@
 #include <icons/threadSymbol.h>
 #include <icons/unlockedSymbol.h>
 
-// Add some basic bitmap scaling for double-resolution screens.
-uint8_t spread(uint8_t in) {
-  uint8_t a = (in & 0x1) | ((in & 0x2) << 1) | ((in & 0x4) << 2) | ((in & 0x8) << 3);
-  return a | (a << 1);
-}
-
-void shiftByte(const uint8_t source[], uint8_t dest[], int sidx, int didx) {
-  uint8_t s = source[sidx];
-  uint8_t a = (s & 0xF0) >> 4;
-  uint8_t b = s & 0x0F;
-  dest[didx] = spread(a);
-  dest[didx + 1] = spread(b);
-}
-
-void fillDest(const uint8_t source[], uint8_t dest[], int sidx, int didx, int bytes) {
-  for (int i = 0; i < bytes; i++) {
-    shiftByte(source, dest, sidx + i, didx + (i * 2));
-  }
-}
-
-void ScaleBMP(const uint8_t source[], uint8_t dest[], int sizex, int sizey) {
-  int bytesx = sizex / 8;
-  for (int i = 0; i < sizey; i++) {
-    fillDest(source, dest, i * bytesx, i * bytesx * 4, bytesx);
-    fillDest(source, dest, i * bytesx, (bytesx * 2) + (i * bytesx * 4), bytesx);
-  }
-}
 
 void Display::init() {
   if (!this->m_ssd1306.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
