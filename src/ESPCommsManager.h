@@ -1,6 +1,6 @@
 #ifdef ESP32
-#ifndef CommsManager_h
-#define CommsManager_h
+#ifndef ESPCommsManager_h
+#define ESPCommsManager_h
 #include <Arduino.h>
 #include <ArduinoOTA.h>
 #include <Update.h>
@@ -14,16 +14,15 @@
 
 #define CHECK_SUFFIX(subject, suffix) strcmp(&(subject[strlen(subject) - sizeof(suffix) + 1]), suffix) == 0
 
-class CommsManager 
-{
+class ESPCommsManager {
 private:
-    const char *server_certificate = "";
+    const char* server_certificate = "";
     bool updating = false;
-    char *stateSubject;
-    char *switchStateSubject;
-    char *statePercentSubject;
-    char *attributeSubject;
-    const char *openedBy;
+    char* stateSubject;
+    char* switchStateSubject;
+    char* statePercentSubject;
+    char* attributeSubject;
+    const char* openedBy;
     int pct;
     bool state;
     bool switchState;
@@ -35,8 +34,8 @@ private:
 
 
 public:
-    CommsManager(/* args */);
-    ~CommsManager();
+    ESPCommsManager(/* args */);
+    ~ESPCommsManager();
     void setup();
     void loop();
 };

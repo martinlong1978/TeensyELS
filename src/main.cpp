@@ -6,7 +6,7 @@
 #include <leadscrew.h>
 #include <spindle.h>
 
-#include "CommsManager.h"
+#include "ESPCommsManager.h"
 
 #include "buttons.h"
 #include "buttonpad.h"
@@ -47,7 +47,7 @@ Leadscrew leadscrew(&spindle,
 #ifdef ESP32  
 KeyArray keyArray(&leadscrew);
 ButtonPad keyPad(&spindle, &leadscrew, &keyArray);
-CommsManager commsManager;
+ESPCommsManager commsManager;
 #else
 ButtonHandler keyPad(&spindle, &leadscrew);
 #endif
