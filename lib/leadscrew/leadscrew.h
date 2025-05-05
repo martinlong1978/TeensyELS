@@ -10,8 +10,6 @@
 #undef ELS_INVERT_DIRECTION
 #endif
 
-#define NR_OF_ALL_BITS 24;
-
 /**
  * The state of the leadscrew stop position for either the left or right stop
  */
