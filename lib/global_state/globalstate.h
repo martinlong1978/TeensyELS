@@ -109,6 +109,13 @@ class GlobalState {
   int getOTALength(){return OTAlength;}
   void setOTAContentLength(int length){OTAlength = length;}
 
+  void setDisplayReset(){ m_displayReset = true;}
+  bool getDisplayReset(){
+    bool ret = m_displayReset;
+    m_displayReset = false;
+    return ret;
+  }
+
   void setFeedSelect(int select);
   int getFeedSelect();
   float getCurrentFeedPitch();

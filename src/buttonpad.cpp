@@ -130,7 +130,9 @@ void ButtonPad::threadSyncHandler(ButtonInfo press) {
   if (lockState == GlobalButtonLock::LK_LOCKED) {
     return;
   }
-
+  if (press.buttonState == BS_HELD) {
+    GlobalState::getInstance()->setDisplayReset();
+  }
   if (press.buttonState == BS_CLICKED) {
     if (GlobalState::getInstance()->getMotionMode() ==
       GlobalMotionMode::MM_ENABLED) {
@@ -194,7 +196,7 @@ void ButtonPad::jogDirectionHandler(ButtonInfo press) {
   if (press.buttonState == BS_CLICKED) {
     switch (press.button) {
     case ELS_JOG_LEFT_BUTTON:
-      if(globalState->getMotionMode() == GlobalMotionMode::MM_JOG_LEFT){
+      if (globalState->getMotionMode() == GlobalMotionMode::MM_JOG_LEFT) {
         globalState->setMotionMode(GlobalMotionMode::MM_DISABLED);
         break;
       }
@@ -204,7 +206,7 @@ void ButtonPad::jogDirectionHandler(ButtonInfo press) {
       }
       break;
     case ELS_JOG_RIGHT_BUTTON:
-    if(globalState->getMotionMode() == GlobalMotionMode::MM_JOG_RIGHT){
+      if (globalState->getMotionMode() == GlobalMotionMode::MM_JOG_RIGHT) {
       globalState->setMotionMode(GlobalMotionMode::MM_DISABLED);
       break;
     }

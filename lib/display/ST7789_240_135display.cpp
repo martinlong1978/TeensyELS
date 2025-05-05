@@ -40,6 +40,12 @@ void ScaleBMP(const uint8_t source[], uint8_t dest[], int sizex, int sizey) {
 }
 
 void Display::init() {
+  strcpy(m_rpmString, "");
+  strcpy(m_pitchString, "");
+  m_mode = GlobalFeedMode::FM_UNSET;
+  m_motionMode = GlobalMotionMode::MM_UNSET;
+  m_locked = GlobalButtonLock::LK_UNSET;
+  m_sync = GlobalThreadSyncState::SS_UNSET;
   tft.init();
   tft.setRotation(3);
   tft.fillScreen(TFT_BLACK);
@@ -47,10 +53,13 @@ void Display::init() {
 
 void Display::update() {
   //  tft.fillScreen(TFT_BLACK); // Rely on localised blanking to avoid blink, for now.
+  if (GlobalState::getInstance()->getDisplayReset()) {
+    init();
+  }
 
   int bytes = GlobalState::getInstance()->getOTABytes();
   int length = GlobalState::getInstance()->getOTALength();
-  if (bytes > 0) {
+  if (GlobalState::getInstance()->hasOTA()) {
     if (!updating) {
       tft.fillRect(0, 0, 240, 135, TFT_BLACK);
       tft.setCursor(10, 10);
@@ -61,7 +70,7 @@ void Display::update() {
     }
     tft.drawRect(0, 70, 240, 40, TFT_WHITE);
     int percent = (((float)(bytes * 240)) / ((float)length));
-    tft.fillRect(0, 70, percent, 40, TFT_WHITE);
+    if(bytes > 0)tft.fillRect(0, 70, percent, 40, TFT_WHITE);
 
   } else {
     drawMode();
