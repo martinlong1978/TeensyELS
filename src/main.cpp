@@ -60,8 +60,12 @@ int finalcyclecount;
 // have to handle the leadscrew updates in a timer callback so we can update the
 // screen independently without losing pulses
 void timerCallback() {
-  spindle.update();
-  leadscrew.update();
+  if (GlobalState::getInstance()->hasOTA()) {
+    commsManager.loop();
+  } else {
+    spindle.update();
+    leadscrew.update();
+  }
 }
 
 
@@ -164,20 +168,19 @@ void setup() {
   display.update();
 
 #ifdef ESP32
-  commsManager.setup();
 
   TaskHandle_t spindleTask;
   TaskHandle_t displayTask;
-  TaskHandle_t commsTask;
+  //TaskHandle_t commsTask;
   xTaskCreatePinnedToCore(SpindleTask, "Spindle", 2048, NULL, 24 | portPRIVILEGE_BIT, &spindleTask, 0);
   xTaskCreatePinnedToCore(DisplayTask, "Display", 8000, NULL, 1, &displayTask, 1);
-  xTaskCreatePinnedToCore(comms_loop, "Comms", 16000, NULL, 10, &commsTask, 1);
+  //xTaskCreatePinnedToCore(comms_loop, "Comms", 16000, NULL, 10, &commsTask, 1);
   disableLoopWDT();
   esp_task_wdt_delete(xTaskGetHandle("IDLE0"));
   esp_task_wdt_delete(xTaskGetHandle("IDLE1"));
   esp_task_wdt_delete(spindleTask);
   esp_task_wdt_delete(displayTask);
-  esp_task_wdt_delete(commsTask);
+  //esp_task_wdt_delete(commsTask);
 
 #else
   timer.begin(timerCallback, LEADSCREW_TIMER_US);

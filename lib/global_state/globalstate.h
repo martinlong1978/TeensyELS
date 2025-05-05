@@ -57,6 +57,7 @@ class GlobalState {
   GlobalButtonLock m_buttonLock;
 
   volatile bool m_debugMode = false;
+  volatile bool m_displayReset = false;
 
   int m_feedSelect;
 

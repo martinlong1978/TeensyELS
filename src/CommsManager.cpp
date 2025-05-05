@@ -51,9 +51,10 @@ void CommsManager::loop() {
     wifiConnect();
     for (;;) {
         wifi_loop();
-        if(GlobalState::getInstance()->hasOTA())
+        if(GlobalState::getInstance()->hasOTA() && !updating)
         {
-            GlobalState::getInstance()->clearOTA();
+            updating = true;
+            Serial.println("Beginning update");
             HttpsOTA.onHttpEvent(HttpEvent);
             HttpsOTA.begin(UPDATE_URL, "");
         }
@@ -75,9 +76,4 @@ void CommsManager::wifi_loop() {
 }
 
 
-void CommsManager::setup() {
-
-    String mac = WiFi.macAddress();
-    mac.replace(":", "");
-}
 #endif
