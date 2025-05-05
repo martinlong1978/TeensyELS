@@ -100,21 +100,17 @@ class GlobalState {
   void setButtonLock(GlobalButtonLock lock);
   GlobalButtonLock getButtonLock();
 
-  bool hasOTA(){return OTA;};
-  void setOTA(){OTA = true;};
-  void clearOTA(){OTA = false;};
+  bool hasOTA();
+  void setOTA();
+  void clearOTA();
 
-  void setOTABytes(int bytes){OTAbytes = bytes;}
-  int getOTABytes(){return OTAbytes;}
-  int getOTALength(){return OTAlength;}
-  void setOTAContentLength(int length){OTAlength = length;}
+  void setOTABytes(int bytes);
+  int getOTABytes();
+  int getOTALength();
+  void setOTAContentLength(int length);
 
-  void setDisplayReset(){ m_displayReset = true;}
-  bool getDisplayReset(){
-    bool ret = m_displayReset;
-    m_displayReset = false;
-    return ret;
-  }
+  void setDisplayReset();
+  bool getDisplayReset();
 
   void setFeedSelect(int select);
   int getFeedSelect();

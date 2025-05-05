@@ -118,3 +118,19 @@ void GlobalState::setThreadSyncState(GlobalThreadSyncState state) {
 GlobalThreadSyncState GlobalState::getThreadSyncState() {
   return m_threadSyncState;
 }
+
+bool  GlobalState::hasOTA() { return OTA; };
+void GlobalState::setOTA() { OTA = true; };
+void  GlobalState::clearOTA() { OTA = false; };
+
+void  GlobalState::setOTABytes(int bytes) { OTAbytes = bytes; }
+int  GlobalState::getOTABytes() { return OTAbytes; }
+int  GlobalState::getOTALength() { return OTAlength; }
+void  GlobalState::setOTAContentLength(int length) { OTAlength = length; }
+
+void  GlobalState::setDisplayReset() { m_displayReset = true; }
+bool  GlobalState::getDisplayReset() {
+  bool ret = m_displayReset;
+  m_displayReset = false;
+  return ret;
+}
