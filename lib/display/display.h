@@ -29,8 +29,10 @@ private:
   Spindle* m_spindle;
   Leadscrew* m_leadscrew;
   GlobalState* m_globalState;
+#ifdef ELS_UI_ENCODER
   EncoderColour firstColour = EC_NONE;
   EncoderColour secondColour = EC_NONE;
+#endif
   bool updating = false;
 #if ELS_DISPLAY == ST7789_240_135
   char m_rpmString[10];

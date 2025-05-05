@@ -70,7 +70,7 @@ void Display::update() {
     }
     tft.drawRect(0, 70, 240, 40, TFT_WHITE);
     int percent = (((float)(bytes * 240)) / ((float)length));
-    if(bytes > 0)tft.fillRect(0, 70, percent, 40, TFT_WHITE);
+    if (bytes > 0)tft.fillRect(0, 70, percent, 40, TFT_WHITE);
 
   } else {
     drawMode();
@@ -218,17 +218,18 @@ void Display::drawEnabled() {
 
 #ifdef ESP32   // TODO Make portable
 void Display::writeLed() {
+#ifdef ELS_UI_ENCODER
   int64_t time = micros() / 250000;
   EncoderColour c = time % 2 == 1 ? firstColour : secondColour;
   digitalWrite(ELS_IND_GREEN, (c & 2) == 2);
   digitalWrite(ELS_IND_RED, c & 1);
-
+#endif
 }
 #endif
 
 
 void Display::updateLed() {
-#ifdef ELS_IND_GREEN
+#ifdef ELS_UI_ENCODER
 
   GlobalState* state = GlobalState::getInstance();
   GlobalMotionMode mode = state->getMotionMode();

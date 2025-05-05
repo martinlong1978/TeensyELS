@@ -43,6 +43,8 @@
 #ifdef ELS_UI_ENCODER
 #define ELS_UI_ENCODER_A 38  
 #define ELS_UI_ENCODER_B 39  
+#define ELS_IND_RED 22   
+#define ELS_IND_GREEN 21  
 #endif
 
 #if defined(CORE_TEENSY)
@@ -72,9 +74,6 @@
 #define ELS_LEADSCREW_DIR_BIT BIT26
 
 #define ELS_STEPPER_ENA 17
-
-#define ELS_IND_RED 22   
-#define ELS_IND_GREEN 21  
 
 #define ELS_RATE_INCREASE_BUTTON 17
 #define ELS_RATE_DECREASE_BUTTON 9

@@ -6,10 +6,12 @@
 
 
 KeyArray::KeyArray(Leadscrew* leadscrew) : m_leadscrew(leadscrew) {
+#ifdef ELS_UI_ENCODER
     ESP32Encoder::useInternalWeakPullResistors = puType::none;
     m_encoder.attachSingleEdge(ELS_UI_ENCODER_A, ELS_UI_ENCODER_B);
     m_encoder.setFilter(1023);
     encoderPos = m_encoder.getCount();
+#endif    
 }
 
 void KeyArray::setupKeys() {
@@ -57,10 +59,12 @@ void KeyArray::handleTimer() {
 }
 
 ButtonInfo KeyArray::consumeButton() {
+#ifdef ELS_UI_ENCODER
     int64_t val = m_encoder.getCount();
     if (val != encoderPos) {
         updateEncoderPos(val - encoderPos);
     }
+#endif
     if (buttonState.buttonState == ButtonState::BS_PRESSED || buttonState.buttonState == ButtonState::BS_NONE) {
         return { 0, ButtonState::BS_NONE };
     }
@@ -71,6 +75,8 @@ ButtonInfo KeyArray::consumeButton() {
 }
 
 void KeyArray::updateEncoderPos(int64_t pos) {
+#ifdef ELS_UI_ENCODER
+
     GlobalButtonLock lockState = GlobalState::getInstance()->getButtonLock();
     if (lockState == GlobalButtonLock::LK_LOCKED) {
         //DEBUG_F("Locked, ingoring rat inc");
@@ -90,6 +96,7 @@ void KeyArray::updateEncoderPos(int64_t pos) {
         }
     }
     encoderPos += pos;
+#endif
 }
 
 int KeyArray::getCodeFromArray() {
