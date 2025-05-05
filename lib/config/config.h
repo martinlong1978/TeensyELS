@@ -112,11 +112,8 @@
 #define SSD1306_128_64 0
 #define ST7789_240_135 1
 
-#if defined(ESP32)
 #define ELS_DISPLAY ST7789_240_135
-#else
-#define ELS_DISPLAY SSD1306_128_64
-#endif
+//#define ELS_DISPLAY SSD1306_128_64
 
 #if ELS_DISPLAY == SSD1306_128_64
  // define this if you have a dedicated pin for the oled reset
