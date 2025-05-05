@@ -76,13 +76,6 @@
 #define ELS_IND_RED 22   
 #define ELS_IND_GREEN 21  
 
-  //  36  20  12
-  //  34  18  10
-  //  33  17   9
-  // --------------
-  //   9  17  33
-  //  10  18  34
-  //  12  20  36
 #define ELS_RATE_INCREASE_BUTTON 17
 #define ELS_RATE_DECREASE_BUTTON 9
 #define ELS_MODE_CYCLE_BUTTON 33
