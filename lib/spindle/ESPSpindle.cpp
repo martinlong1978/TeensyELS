@@ -1,5 +1,5 @@
 #ifdef ESP32
-#include "ESPSpindle.h"
+#include "Spindle.h"
 
 #include <config.h>
 #include <math.h>

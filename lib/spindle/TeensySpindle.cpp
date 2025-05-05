@@ -1,5 +1,5 @@
 #ifdef CORE_TEENSY
-#include "TeensySpindle.h"
+#include "Spindle.h"
 
 #include <config.h>
 #include <math.h>
