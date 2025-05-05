@@ -47,7 +47,7 @@ void Spindle::incrementCurrentPosition(int amount) {
   }
   if (amount != 0) {
     m_lastPulseTimestamp = t;
-    if (abs(newpos - m_lastRevPosition) > SPEED_COUNTS) {
+    if (abs(newpos - m_lastRevPosition) > ELS_SPEED_COUNTS) {
       // Update stats for last full revolution. 
       m_lastRevSize = newpos - m_lastRevPosition;
       m_lastRevPosition = newpos;

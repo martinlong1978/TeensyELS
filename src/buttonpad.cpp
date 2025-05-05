@@ -207,10 +207,10 @@ void ButtonPad::jogDirectionHandler(ButtonInfo press) {
       break;
     case ELS_JOG_RIGHT_BUTTON:
       if (globalState->getMotionMode() == GlobalMotionMode::MM_JOG_RIGHT) {
-      globalState->setMotionMode(GlobalMotionMode::MM_DISABLED);
-      break;
-    }
-    if (m_leadscrew->getStopPositionState(LeadscrewStopPosition::RIGHT) != LeadscrewStopState::UNSET) {
+        globalState->setMotionMode(GlobalMotionMode::MM_DISABLED);
+        break;
+      }
+      if (m_leadscrew->getStopPositionState(LeadscrewStopPosition::RIGHT) != LeadscrewStopState::UNSET) {
         globalState->setMotionMode(GlobalMotionMode::MM_JOG_RIGHT);
         globalState->setThreadSyncState(GlobalThreadSyncState::SS_UNSYNC);
       }

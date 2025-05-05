@@ -38,7 +38,7 @@ enum class LeadscrewSpindleSyncPositionState { LEFT, RIGHT, UNSET };
 class Leadscrew : public LinearAxis, public DerivedAxis, public DrivenAxis {
 private:
 
-#ifdef USE_RMT
+#ifdef ELS_USE_RMT
   rmt_data_t rmt_data[24];
   rmt_obj_t *rmtObj;
 #endif
@@ -92,7 +92,7 @@ public:
     float leadscrewAccel, float initialPulseDelay, 
     int motorPulsePerRevolution,
     float leadscrewPitch, int encoderPPR);
-  #ifdef USE_RMT
+  #ifdef ELS_USE_RMT
   void setRMT(rmt_obj_t *rmtObj){
     this->rmtObj = rmtObj;
     rmt_data->duration0 = 8;

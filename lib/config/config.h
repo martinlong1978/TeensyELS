@@ -65,7 +65,7 @@
 
 
 #elif defined(ESP32)
-#define USE_RMT
+#define ELS_USE_RMT
 #define ELS_LEADSCREW_STEP 25 
 #define ELS_LEADSCREW_STEP_BIT BIT25
 #define ELS_LEADSCREW_DIR 26
@@ -131,7 +131,9 @@
 #endif
 
 #define ELS_SPINDLE_ENCODER_PPR 1200
-#define SPEED_COUNTS 300
+
+// Number of pulses between speed updates
+#define ELS_SPEED_COUNTS 300
 #define ELS_LEADSCREW_STEPPER_PPR 400
 
 // uncomment this if your leadscrew direction is inverted to what is expected
@@ -154,11 +156,11 @@
 
 // extra config options
 // jog speed in mm/s
-#define JOG_SPEED 250
+#define ELS_JOG_SPEED 250
 
-#define JOG_PULSE_DELAY   \
+#define ELS_JOG_PULSE_DELAY   \
   ((float)US_PER_SECOND / \
-   ((float)JOG_SPEED * (float)ELS_LEADSCREW_STEPS_PER_MM))
+   ((float)ELS_JOG_SPEED * (float)ELS_LEADSCREW_STEPS_PER_MM))
 
 /**
  * The unit mode the system should start up in

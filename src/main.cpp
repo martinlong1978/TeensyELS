@@ -122,7 +122,7 @@ void setup() {
 //  pinMode(ELS_SPINDLE_ENCODER_B, INPUT_PULLUP); // encoder pin 2
 #endif
 
-#ifdef USE_RMT
+#ifdef ELS_USE_RMT
   rmt_obj_t* leadscreRMT = rmtInit(ELS_LEADSCREW_STEP, true, RMT_MEM_64);
   leadscrew.setRMT(leadscreRMT);
   rmtSetTick(leadscreRMT, 2500);

@@ -136,7 +136,7 @@ void Leadscrew::setCurrentPosition(int position) {
 
 bool Leadscrew::sendPulse() {
 
-#ifdef USE_RMT
+#ifdef ELS_USE_RMT
   rmtWrite(rmtObj, rmt_data, sizeof(rmt_data));
   return true;
 #else
@@ -192,13 +192,13 @@ void Leadscrew::update() {
 
   if (mode == GlobalMotionMode::MM_JOG_LEFT) {
     m_spindle->consumePosition(); // Consume the spindle position while we're jogging
-    if (tm - this->jogMicros > JOG_PULSE_DELAY) {
+    if (tm - this->jogMicros > ELS_JOG_PULSE_DELAY) {
       m_expectedPosition = m_currentPosition - 1500;
       this->jogMicros = tm;
     }
   } else if (mode == GlobalMotionMode::MM_JOG_RIGHT) {
     m_spindle->consumePosition(); // Consume the spindle position while we're jogging
-    if (tm - this->jogMicros > JOG_PULSE_DELAY) {
+    if (tm - this->jogMicros > ELS_JOG_PULSE_DELAY) {
       m_expectedPosition = (m_currentPosition + 1500);
       this->jogMicros = tm;
     }
