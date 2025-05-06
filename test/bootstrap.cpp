@@ -1,8 +1,13 @@
 
-#include <gmock/gmock.h>
+#ifndef PIO_UNIT_TESTING
+#define PIO_UNIT_TESTING  // for intellisense to pick up the MicrosSingleton etc
+#endif 
 
-// TEST(...)
-// TEST_F(...)
+#include <gmock/gmock.h>
+#include <globalstate.h>
+#include "TestSpindle.h"
+#include <leadscrew.h>
+#include "mocks/leadscrewio_mock.h"
 
 #if defined(ARDUINO)
 #include <Arduino.h>
@@ -28,14 +33,44 @@ void loop() {
 
 #else
 int main(int argc, char **argv) {
-  ::testing::InitGoogleTest(&argc, argv);
+  //::testing::InitGoogleTest(&argc, argv);
   // if you plan to use GMock, replace the line above with
   // ::testing::InitGoogleMock(&argc, argv);
 
-  if (RUN_ALL_TESTS())
-    ;
+  //if (RUN_ALL_TESTS())
+    //;
 
   // Always return zero-code and allow PlatformIO to parse results
+
+  MicrosSingleton& micros = MicrosSingleton::getInstance();
+  MillisSingleton& millis = MillisSingleton::getInstance();
+
+  LeadscrewIOMock leadscrewIOMock;
+  Spindle spindle;
+  Leadscrew leadscrew(&spindle, &leadscrewIOMock, LEADSCREW_INITIAL_PULSE_DELAY_US,
+    LEADSCREW_PULSE_DELAY_STEP_US, ELS_LEADSCREW_STEPPER_PPR* ELS_GEARBOX_RATIO,
+    ELS_LEADSCREW_PITCH_MM, ELS_SPINDLE_ENCODER_PPR);
+
+  leadscrew.setStopPosition(LeadscrewStopPosition::LEFT, 0);
+  leadscrew.setStopPosition(LeadscrewStopPosition::RIGHT, 10000); 
+  leadscrew.setCurrentPosition(10000);
+  leadscrew.setTargetPitchMM(0.25);
+  GlobalState::getInstance()->setMotionMode(GlobalMotionMode::MM_ENABLED); 
+  GlobalState::getInstance()->setThreadSyncState(GlobalThreadSyncState::SS_SYNC); 
+
+
+  micros.setMicros(0);
+  millis.setMillis(0);
+
+  for(int i = 0; i < 10000; i++){
+    micros.incrementMicros(100);
+    millis.incrementMillis(1);
+    leadscrew.update();
+  }
+
+
+  DEBUG_F("Hello\n");
+
   return 0;
 }
 #endif
