@@ -7,6 +7,8 @@
  * actual calls so we can test it more easily
  */
 class LeadscrewIO {
+ protected:
+  int stepBitState;
  public:
   virtual void writeStepPin(uint8_t val) = 0;
   virtual uint8_t readStepPin() = 0;
