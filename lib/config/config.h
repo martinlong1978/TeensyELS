@@ -145,11 +145,8 @@
 
 // extra config options
 // jog speed in mm/s
-#define ELS_JOG_SPEED 250
-
-#define ELS_JOG_PULSE_DELAY   \
-  ((float)US_PER_SECOND / \
-   ((float)ELS_JOG_SPEED * (float)ELS_LEADSCREW_STEPS_PER_MM))
+#define ELS_JOG_SPEED_MM 40
+#define ELS_JOG_SPEED_PPS  ELS_JOG_SPEED_MM * ELS_LEADSCREW_STEPS_PER_MM
 
 /**
  * The unit mode the system should start up in
