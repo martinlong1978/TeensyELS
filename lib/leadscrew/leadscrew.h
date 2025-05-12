@@ -2,6 +2,7 @@
 #include <axis.h>
 #include <Arduino.h>
 #include "leadscrew_io.h"
+#include "globalstate.h"
 #pragma once
 
 
@@ -84,6 +85,9 @@ private:
 
   int debugPulseCount;
   bool initPos;
+
+  GlobalMotionMode m_motionMode = MM_DISABLED;
+  GlobalState *m_globalState;
 
 public:
   Leadscrew(Spindle* spindle, LeadscrewIO* io,
