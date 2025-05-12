@@ -56,7 +56,7 @@ void Leadscrew::unsetStopPosition(LeadscrewStopPosition position) {
       m_syncPositionState = LeadscrewSpindleSyncPositionState::UNSET;
       // extrapolate the sync position to the other endstop if set
       if (m_rightStopState == LeadscrewStopState::SET) {
-        m_spindleSyncPosition = ((int)(static_cast<int>(m_syncPositionState) + (m_rightStopPosition - m_leftStopPosition) * m_ratio)) % encoderPPR;
+        m_spindleSyncPosition = ((((int)(static_cast<int>(m_syncPositionState) + (m_rightStopPosition - m_leftStopPosition) * m_ratio)) % encoderPPR) + encoderPPR) % encoderPPR;
         m_syncPositionState = LeadscrewSpindleSyncPositionState::RIGHT;
       }
     }
@@ -65,7 +65,7 @@ void Leadscrew::unsetStopPosition(LeadscrewStopPosition position) {
     m_rightStopState = LeadscrewStopState::UNSET;
     m_rightStopPosition = INT32_MAX;
     if (m_syncPositionState == LeadscrewSpindleSyncPositionState::RIGHT) {
-      m_spindleSyncPosition = ((int)(static_cast<int>(m_syncPositionState) + (m_rightStopPosition - m_leftStopPosition) * m_ratio)) % encoderPPR;
+      m_spindleSyncPosition = ((((int)(static_cast<int>(m_syncPositionState) + (m_rightStopPosition - m_leftStopPosition) * m_ratio)) % encoderPPR) + encoderPPR) % encoderPPR;
       m_syncPositionState = LeadscrewSpindleSyncPositionState::LEFT;
     }
     break;
@@ -190,18 +190,9 @@ void Leadscrew::update() {
   bool hitRightEndstop = m_rightStopState == LeadscrewStopState::SET &&
     m_currentPosition >= m_rightStopPosition;
 
-  if (mode == GlobalMotionMode::MM_JOG_LEFT) {
+  if (mode == GlobalMotionMode::MM_JOG_LEFT || mode == GlobalMotionMode::MM_JOG_RIGHT) {
     m_spindle->consumePosition(); // Consume the spindle position while we're jogging
-    if (tm - this->jogMicros > ELS_JOG_PULSE_DELAY) {
-      m_expectedPosition = m_currentPosition - 1500;
-      this->jogMicros = tm;
-    }
-  } else if (mode == GlobalMotionMode::MM_JOG_RIGHT) {
-    m_spindle->consumePosition(); // Consume the spindle position while we're jogging
-    if (tm - this->jogMicros > ELS_JOG_PULSE_DELAY) {
-      m_expectedPosition = (m_currentPosition + 1500);
-      this->jogMicros = tm;
-    }
+    m_expectedPosition = m_currentPosition;
   } else {
     // Update expected position from any unconsumed spindle pulses
     m_expectedPosition = (m_expectedPosition + (float)(((float)m_spindle->consumePosition()) * m_ratio));
@@ -210,7 +201,6 @@ void Leadscrew::update() {
   // How far are we from the expected position
   float positionError = getPositionError();
   if ((hitLeftEndstop || hitRightEndstop) && abs(positionError) > encoderPPR * m_ratio) {
-    //DEBUG_F("Hit end stop %d %d %d %d %f %d %d %d\n", hitLeftEndstop, hitRightEndstop, positionError, encoderPPR, m_ratio, m_currentPosition, m_leftStopPosition, m_rightStopPosition);
     // if we've hit the endstop, keep the expected position within one spindle rotation of the endstop
     // we can assume that the current position will not actually move due to later logic
 
@@ -235,6 +225,7 @@ void Leadscrew::update() {
     break;
   case GlobalMotionMode::MM_JOG_LEFT:
   case GlobalMotionMode::MM_JOG_RIGHT:
+
   case GlobalMotionMode::MM_ENABLED:
     LeadscrewDirection nextDirection = LeadscrewDirection::UNKNOWN;
 
@@ -246,7 +237,7 @@ void Leadscrew::update() {
      * If the next direction is different from the current direction, we
      * should start decelerating to move in the intended direction
      */
-    if (positionError > 1 && !hitRightEndstop) {
+    if ((positionError > 1 || globalState->getMotionMode() == MM_JOG_RIGHT) && !hitRightEndstop) { 
       nextDirection = LeadscrewDirection::RIGHT;
       if (m_currentDirection == LeadscrewDirection::LEFT && m_leadscrewSpeed == 0) {
         m_currentDirection = LeadscrewDirection::UNKNOWN;
@@ -255,7 +246,7 @@ void Leadscrew::update() {
         m_io->writeDirPin(ELS_DIR_RIGHT);
         m_currentDirection = LeadscrewDirection::RIGHT;
       }
-    } else if (positionError < 1 && !hitLeftEndstop) {
+    } else if ((positionError < 1 || globalState->getMotionMode() == MM_JOG_LEFT) && !hitLeftEndstop) { 
       nextDirection = LeadscrewDirection::LEFT;
       if (m_currentDirection == LeadscrewDirection::RIGHT && m_leadscrewSpeed == 0) {
         m_currentDirection = LeadscrewDirection::UNKNOWN;
@@ -273,8 +264,6 @@ void Leadscrew::update() {
      * If we are not in sync with the thread, if not, figure out where we should restart based on
      * the difference in position between the sync point and the current position
      */
-     // if(globalState->getThreadSyncState() == SS_UNSYNC)DEBUG_F("Currently unsynced %s\n",
-       //  m_syncPositionState == LeadscrewSpindleSyncPositionState::UNSET ? "UNSET" :  m_syncPositionState == LeadscrewSpindleSyncPositionState::LEFT ? "LEFT" : "RIGHT")
     if (m_syncPositionState != LeadscrewSpindleSyncPositionState::UNSET && globalState->getThreadSyncState() == SS_UNSYNC) {
       int syncPosition = 0;
       switch (m_syncPositionState) {
@@ -293,10 +282,9 @@ void Leadscrew::update() {
       int currentpos = m_spindle->getCurrentPosition();
 
       if (globalState->getThreadSyncState() != SS_SYNC) {
-        int pulsesToTargetSpeed = getTargetSpeedDistanceInPulses();
+        //int pulsesToTargetSpeed = getTargetSpeedDistanceInPulses();
         // So, I think this is, how far we need to move, converted to spindle pulses, plus the spindle sync pos, mod the spindle PPM, to get the next revolution. 
-        int expectedSyncPosition = ((int)((m_currentPosition - syncPosition) / m_ratio) + m_spindleSyncPosition) % encoderPPR;
-
+        int expectedSyncPosition = ((((int)((m_currentPosition - syncPosition) / m_ratio) + m_spindleSyncPosition) % encoderPPR) + encoderPPR) % encoderPPR;
 
         if (currentpos == expectedSyncPosition) {
           m_expectedPosition = m_currentPosition; // Ensure these are aligned at the sync point. 
@@ -314,11 +302,14 @@ void Leadscrew::update() {
      * - The last pulse was sent recently i.e: less than the current pulse delay
      * - the sync position was previously set and we are currently not synced with the spindle
      */
-    if (m_currentDirection == LeadscrewDirection::UNKNOWN
-      || (tm - m_lastPulseTimestamp) < m_currentPulseDelay
-      || (m_syncPositionState != LeadscrewSpindleSyncPositionState::UNSET && globalState->getThreadSyncState() == SS_UNSYNC)) {
-      break;
-    }
+    if (m_currentDirection == LeadscrewDirection::UNKNOWN 
+      || (tm - m_lastPulseTimestamp) < m_currentPulseDelay 
+      || (m_syncPositionState != LeadscrewSpindleSyncPositionState::UNSET  
+        && globalState->getThreadSyncState() == SS_UNSYNC 
+        && globalState->getMotionMode() != MM_JOG_LEFT 
+        && globalState->getMotionMode() != MM_JOG_RIGHT)) { 
+      break; 
+    } 
 
     // attempt to keep in sync with the leadscrew
     // if sendPulse returns true, we've actually sent a pulse
@@ -345,7 +336,6 @@ void Leadscrew::update() {
        * the stopping distance based on the current speed and acceleration and cant plan ahead much further than this
        */
       int pulsesToStop = getStoppingDistanceInPulses();
-      int pulsesToTargetSpeed = getTargetSpeedDistanceInPulses();
 
       bool goingToHitLeftEndstop = m_leftStopState == LeadscrewStopState::SET &&
         m_currentPosition - pulsesToStop <= m_leftStopPosition;
@@ -354,9 +344,19 @@ void Leadscrew::update() {
 
       // if this is true we should start decelerating to stop at the
       // correct position
-      bool shouldStop = ((int)m_currentDirection * positionError) < pulsesToTargetSpeed ||
+      
+      bool shouldStop;
+      if(globalState->getMotionMode() == MM_ENABLED){
+        int pulsesToTargetSpeed = getTargetSpeedDistanceInPulses();
+        shouldStop = ((int)m_currentDirection * positionError) < pulsesToTargetSpeed ||
         nextDirection != m_currentDirection ||
         goingToHitLeftEndstop || goingToHitRightEndstop;
+      }else{
+        shouldStop = m_leadscrewSpeed > ELS_JOG_SPEED_PPS ||
+        nextDirection != m_currentDirection ||
+        goingToHitLeftEndstop || goingToHitRightEndstop;
+      }
+
 
 
       if (shouldStop) {
@@ -368,7 +368,7 @@ void Leadscrew::update() {
         m_leadscrewSpeed = min(m_leadscrewSpeed, LEADSCREW_MAX_SPEED_PPS);
         m_currentPulseDelay = m_leadscrewSpeed == 0 ? initialPulseDelay : US_PER_SECOND / m_leadscrewSpeed;
       }
-
+      
       /**
        * Ensure that the pulse delay is within the bounds
        * of the initial pulse delay (i.e the pulse delay when moving from zero) and 0
