@@ -283,7 +283,7 @@ void Leadscrew::update() {
 
       int currentpos = m_spindle->getCurrentPosition();
 
-      if (m_globalState->getThreadSyncState() != SS_SYNC) {
+      if (m_globalState->getThreadSyncState() != SS_SYNC && !jogMode) {
         //int pulsesToTargetSpeed = getTargetSpeedDistanceInPulses();
         // So, I think this is, how far we need to move, converted to spindle pulses, plus the spindle sync pos, mod the spindle PPM, to get the next revolution. 
         int expectedSyncPosition = ((((int)((m_currentPosition - syncPosition) / m_ratio) + m_spindleSyncPosition) % encoderPPR) + encoderPPR) % encoderPPR;
