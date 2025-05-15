@@ -200,6 +200,7 @@ void Leadscrew::update() {
   }
 
   // How far are we from the expected position
+  int pulsesToTargetSpeed = getTargetSpeedDistanceInPulses();
   float positionError = getPositionError();
   if ((hitLeftEndstop || hitRightEndstop) && (abs(positionError) > encoderPPR * m_ratio || jogMode)) {
     // if we've hit the endstop, keep the expected position within one spindle rotation of the endstop
@@ -266,7 +267,7 @@ void Leadscrew::update() {
      * If we are not in sync with the thread, if not, figure out where we should restart based on
      * the difference in position between the sync point and the current position
      */
-    if (m_syncPositionState != LeadscrewSpindleSyncPositionState::UNSET && m_globalState->getThreadSyncState() == SS_UNSYNC) {
+    if (m_syncPositionState != LeadscrewSpindleSyncPositionState::UNSET && m_globalState->getThreadSyncState() == SS_UNSYNC  && !jogMode) {
       int syncPosition = 0;
       switch (m_syncPositionState) {
       case LeadscrewSpindleSyncPositionState::LEFT:
@@ -283,8 +284,7 @@ void Leadscrew::update() {
 
       int currentpos = m_spindle->getCurrentPosition();
 
-      if (m_globalState->getThreadSyncState() != SS_SYNC && !jogMode) {
-        //int pulsesToTargetSpeed = getTargetSpeedDistanceInPulses();
+      if (m_globalState->getThreadSyncState() != SS_SYNC) {
         // So, I think this is, how far we need to move, converted to spindle pulses, plus the spindle sync pos, mod the spindle PPM, to get the next revolution. 
         int expectedSyncPosition = ((((int)((m_currentPosition - syncPosition) / m_ratio) + m_spindleSyncPosition) % encoderPPR) + encoderPPR) % encoderPPR;
 
@@ -348,8 +348,7 @@ void Leadscrew::update() {
 
       bool shouldStop;
       if (m_motionMode == MM_ENABLED) {
-        int pulsesToTargetSpeed = getTargetSpeedDistanceInPulses();
-        shouldStop = ((int)m_currentDirection * positionError) < pulsesToTargetSpeed ||
+        shouldStop = ((int)m_currentDirection * (positionError + pulsesToTargetSpeed)) < 0 ||
           nextDirection != m_currentDirection ||
           goingToHitLeftEndstop || goingToHitRightEndstop;
       } else {
