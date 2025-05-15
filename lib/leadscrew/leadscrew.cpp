@@ -240,7 +240,7 @@ void Leadscrew::update() {
      * If the next direction is different from the current direction, we
      * should start decelerating to move in the intended direction
      */
-    if ((positionError > 1 || m_motionMode == MM_JOG_RIGHT) && !hitRightEndstop) {
+    if (((positionError > 1 && !jogMode) || m_motionMode == MM_JOG_RIGHT) && !hitRightEndstop) { 
       nextDirection = LeadscrewDirection::RIGHT;
       if (m_currentDirection == LeadscrewDirection::LEFT && m_leadscrewSpeed == 0) {
         m_currentDirection = LeadscrewDirection::UNKNOWN;
@@ -249,7 +249,7 @@ void Leadscrew::update() {
         m_io->writeDirPin(ELS_DIR_RIGHT);
         m_currentDirection = LeadscrewDirection::RIGHT;
       }
-    } else if ((positionError < 1 || m_motionMode == MM_JOG_LEFT) && !hitLeftEndstop) {
+    } else if (((positionError < 1 && !jogMode) || m_motionMode == MM_JOG_LEFT) && !hitLeftEndstop) { 
       nextDirection = LeadscrewDirection::LEFT;
       if (m_currentDirection == LeadscrewDirection::RIGHT && m_leadscrewSpeed == 0) {
         m_currentDirection = LeadscrewDirection::UNKNOWN;
