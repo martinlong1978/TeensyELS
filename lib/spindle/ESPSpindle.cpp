@@ -60,7 +60,7 @@ void Spindle::incrementCurrentPosition(int amount) {
 float Spindle::getEstimatedVelocityInPPS() {
   if (m_lastRevMicros == 0)return 0;
   if(micros() - m_lastRevTimestamp > 1000000)return 0;
-  return abs((m_lastRevSize * US_PER_SECOND) / (m_lastRevMicros));
+  return (m_lastRevSize * US_PER_SECOND) / (m_lastRevMicros);
 }
 
 

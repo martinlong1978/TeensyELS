@@ -40,15 +40,34 @@ enum GlobalThreadSyncState { SS_UNSET, SS_SYNC, SS_UNSYNC };
  */
 enum GlobalButtonLock { LK_UNSET, LK_UNLOCKED, LK_LOCKED };
 
+typedef struct DebugData {
+  int tm;
+  uint32_t m_lastFullPulseDurationMicros;
+  float positionError;
+  int pulsesToStop;
+  int pulsesToTargetSpeed;
+  float m_currentPulseDelay;
+  int m_currentPosition;
+  int m_currentDirection;
+  float m_expectedPosition;
+  float m_leadscrewSpeed;
+  int spindlePos;
+  float timeToTarget;
+  float targetSpeed;
+  float m_targetSpeed;
+  float m_speedDif;
+  float m_timeToTarget;
+} DebugData;
 
 // this is a singleton class - we don't want more than one of these existing at
 // a time!
 class GlobalState {
- private:
-  static GlobalState *m_instance;
+private:
+  static GlobalState* m_instance;
   volatile bool OTA = false;
   volatile int OTAbytes = 0;
   volatile int OTAlength = 0;
+
 
   GlobalFeedMode m_feedMode;
   GlobalMotionMode m_motionMode;
@@ -77,13 +96,19 @@ class GlobalState {
     m_resyncPulseCount = 0;
   }
 
- public:
+public:
+  DebugData* volatile debugBuffer;
+  DebugData* volatile debugInit;
+
 
   // singleton stuff, no cloning and no copying
-  GlobalState(GlobalState const &) = delete;
-  void operator=(GlobalState const &) = delete;
+  GlobalState(GlobalState const&) = delete;
+  void operator=(GlobalState const&) = delete;
 
-  static GlobalState *getInstance();
+  bool getDebugMode();
+  void setDebugMode(bool mode);
+
+  static GlobalState* getInstance();
 
   void setFeedMode(GlobalFeedMode mode);
   GlobalFeedMode getFeedMode();
@@ -118,6 +143,6 @@ class GlobalState {
   int nextFeedPitch();
   int prevFeedPitch();
 
- protected:
+protected:
   int getCurrentFeedSelectArraySize();
 };

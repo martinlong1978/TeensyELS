@@ -11,6 +11,43 @@ GlobalState* GlobalState::getInstance() {
   return m_instance;
 }
 
+bool GlobalState::getDebugMode() { 
+  return m_debugMode; 
+} 
+ 
+void GlobalState::setDebugMode(bool mode) { 
+  if (mode) { 
+    Serial.printf("Heap: %d PSRam %d \n", ESP.getFreeHeap(), ESP.getFreePsram()); 
+    debugBuffer = (DebugData*)malloc(100000); 
+    debugInit = (DebugData*)debugBuffer; 
+  } else { 
+    Serial.printf("Bytes found %d, %d items of %d bytes\n", (debugBuffer - debugInit) * sizeof(DebugData), (debugBuffer - debugInit), sizeof(DebugData)); 
+    int count = (debugBuffer - debugInit); 
+    debugBuffer = debugInit; 
+     Serial.println("time,pulseDuration,posError,pulsetoStop,pulseToTarget,pulseDelay,pos,expectedPos,speed,spindlepos,targetSpeed,timeToTarget,direction,targetSpeed,speedDiff,timeToTarget");
+    for (int i = 0; i < count; i++) { 
+      Serial.printf("%d,%d,%f,%d,%d,%f,%d,%f,%f,%d,%f,%f,%d,%f,%f,%f\n", debugBuffer->tm, 
+        debugBuffer->m_lastFullPulseDurationMicros, 
+        debugBuffer->positionError, debugBuffer->pulsesToStop, debugBuffer->pulsesToTargetSpeed, 
+        debugBuffer->m_currentPulseDelay, 
+        debugBuffer->m_currentPosition, 
+        debugBuffer->m_expectedPosition, 
+        debugBuffer->m_leadscrewSpeed, 
+        debugBuffer->spindlePos, 
+        debugBuffer->targetSpeed, 
+        debugBuffer->timeToTarget,
+        debugBuffer->m_currentDirection,
+        debugBuffer->m_targetSpeed,
+        debugBuffer->m_speedDif,
+        debugBuffer->m_timeToTarget 
+      ); 
+      debugBuffer++; 
+    } 
+    free(debugInit); 
+  } 
+  m_debugMode = mode; 
+} 
+ 
 
 void GlobalState::setFeedMode(GlobalFeedMode mode) {
   m_feedMode = mode;

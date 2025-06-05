@@ -114,7 +114,7 @@ public:
   void setTargetPitchMM(float ratio);
   void setCurrentPosition(int position);
   void update();
-  int getPositionError();
+  float getPositionError();
   LeadscrewDirection getCurrentDirection();
   float getEstimatedVelocityInMillimetersPerSecond();
 

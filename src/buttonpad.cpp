@@ -84,16 +84,12 @@ void ButtonPad::halfNutHandler(ButtonInfo press) {
   if (press.buttonState == BS_HELD) { 
     GlobalState::getInstance()->setOTA(); 
   } 
- 
-  // honestly I don't know what this button should do after the refactor... 
- 
-  /*if (event == Button::SINGLE_CLICKED_EVENT && 
-      globalState->getFeedMode() == GlobalFeedMode::THREAD) { 
-    readyToThread = true; 
-    globalState->setMotionMode(GlobalMotionMode::ENABLED); 
-    globalState->setThreadSyncState(GlobalThreadSyncState::SYNC); 
-    pulsesBackToSync = 0; 
-  }*/ 
+
+  if(press.buttonState == BS_CLICKED){
+    GlobalState *gs = GlobalState::getInstance();
+    gs->setDebugMode(!gs->getDebugMode());
+  } 
+  
 } 
  
 void ButtonPad::enableHandler(ButtonInfo press) { 
