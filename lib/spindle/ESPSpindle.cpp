@@ -1,7 +1,7 @@
-#ifdef ESP32
+#include <config.h>
+#if defined(ESP32)
 #include "Spindle.h"
 
-#include <config.h>
 #include <math.h>
 
 #ifndef ELS_SPINDLE_DRIVEN
@@ -20,12 +20,26 @@ Spindle::Spindle() {
   m_currentPosition = 0;
 }
 
+#ifdef ELS_OFFLINE
+#define TEST_SPEED_DIVISOR 15
+
+void Spindle::update() {
+  // read the encoder and update the current position
+  // todo: we should keep the absolute position of the spindle, cbf right now
+  unsigned long mic = micros();
+  int amount = -(((int)(mic - m_lastFetchTime)) / TEST_SPEED_DIVISOR);
+  incrementCurrentPosition(amount);
+  m_lastFetchTime += (amount * -(TEST_SPEED_DIVISOR));
+}
+#else
+
 void Spindle::update() {
   // read the encoder and update the current position
   // todo: we should keep the absolute position of the spindle, cbf right now
   int64_t position = m_encoder.getAndClearCount();
   incrementCurrentPosition(position);
 }
+#endif
 
 void Spindle::setCurrentPosition(int position) {
   // update the unconsumed position by finding the delta between the old and new
@@ -66,8 +80,8 @@ float Spindle::getEstimatedVelocityInPPS() {
 
 float Spindle::getEstimatedVelocityInRPM() {
   if (m_lastRevMicros == 0)return 0;
-  if(micros() - m_lastRevTimestamp > 1000000)return 0;
-  return abs((m_lastRevSize * 60000000) / (m_lastRevMicros * ELS_SPINDLE_ENCODER_PPR));
+  if (micros() - m_lastRevTimestamp > 1000000)return 0;
+  return -((m_lastRevSize * 60000000) / (m_lastRevMicros * ELS_SPINDLE_ENCODER_PPR));
 }
 
 int Spindle::consumePosition() {

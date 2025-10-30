@@ -13,6 +13,8 @@ private:
     // but hasn't been used to update the current position of any driven axes
     int m_unconsumedPosition;
 
+    unsigned long m_lastFetchTime;
+
 #ifndef ELS_SPINDLE_DRIVEN
 #if defined(ESP32)
     ESP32Encoder  m_encoder;
