@@ -5,6 +5,9 @@
 #ifndef ELS_CONFIG_H
 #define ELS_CONFIG_H
 
+#define ELS_OFFLINE
+
+
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(arr[0]))
 
 // Macro to check at compile time if an index is out of bounds
@@ -67,6 +70,7 @@
 
 
 #elif defined(ESP32)
+
 #define ELS_USE_RMT
 #define ELS_LEADSCREW_STEP 25 
 #define ELS_LEADSCREW_STEP_BIT BIT25
@@ -145,7 +149,7 @@
 
 // extra config options
 // jog speed in mm/s
-#define ELS_JOG_SPEED_MM 40
+#define ELS_JOG_SPEED_MM 30
 #define ELS_JOG_SPEED_PPS  ELS_JOG_SPEED_MM * ELS_LEADSCREW_STEPS_PER_MM
 
 /**
@@ -164,8 +168,8 @@
 #define LEADSCREW_JERK 0.5
 
 // The acceleration of the leadscrew in mm/s^2
-#define LEADSCREW_ACCEL 90
-#define LEADSCREW_MAX_SPEED_MM 40
+#define LEADSCREW_ACCEL 50
+#define LEADSCREW_MAX_SPEED_MM 30
 #define LEADSCREW_MAX_SPEED_PPS  LEADSCREW_MAX_SPEED_MM * ELS_LEADSCREW_STEPS_PER_MM
 
 
