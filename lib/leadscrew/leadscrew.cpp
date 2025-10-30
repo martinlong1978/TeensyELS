@@ -175,7 +175,7 @@ int Leadscrew::getStoppingDistanceInPulses() {
 int Leadscrew::getTargetSpeedDistanceInPulses() {
   float targetSpeed = m_spindle->getEstimatedVelocityInPPS() * m_ratio;
   float speedDif = (float)m_currentDirection * m_leadscrewSpeed - targetSpeed;
-  float time = abs(speedDif) * 1.3 / m_leadscrewAccel;  // Leave some margin for catching up. 
+  float time = abs(speedDif) * 1.5 / m_leadscrewAccel;  // Leave some margin for catching up. 
   if (m_globalState->getDebugMode()) {
     m_globalState->debugBuffer->m_currentDirection = (int)m_currentDirection;
     m_globalState->debugBuffer->m_leadscrewSpeed = m_leadscrewSpeed;
@@ -183,6 +183,7 @@ int Leadscrew::getTargetSpeedDistanceInPulses() {
     m_globalState->debugBuffer->m_speedDif = speedDif;
     m_globalState->debugBuffer->m_timeToTarget = time;
   }
+
   return 0 - ((speedDif)*time / 2);
 }
 
@@ -212,6 +213,22 @@ void Leadscrew::update() {
   float positionErrorRaw = getPositionError();
   float positionError = positionErrorRaw + pulsesToTargetSpeed;
 
+  // if(jogMode){
+  //   positionError = 0;
+  //   pulsesToTargetSpeed = 0;
+  //   switch (m_motionMode)
+  //   {
+  //   case MM_JOG_LEFT:
+  //     m_currentDirection = LeadscrewDirection::LEFT;
+  //     break;
+  //   case MM_JOG_RIGHT:
+  //     m_currentDirection = LeadscrewDirection::RIGHT;
+  //     break;
+  //   default:
+  //     break;
+  //   }
+  // }
+
   if (hitLeftEndstop || hitRightEndstop) {
     // if we've hit the endstop, keep the expected position within one spindle rotation of the endstop
     // we can assume that the current position will not actually move due to later logic
@@ -233,9 +250,14 @@ void Leadscrew::update() {
   switch (m_motionMode) {
   case GlobalMotionMode::MM_DISABLED:
     // consume position but don't move
-    m_expectedPosition = (m_currentPosition);
-    m_spindle->consumePosition();
-    break;
+    // actually it will decellerate if necessary
+    if (m_leadscrewSpeed == 0) {
+      m_expectedPosition = (m_currentPosition);
+      m_spindle->consumePosition();
+      positionError = 0;
+      m_currentDirection = LeadscrewDirection::UNKNOWN;
+      m_globalState->setThreadSyncState(GlobalThreadSyncState::SS_UNSYNC);
+    }
   case GlobalMotionMode::MM_JOG_LEFT:
   case GlobalMotionMode::MM_JOG_RIGHT:
 
@@ -269,7 +291,7 @@ void Leadscrew::update() {
         m_currentDirection = LeadscrewDirection::LEFT;
       }
     } else {
-     // m_currentDirection = LeadscrewDirection::UNKNOWN;
+      // m_currentDirection = LeadscrewDirection::UNKNOWN;
     }
 
 
@@ -300,7 +322,6 @@ void Leadscrew::update() {
 
         if (currentpos == expectedSyncPosition) {
           m_expectedPosition = m_currentPosition - pulsesToTargetSpeed; // Ensure these are aligned at the sync point. 
-          Serial.printf("Setting expected %f = current %d + ptt %f \n", m_expectedPosition, m_currentPosition, pulsesToTargetSpeed);
           m_globalState->setThreadSyncState(GlobalThreadSyncState::SS_SYNC);
         }
 
@@ -362,6 +383,8 @@ void Leadscrew::update() {
         shouldStop = ((int)m_currentDirection * positionError) < 0 ||
           nextDirection != m_currentDirection ||
           goingToHitLeftEndstop || goingToHitRightEndstop;
+      } else if (m_motionMode == MM_DISABLED) {
+        shouldStop = true;
       } else {
         shouldStop = m_leadscrewSpeed > ELS_JOG_SPEED_PPS ||
           nextDirection != m_currentDirection ||
@@ -389,7 +412,6 @@ void Leadscrew::update() {
         m_globalState->debugBuffer->pulsesToTargetSpeed = pulsesToTargetSpeed;
         m_globalState->debugBuffer->m_currentPosition = m_currentPosition;
         m_globalState->debugBuffer->m_expectedPosition = m_expectedPosition;
-        m_globalState->debugBuffer->timeToTarget = abs(m_leadscrewSpeed - m_globalState->debugBuffer->m_targetSpeed) / m_leadscrewAccel;
         m_globalState->debugBuffer++;
       }
       if (++debugPulseCount > 10) {

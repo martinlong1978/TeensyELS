@@ -49,7 +49,6 @@ typedef struct DebugData {
   int m_currentDirection;
   float m_expectedPosition;
   float m_leadscrewSpeed;
-  float timeToTarget;
   float m_targetSpeed;
   float m_speedDif;
   float m_timeToTarget;

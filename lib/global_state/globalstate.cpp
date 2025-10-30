@@ -27,7 +27,7 @@ void GlobalState::setDebugMode(bool mode) {
     debugBuffer = debugInit; 
      Serial.println("time,posError,posErrorRaw,pulseToTarget,pos,expectedPos,speed,timeToTarget,direction,targetSpeed,speedDiff,timeToTarget");
     for (int i = 0; i < count; i++) { 
-      Serial.printf("%d,%f,%f,%f,%d,%f,%f,%f,%d,%f,%f,%f\n", 
+      Serial.printf("%d,%f,%f,%f,%d,%f,%f,%d,%f,%f,%f\n", 
         debugBuffer->tm,  //d 
         debugBuffer->positionError, //f
         debugBuffer->positionErrorRaw, //f
@@ -35,7 +35,6 @@ void GlobalState::setDebugMode(bool mode) {
         debugBuffer->m_currentPosition,  //d
         debugBuffer->m_expectedPosition, //f
         debugBuffer->m_leadscrewSpeed, //f
-        debugBuffer->timeToTarget, //f
         debugBuffer->m_currentDirection, //d
         debugBuffer->m_targetSpeed, //f
         debugBuffer->m_speedDif, //f
