@@ -102,7 +102,6 @@ void ButtonPad::enableHandler(ButtonInfo press) {
   if (press.buttonState == BS_CLICKED) {
     if (motionMode == GlobalMotionMode::MM_ENABLED) {
       GlobalState::getInstance()->setMotionMode(GlobalMotionMode::MM_DISABLED);
-      GlobalState::getInstance()->setThreadSyncState(GlobalThreadSyncState::SS_UNSYNC);
     }
     if (motionMode == GlobalMotionMode::MM_DISABLED) {
       GlobalState::getInstance()->setMotionMode(GlobalMotionMode::MM_ENABLED);

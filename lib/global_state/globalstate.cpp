@@ -25,7 +25,7 @@ void GlobalState::setDebugMode(bool mode) {
     Serial.printf("Bytes found %d, %d items of %d bytes\n", (debugBuffer - debugInit) * sizeof(DebugData), (debugBuffer - debugInit), sizeof(DebugData)); 
     int count = (debugBuffer - debugInit); 
     debugBuffer = debugInit; 
-     Serial.println("time,posError,posErrorRaw,pulseToTarget,pos,expectedPos,speed,timeToTarget,direction,targetSpeed,speedDiff,timeToTarget");
+     Serial.println("time,posError,posErrorRaw,pulseToTarget,pos,expectedPos,speed,direction,targetSpeed,speedDiff,timeToTarget");
     for (int i = 0; i < count; i++) { 
       Serial.printf("%d,%f,%f,%f,%d,%f,%f,%d,%f,%f,%f\n", 
         debugBuffer->tm,  //d 
