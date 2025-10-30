@@ -77,5 +77,5 @@ public:
 class DrivenAxis {
 public:
   virtual void update() = 0;
-  virtual int getPositionError() = 0;
+  virtual float getPositionError() = 0;
 };

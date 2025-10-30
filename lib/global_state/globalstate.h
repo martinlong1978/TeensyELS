@@ -42,18 +42,14 @@ enum GlobalButtonLock { LK_UNSET, LK_UNLOCKED, LK_LOCKED };
 
 typedef struct DebugData {
   int tm;
-  uint32_t m_lastFullPulseDurationMicros;
   float positionError;
-  int pulsesToStop;
-  int pulsesToTargetSpeed;
-  float m_currentPulseDelay;
+  float positionErrorRaw;
+  float pulsesToTargetSpeed;
   int m_currentPosition;
   int m_currentDirection;
   float m_expectedPosition;
   float m_leadscrewSpeed;
-  int spindlePos;
   float timeToTarget;
-  float targetSpeed;
   float m_targetSpeed;
   float m_speedDif;
   float m_timeToTarget;

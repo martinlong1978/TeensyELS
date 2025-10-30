@@ -174,12 +174,14 @@ int Leadscrew::getStoppingDistanceInPulses() {
  */
 int Leadscrew::getTargetSpeedDistanceInPulses() {
   float targetSpeed = m_spindle->getEstimatedVelocityInPPS() * m_ratio;
-  float speedDif = (int)m_currentDirection * m_leadscrewSpeed - targetSpeed;
-  float time = abs(speedDif) / m_leadscrewAccel;
+  float speedDif = (float)m_currentDirection * m_leadscrewSpeed - targetSpeed;
+  float time = abs(speedDif) * 1.3 / m_leadscrewAccel;  // Leave some margin for catching up. 
   if (m_globalState->getDebugMode()) {
+    m_globalState->debugBuffer->m_currentDirection = (int)m_currentDirection;
+    m_globalState->debugBuffer->m_leadscrewSpeed = m_leadscrewSpeed;
     m_globalState->debugBuffer->m_targetSpeed = targetSpeed;
     m_globalState->debugBuffer->m_speedDif = speedDif;
-    m_globalState->debugBuffer->m_timeToTarget = speedDif;
+    m_globalState->debugBuffer->m_timeToTarget = time;
   }
   return 0 - ((speedDif)*time / 2);
 }
@@ -206,18 +208,20 @@ void Leadscrew::update() {
   }
 
   // How far are we from the expected position
-  int pulsesToTargetSpeed = getTargetSpeedDistanceInPulses();
-  float positionError = getPositionError() + pulsesToTargetSpeed;
+  float pulsesToTargetSpeed = (float)getTargetSpeedDistanceInPulses();
+  float positionErrorRaw = getPositionError();
+  float positionError = positionErrorRaw + pulsesToTargetSpeed;
+
   if (hitLeftEndstop || hitRightEndstop) {
     // if we've hit the endstop, keep the expected position within one spindle rotation of the endstop
     // we can assume that the current position will not actually move due to later logic
 
     // if the position error is bigger than one rev worht of movement, reset the expected so that we don't move
 
-    m_expectedPosition = (m_currentPosition);
     if ((m_motionMode == GlobalMotionMode::MM_JOG_LEFT && hitLeftEndstop)
       || (m_motionMode == GlobalMotionMode::MM_JOG_RIGHT && hitRightEndstop)
       || (m_motionMode == GlobalMotionMode::MM_ENABLED && hitLeftEndstop)) {
+      m_expectedPosition = (m_currentPosition);
       m_motionMode = GlobalMotionMode::MM_DISABLED;
       m_globalState->setMotionMode(GlobalMotionMode::MM_DISABLED);
       m_globalState->setThreadSyncState(GlobalThreadSyncState::SS_UNSYNC);
@@ -265,7 +269,7 @@ void Leadscrew::update() {
         m_currentDirection = LeadscrewDirection::LEFT;
       }
     } else {
-      m_currentDirection = LeadscrewDirection::UNKNOWN;
+     // m_currentDirection = LeadscrewDirection::UNKNOWN;
     }
 
 
@@ -292,10 +296,11 @@ void Leadscrew::update() {
 
       if (m_globalState->getThreadSyncState() != SS_SYNC) {
         // So, I think this is, how far we need to move, converted to spindle pulses, plus the spindle sync pos, mod the spindle PPM, to get the next revolution. 
-        int expectedSyncPosition = ((((int)((m_currentPosition - (pulsesToTargetSpeed)-syncPosition) / m_ratio) + m_spindleSyncPosition) % encoderPPR) + encoderPPR) % encoderPPR;
+        int expectedSyncPosition = ((((int)((m_currentPosition - pulsesToTargetSpeed - syncPosition) / m_ratio) + m_spindleSyncPosition) % encoderPPR) + encoderPPR) % encoderPPR;
 
         if (currentpos == expectedSyncPosition) {
-          m_expectedPosition = m_currentPosition - (pulsesToTargetSpeed); // Ensure these are aligned at the sync point. 
+          m_expectedPosition = m_currentPosition - pulsesToTargetSpeed; // Ensure these are aligned at the sync point. 
+          Serial.printf("Setting expected %f = current %d + ptt %f \n", m_expectedPosition, m_currentPosition, pulsesToTargetSpeed);
           m_globalState->setThreadSyncState(GlobalThreadSyncState::SS_SYNC);
         }
 
@@ -379,18 +384,12 @@ void Leadscrew::update() {
 
       if (debugPulseCount == 0 && m_globalState->getDebugMode()) {
         m_globalState->debugBuffer->tm = (int)tm;
-        m_globalState->debugBuffer->m_lastFullPulseDurationMicros = m_lastFullPulseDurationMicros;
-        m_globalState->debugBuffer->m_currentDirection = (int)m_currentDirection;
         m_globalState->debugBuffer->positionError = positionError;
-        m_globalState->debugBuffer->pulsesToStop = pulsesToStop;
+        m_globalState->debugBuffer->positionErrorRaw = positionErrorRaw;
         m_globalState->debugBuffer->pulsesToTargetSpeed = pulsesToTargetSpeed;
-        m_globalState->debugBuffer->m_currentPulseDelay = m_currentPulseDelay;
         m_globalState->debugBuffer->m_currentPosition = m_currentPosition;
         m_globalState->debugBuffer->m_expectedPosition = m_expectedPosition;
-        m_globalState->debugBuffer->m_leadscrewSpeed = m_leadscrewSpeed;
-        m_globalState->debugBuffer->spindlePos = m_spindle->getCurrentPosition();
-        m_globalState->debugBuffer->targetSpeed = m_spindle->getEstimatedVelocityInPPS() * m_ratio;
-        m_globalState->debugBuffer->timeToTarget = abs(m_leadscrewSpeed - m_globalState->debugBuffer->targetSpeed) / m_leadscrewAccel;
+        m_globalState->debugBuffer->timeToTarget = abs(m_leadscrewSpeed - m_globalState->debugBuffer->m_targetSpeed) / m_leadscrewAccel;
         m_globalState->debugBuffer++;
       }
       if (++debugPulseCount > 10) {
