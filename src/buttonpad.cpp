@@ -130,14 +130,15 @@ void ButtonPad::threadSyncHandler(ButtonInfo press) {
     GlobalState::getInstance()->setDisplayReset();
   }
   if (press.buttonState == BS_CLICKED) {
-    if (GlobalState::getInstance()->getMotionMode() ==
-      GlobalMotionMode::MM_ENABLED) {
-      GlobalState::getInstance()->setThreadSyncState(
-        GlobalThreadSyncState::SS_UNSYNC);
-    } else {
-      GlobalState::getInstance()->setThreadSyncState(
-        GlobalThreadSyncState::SS_SYNC);
-    }
+    GlobalState::getInstance()->toggleSystemMode();
+    // if (GlobalState::getInstance()->getMotionMode() ==
+    //   GlobalMotionMode::MM_ENABLED) {
+    //   GlobalState::getInstance()->setThreadSyncState(
+    //     GlobalThreadSyncState::SS_UNSYNC);
+    // } else {
+    //   GlobalState::getInstance()->setThreadSyncState(
+    //     GlobalThreadSyncState::SS_SYNC);
+    // }
   }
 }
 
@@ -181,6 +182,7 @@ void ButtonPad::jogDirectionHandler(ButtonInfo press) {
   GlobalState* globalState = GlobalState::getInstance();
   GlobalButtonLock lockState = globalState->getButtonLock();
   GlobalMotionMode motionMode = globalState->getMotionMode();
+  GlobalSystemMode systemMode = globalState->getSystemMode();
 
   // no jogging functionality allowed during lock or enable 
   if (lockState == GlobalButtonLock::LK_LOCKED ||
@@ -189,7 +191,7 @@ void ButtonPad::jogDirectionHandler(ButtonInfo press) {
   }
 
   // single click should jog to the stop position 
-  if (press.buttonState == BS_CLICKED) {
+  if (systemMode == SM_NORMAL && press.buttonState == BS_CLICKED) {
     switch (press.button) {
     case ELS_JOG_LEFT_BUTTON:
       if (globalState->getMotionMode() == GlobalMotionMode::MM_JOG_LEFT) {
@@ -217,7 +219,7 @@ void ButtonPad::jogDirectionHandler(ButtonInfo press) {
   /**
    * holding the jog button will set/unset the stop position
    */
-  if (press.buttonState == BS_HELD) {
+  if (systemMode == SM_NORMAL && press.buttonState == BS_HELD) {
     switch (press.button) {
     case ELS_JOG_LEFT_BUTTON:
       if (m_leadscrew->getStopPositionState(LeadscrewStopPosition::LEFT) ==
@@ -237,6 +239,22 @@ void ButtonPad::jogDirectionHandler(ButtonInfo press) {
       }
       break;
     }
+  }
+
+  if (systemMode == SM_JOG && press.buttonState == BS_PRESSED) {
+    globalState->setThreadSyncState(GlobalThreadSyncState::SS_UNSYNC);
+    switch (press.button) {
+    case ELS_JOG_LEFT_BUTTON:
+      globalState->setMotionMode(MM_INTERACTIVE_JOG_LEFT);
+      break;
+    case ELS_JOG_RIGHT_BUTTON:
+      globalState->setMotionMode(MM_INTERACTIVE_JOG_RIGHT);
+      break;
+    }
+  }
+  if (systemMode == SM_JOG && press.buttonState == BS_RELEASED) {
+    globalState->setThreadSyncState(GlobalThreadSyncState::SS_UNSYNC);
+    globalState->setMotionMode(MM_DISABLED);
   }
 }
 

@@ -164,6 +164,9 @@ int  GlobalState::getOTABytes() { return OTAbytes; }
 int  GlobalState::getOTALength() { return OTAlength; }
 void  GlobalState::setOTAContentLength(int length) { OTAlength = length; }
 
+void GlobalState::toggleSystemMode() { m_systemMode = m_systemMode == SM_NORMAL ? SM_JOG : SM_NORMAL;}
+GlobalSystemMode GlobalState::getSystemMode() { return m_systemMode;}
+
 void  GlobalState::setDisplayReset() { m_displayReset = true; }
 bool  GlobalState::getDisplayReset() {
   bool ret = m_displayReset;

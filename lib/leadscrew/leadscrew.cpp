@@ -192,7 +192,7 @@ void Leadscrew::update() {
   int64_t tm = micros();
 
   m_motionMode = m_globalState->getMotionMode();
-  bool jogMode = m_motionMode == MM_JOG_LEFT || m_motionMode == MM_JOG_RIGHT;
+  bool jogMode = (m_motionMode | MMF_JOG) > 0;
 
   bool hitLeftEndstop = m_leftStopState == LeadscrewStopState::SET &&
     m_currentPosition <= m_leftStopPosition;
@@ -260,7 +260,8 @@ void Leadscrew::update() {
     }
   case GlobalMotionMode::MM_JOG_LEFT:
   case GlobalMotionMode::MM_JOG_RIGHT:
-
+  case GlobalMotionMode::MM_INTERACTIVE_JOG_LEFT:
+  case GlobalMotionMode::MM_INTERACTIVE_JOG_RIGHT:
   case GlobalMotionMode::MM_ENABLED:
     LeadscrewDirection nextDirection = LeadscrewDirection::UNKNOWN;
 
@@ -272,7 +273,7 @@ void Leadscrew::update() {
      * If the next direction is different from the current direction, we
      * should start decelerating to move in the intended direction
      */
-    if (((positionError > 1 && !jogMode) || m_motionMode == MM_JOG_RIGHT) && !hitRightEndstop) {
+    if (((positionError > 1 && !jogMode) || m_motionMode == MM_JOG_RIGHT || m_motionMode == MM_INTERACTIVE_JOG_RIGHT) && !hitRightEndstop) {
       nextDirection = LeadscrewDirection::RIGHT;
       if (m_currentDirection == LeadscrewDirection::LEFT && m_leadscrewSpeed == 0) {
         m_currentDirection = LeadscrewDirection::UNKNOWN;
@@ -281,7 +282,7 @@ void Leadscrew::update() {
         m_io->writeDirPin(ELS_DIR_RIGHT);
         m_currentDirection = LeadscrewDirection::RIGHT;
       }
-    } else if (((positionError < -1 && !jogMode) || m_motionMode == MM_JOG_LEFT) && !hitLeftEndstop) {
+    } else if (((positionError < -1 && !jogMode) || m_motionMode == MM_JOG_LEFT  || m_motionMode == MM_INTERACTIVE_JOG_RIGHT) && !hitLeftEndstop) {
       nextDirection = LeadscrewDirection::LEFT;
       if (m_currentDirection == LeadscrewDirection::RIGHT && m_leadscrewSpeed == 0) {
         m_currentDirection = LeadscrewDirection::UNKNOWN;

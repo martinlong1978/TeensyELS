@@ -17,7 +17,9 @@ enum GlobalFeedMode { FM_UNSET = -1, FM_FEED = 0, FM_THREAD = 1 };
 // Disabled: The leadscrew does not move when the spindle is moving
 // Jog: The leadscrew is moving independently of the spindle
 // Enabled: The leadscrew is moving in sync with the spindle
-enum GlobalMotionMode { MM_UNSET, MM_DISABLED, MM_JOG_LEFT, MM_JOG_RIGHT, MM_ENABLED };
+enum GlobalMotionMode { MM_UNSET = 0, MM_DISABLED = 2, MM_ENABLED = 3, MM_JOG_LEFT = 4, MM_JOG_RIGHT = 5, MM_INTERACTIVE_JOG_LEFT = 12, MM_INTERACTIVE_JOG_RIGHT = 13};
+
+enum GlobalMotionModeMasks { MMF_ENABLESTATE = 2, MMF_JOG = 4, MMF_JOG_DIRECTION = 5, MMF_INTERACTIVEJOG = 8};
 
 /**
  * The unit mode of the application, usually for threading
@@ -39,6 +41,8 @@ enum GlobalThreadSyncState { SS_UNSET, SS_SYNC, SS_UNSYNC };
  * Locked: The buttons are locked
  */
 enum GlobalButtonLock { LK_UNSET, LK_UNLOCKED, LK_LOCKED };
+
+enum GlobalSystemMode {SM_NORMAL, SM_JOG};
 
 typedef struct DebugData {
   int tm;
@@ -64,6 +68,8 @@ private:
   volatile int OTAlength = 0;
 
 
+
+  GlobalSystemMode m_systemMode;
   GlobalFeedMode m_feedMode;
   GlobalMotionMode m_motionMode;
   GlobalUnitMode m_unitMode;
@@ -88,6 +94,7 @@ private:
     setFeedSelect(-1);
     setThreadSyncState(SS_UNSYNC);
     m_motionMode = MM_DISABLED;
+    m_systemMode = SM_NORMAL;
     m_resyncPulseCount = 0;
   }
 
@@ -137,6 +144,9 @@ public:
   float getCurrentFeedPitch();
   int nextFeedPitch();
   int prevFeedPitch();
+  
+  void toggleSystemMode();
+  GlobalSystemMode getSystemMode();
 
 protected:
   int getCurrentFeedSelectArraySize();
