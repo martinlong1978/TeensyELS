@@ -193,29 +193,35 @@ void Display::drawEnabled() {
 
   if (mode == m_motionMode)return;
   m_motionMode = mode;
-  tft.fillRoundRect(52, 80, 40, 40, 4, mode == GlobalMotionMode::MM_ENABLED ? TFT_GREEN : ((mode == GlobalMotionMode::MM_JOG_LEFT || mode == GlobalMotionMode::MM_JOG_RIGHT) ? TFT_YELLOW : TFT_WHITE));
   uint8_t scaled[128];
   GlobalButtonLock lock = GlobalState::getInstance()->getButtonLock();
   switch (mode) {
   case GlobalMotionMode::MM_DISABLED:
+  case GlobalMotionMode::MM_DECELLERATE:
+    tft.fillRoundRect(52, 80, 40, 40, 4, TFT_WHITE);
     ScaleBMP(pauseSymbol, scaled, 16, 16);
     tft.drawBitmap(56, 84, scaled, 32, 32, TFT_BLACK);
     break;
   case GlobalMotionMode::MM_JOG_LEFT:
+  case GlobalMotionMode::MM_INTERACTIVE_JOG_LEFT:
     // todo bitmap for jogging
+    tft.fillRoundRect(52, 80, 40, 40, 4, TFT_YELLOW);
     tft.setCursor(58, 88);
     tft.setTextSize(4);
     tft.setTextColor(TFT_BLACK);
     tft.print("<");
     break;
   case GlobalMotionMode::MM_JOG_RIGHT:
+  case GlobalMotionMode::MM_INTERACTIVE_JOG_RIGHT:
     // todo bitmap for jogging
+    tft.fillRoundRect(52, 80, 40, 40, 4, TFT_YELLOW);
     tft.setCursor(58, 88);
     tft.setTextSize(4);
     tft.setTextColor(TFT_BLACK);
     tft.print(">");
     break;
   case GlobalMotionMode::MM_ENABLED:
+    tft.fillRoundRect(52, 80, 40, 40, 4, TFT_GREEN);
     ScaleBMP(runSymbol, scaled, 16, 16);
     tft.drawBitmap(56, 84, scaled, 32, 32, TFT_BLACK);
     break;
