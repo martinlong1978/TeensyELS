@@ -179,6 +179,8 @@ void ButtonPad::modeCycleHandler(ButtonInfo press) {
 }
 
 void ButtonPad::jogDirectionHandler(ButtonInfo press) {
+
+
   GlobalState* globalState = GlobalState::getInstance();
   GlobalButtonLock lockState = globalState->getButtonLock();
   GlobalMotionMode motionMode = globalState->getMotionMode();
@@ -253,7 +255,6 @@ void ButtonPad::jogDirectionHandler(ButtonInfo press) {
     }
   }
   if (systemMode == SM_JOG && press.buttonState == BS_RELEASED) {
-    globalState->setThreadSyncState(GlobalThreadSyncState::SS_UNSYNC);
     globalState->setMotionMode(MM_DISABLED);
   }
 }
@@ -263,12 +264,6 @@ void ButtonPad::jogHandler(ButtonInfo press) {
 
   jogDirectionHandler(press);
 
-  // common jog functionality 
-  // if neither jog button is held, reset the motion mode 
-//  if (press.buttonState == BS_RELEASED && 
-//    motionMode == GlobalMotionMode::MM_JOG) { 
-//    GlobalState::getInstance()->setMotionMode(GlobalMotionMode::MM_DISABLED); 
-//  } 
 }
 
 

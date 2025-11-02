@@ -51,6 +51,7 @@ void KeyArray::handleTimer() {
     int code = getCodeFromArray();
     if (buttonState.buttonState == ButtonState::BS_PRESSED && buttonState.button == code) {
         buttonState.buttonState = ButtonState::BS_HELD;
+        emitButton();
     } else {
         // if the same button isnt' still pressed, then cancel the whole thing. 
         buttonState.buttonState = ButtonState::BS_NONE;
@@ -65,14 +66,19 @@ ButtonInfo KeyArray::consumeButton() {
         updateEncoderPos(val - encoderPos);
     }
 #endif
-    if (buttonState.buttonState == ButtonState::BS_PRESSED || buttonState.buttonState == ButtonState::BS_NONE) {
+    if(readindex == writeindex)
         return { 0, ButtonState::BS_NONE };
-    }
-    ButtonInfo ret = { buttonState.button, buttonState.buttonState };
-    buttonState.buttonState = ButtonState::BS_NONE;
-    buttonState.button = 0;
+    ButtonInfo ret = ringBuffer[readindex];
+    readindex = (readindex + 1) % 10;
     return ret;
 }
+
+void KeyArray::emitButton(){
+    ringBuffer[writeindex].button = buttonState.button;
+    ringBuffer[writeindex].buttonState = buttonState.buttonState;
+    writeindex = (writeindex + 1) % 10;
+}
+
 
 void KeyArray::updateEncoderPos(int64_t pos) {
 #ifdef ELS_UI_ENCODER
@@ -130,12 +136,16 @@ void KeyArray::handle() {
         keycodeMillis = time;
         if (buttonState.buttonState == BS_PRESSED) {
             buttonState.buttonState = BS_CLICKED;
+            emitButton();
         }
+        buttonState.buttonState = BS_RELEASED;
+        emitButton();
     } else {
         //DEBUG_F("Pressed %d\n", code);
         buttonState.button = code;
         buttonState.buttonState = BS_PRESSED;
         keycodeMillis = time;
+        emitButton();
         timerRestart(Timer0_Cfg);
         timerStart(Timer0_Cfg);
     }

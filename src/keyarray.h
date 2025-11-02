@@ -22,10 +22,15 @@ private:
     Leadscrew* m_leadscrew;
     volatile ButtonInfo buttonState;
     volatile unsigned long keycodeMillis;
+    ButtonInfo ringBuffer[10];
+    volatile int readindex = 0;
+    volatile int writeindex = 0;
     hw_timer_t* Timer0_Cfg;
+
     void setupKeys();
     int getCodeFromArray();
     void updateEncoderPos(int64_t pos);
+    void emitButton();
 #ifdef ELS_UI_ENCODER
     ESP32Encoder m_encoder;
     int64_t encoderPos;
