@@ -16,6 +16,8 @@
 #include <Adafruit_SSD1306.h>
 
 #elif  ELS_DISPLAY == ST7789_240_135
+#define USER_SETUP_LOADED
+#include "displayconfig.h"
 #include <TFT_eSPI.h>
 #include <SPI.h>
 #else
