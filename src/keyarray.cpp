@@ -14,7 +14,7 @@ KeyArray::KeyArray(Leadscrew* leadscrew) : m_leadscrew(leadscrew) {
 #endif    
 }
 
-void KeyArray::setupKeys() {
+void KeyArray::setupKeys(bool press) {
 
     // Set pad H pins as input
     pinMode(ELS_PAD_H1, INPUT_PULLDOWN);
@@ -29,9 +29,15 @@ void KeyArray::setupKeys() {
     digitalWrite(ELS_PAD_V2, 1);
     digitalWrite(ELS_PAD_V3, 1);
 
-    attachInterrupt(digitalPinToInterrupt(ELS_PAD_H1), buttonInterrupt, CHANGE);
-    attachInterrupt(digitalPinToInterrupt(ELS_PAD_H2), buttonInterrupt, CHANGE);
-    attachInterrupt(digitalPinToInterrupt(ELS_PAD_H3), buttonInterrupt, CHANGE);
+    if (press) {
+        attachInterrupt(digitalPinToInterrupt(ELS_PAD_H1), buttonInterrupt, RISING);
+        attachInterrupt(digitalPinToInterrupt(ELS_PAD_H2), buttonInterrupt, RISING);
+        attachInterrupt(digitalPinToInterrupt(ELS_PAD_H3), buttonInterrupt, RISING);
+    } else {
+        attachInterrupt(digitalPinToInterrupt(ELS_PAD_H1), buttonInterruptRelease, FALLING);
+        attachInterrupt(digitalPinToInterrupt(ELS_PAD_H2), buttonInterruptRelease, FALLING);
+        attachInterrupt(digitalPinToInterrupt(ELS_PAD_H3), buttonInterruptRelease, FALLING);
+    }
 
 }
 
@@ -42,7 +48,7 @@ void KeyArray::initPad() {
     timerAlarmWrite(Timer0_Cfg, 1000000, true);
     timerStop(Timer0_Cfg);
     timerAlarmEnable(Timer0_Cfg);
-    setupKeys();
+    setupKeys(true);
 }
 
 void KeyArray::handleTimer() {
@@ -66,14 +72,14 @@ ButtonInfo KeyArray::consumeButton() {
         updateEncoderPos(val - encoderPos);
     }
 #endif
-    if(readindex == writeindex)
+    if (readindex == writeindex)
         return { 0, ButtonState::BS_NONE };
     ButtonInfo ret = ringBuffer[readindex];
     readindex = (readindex + 1) % 10;
     return ret;
 }
 
-void KeyArray::emitButton(){
+void KeyArray::emitButton() {
     ringBuffer[writeindex].button = buttonState.button;
     ringBuffer[writeindex].buttonState = buttonState.buttonState;
     writeindex = (writeindex + 1) % 10;
@@ -114,13 +120,13 @@ int KeyArray::getCodeFromArray() {
     pinMode(ELS_PAD_H1, OUTPUT);
     pinMode(ELS_PAD_H2, OUTPUT);
     pinMode(ELS_PAD_H3, OUTPUT);
-    digitalWrite(ELS_PAD_H1, 1);
-    digitalWrite(ELS_PAD_H2, 1);
-    digitalWrite(ELS_PAD_H3, 1);
+    digitalWrite(ELS_PAD_H1, a == 1 ? 1 : 0);
+    digitalWrite(ELS_PAD_H2, a == 2 ? 1 : 0);
+    digitalWrite(ELS_PAD_H3, a == 4 ? 1 : 0);
     // Now read the V states
     int b = digitalRead(ELS_PAD_V1) | (digitalRead(ELS_PAD_V2) << 1) | (digitalRead(ELS_PAD_V3) << 2);
     int code = (a == 0 || b == 0) ? 0 : a | b << 3;
-    setupKeys();
+    setupKeys(code == 0);
     return code;
 
 }
@@ -130,31 +136,38 @@ void KeyArray::handle() {
     if (time < keycodeMillis + 10)return; // debounce
     // First read the H states
     int code = getCodeFromArray();
-    if (code == 0) {
-        // Release
-        timerStop(Timer0_Cfg);
-        keycodeMillis = time;
-        if (buttonState.buttonState == BS_PRESSED) {
-            buttonState.buttonState = BS_CLICKED;
-            emitButton();
-        }
-        buttonState.buttonState = BS_RELEASED;
+    buttonState.button = code;
+    buttonState.buttonState = BS_PRESSED;
+    keycodeMillis = time;
+    emitButton();
+    timerRestart(Timer0_Cfg);
+    timerStart(Timer0_Cfg);
+}
+
+void KeyArray::handleRelease() {
+    unsigned long time = millis();
+    if (time < keycodeMillis + 10)return; // debounce
+    setupKeys(true);
+    // Release
+    timerStop(Timer0_Cfg);
+    keycodeMillis = time;
+    if (buttonState.buttonState == BS_PRESSED) {
+        buttonState.buttonState = BS_CLICKED;
         emitButton();
-    } else {
-        //DEBUG_F("Pressed %d\n", code);
-        buttonState.button = code;
-        buttonState.buttonState = BS_PRESSED;
-        keycodeMillis = time;
-        emitButton();
-        timerRestart(Timer0_Cfg);
-        timerStart(Timer0_Cfg);
     }
+    buttonState.buttonState = BS_RELEASED;
+    emitButton();
 }
 
 
 void buttonInterrupt() {
     keyArray.handle();
 }
+
+void buttonInterruptRelease() {
+    keyArray.handleRelease();
+}
+
 
 void IRAM_ATTR timerInterrupt() {
     keyArray.handleTimer();

@@ -8,6 +8,7 @@
 #include <ESP32Encoder.h>
 
 void buttonInterrupt();
+void buttonInterruptRelease();
 void IRAM_ATTR timerInterrupt();
 
 enum ButtonState { BS_NONE = 0, BS_PRESSED = 1, BS_CLICKED = 2, BS_HELD = 3, BS_RELEASED = 4, BS_DOUBLE_CLICKED = 5 };
@@ -27,7 +28,7 @@ private:
     volatile int writeindex = 0;
     hw_timer_t* Timer0_Cfg;
 
-    void setupKeys();
+    void setupKeys(bool press);
     int getCodeFromArray();
     void updateEncoderPos(int64_t pos);
     void emitButton();
@@ -39,6 +40,7 @@ public:
     KeyArray();
     void initPad();
     void handle();
+    void handleRelease();
     void handleTimer();
     ButtonInfo consumeButton();
     KeyArray(Leadscrew* leadscrew);

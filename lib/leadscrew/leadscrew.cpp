@@ -234,7 +234,9 @@ void Leadscrew::update() {
       positionError = 0;
       m_currentDirection = LeadscrewDirection::UNKNOWN;
       m_globalState->setThreadSyncState(GlobalThreadSyncState::SS_UNSYNC);
-      m_globalState->setMotionMode(GlobalMotionMode::MM_DISABLED);
+      if (m_motionMode == MM_DECELLERATE) {
+        m_globalState->setMotionMode(GlobalMotionMode::MM_DISABLED);
+      }
     }
   }
 

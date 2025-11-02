@@ -83,12 +83,13 @@ void DisplayTask(void* parameter) {
   while (true) {
     displayLoop();
     esp_task_wdt_reset();
-    uint64_t c = micros();
-    uint64_t delay = (250000 - (c - m)) / 1000;
-    if (delay > 0) {
-      vTaskDelay((delay > 250 ? 250 : delay) / portTICK_PERIOD_MS);
-    }
-    m = c + 250000;
+    //uint64_t c = micros();
+    //uint64_t delay = (100000 - (c - m)) / 1000;
+    //if (delay > 0) {
+      //vTaskDelay((delay > 100 ? 100 : delay) / portTICK_PERIOD_MS);
+      vTaskDelay((100) / portTICK_PERIOD_MS);
+    //}
+    //m = c + 100000;
   }
 }
 
