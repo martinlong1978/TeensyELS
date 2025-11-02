@@ -213,16 +213,11 @@ void Leadscrew::update() {
   float positionErrorRaw = getPositionError();
   float positionError = positionErrorRaw + pulsesToTargetSpeed;
 
+  // If we've hit an endstop, reset everything to disabled
   if (hitLeftEndstop || hitRightEndstop) {
-    // if we've hit the endstop, keep the expected position within one spindle rotation of the endstop
-    // we can assume that the current position will not actually move due to later logic
-
-    // if the position error is bigger than one rev worht of movement, reset the expected so that we don't move
-
     if ((m_motionMode == GlobalMotionMode::MM_JOG_LEFT && hitLeftEndstop)
       || (m_motionMode == GlobalMotionMode::MM_JOG_RIGHT && hitRightEndstop)
       || (m_motionMode == GlobalMotionMode::MM_ENABLED && hitLeftEndstop)) {
-      m_expectedPosition = (m_currentPosition);
       m_motionMode = GlobalMotionMode::MM_DISABLED;
       m_globalState->setMotionMode(GlobalMotionMode::MM_DISABLED);
       m_globalState->setThreadSyncState(GlobalThreadSyncState::SS_UNSYNC);
@@ -230,7 +225,7 @@ void Leadscrew::update() {
   }
 
 
-  if (m_motionMode == MM_DISABLED) {
+  if (m_motionMode == MM_DISABLED || m_motionMode == MM_DECELLERATE) {
     // consume position but don't move  
     // actually it will decellerate if necessary
     if (m_leadscrewSpeed == 0) {
@@ -239,8 +234,8 @@ void Leadscrew::update() {
       positionError = 0;
       m_currentDirection = LeadscrewDirection::UNKNOWN;
       m_globalState->setThreadSyncState(GlobalThreadSyncState::SS_UNSYNC);
+      m_globalState->setMotionMode(GlobalMotionMode::MM_DISABLED);
     }
-
   }
 
   LeadscrewDirection nextDirection = LeadscrewDirection::UNKNOWN;
@@ -368,6 +363,7 @@ void Leadscrew::update() {
         goingToHitLeftEndstop || goingToHitRightEndstop;
       break;
     case MM_DISABLED:
+    case MM_DECELLERATE:
       shouldStop = true;
       break;
     case MM_JOG_LEFT:

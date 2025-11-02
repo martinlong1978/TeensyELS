@@ -101,7 +101,7 @@ void ButtonPad::enableHandler(ButtonInfo press) {
 
   if (press.buttonState == BS_CLICKED) {
     if (motionMode == GlobalMotionMode::MM_ENABLED) {
-      GlobalState::getInstance()->setMotionMode(GlobalMotionMode::MM_DISABLED);
+      GlobalState::getInstance()->setMotionMode(GlobalMotionMode::MM_DECELLERATE);
     }
     if (motionMode == GlobalMotionMode::MM_DISABLED) {
       GlobalState::getInstance()->setMotionMode(GlobalMotionMode::MM_ENABLED);
@@ -197,7 +197,7 @@ void ButtonPad::jogDirectionHandler(ButtonInfo press) {
     switch (press.button) {
     case ELS_JOG_LEFT_BUTTON:
       if (globalState->getMotionMode() == GlobalMotionMode::MM_JOG_LEFT) {
-        globalState->setMotionMode(GlobalMotionMode::MM_DISABLED);
+        globalState->setMotionMode(GlobalMotionMode::MM_DECELLERATE);
         break;
       }
       if (m_leadscrew->getStopPositionState(LeadscrewStopPosition::LEFT) != LeadscrewStopState::UNSET) {
@@ -207,7 +207,7 @@ void ButtonPad::jogDirectionHandler(ButtonInfo press) {
       break;
     case ELS_JOG_RIGHT_BUTTON:
       if (globalState->getMotionMode() == GlobalMotionMode::MM_JOG_RIGHT) {
-        globalState->setMotionMode(GlobalMotionMode::MM_DISABLED);
+        globalState->setMotionMode(GlobalMotionMode::MM_DECELLERATE);
         break;
       }
       if (m_leadscrew->getStopPositionState(LeadscrewStopPosition::RIGHT) != LeadscrewStopState::UNSET) {
@@ -255,7 +255,7 @@ void ButtonPad::jogDirectionHandler(ButtonInfo press) {
     }
   }
   if (systemMode == SM_JOG && press.buttonState == BS_RELEASED) {
-    globalState->setMotionMode(MM_DISABLED);
+    globalState->setMotionMode(MM_DECELLERATE);
   }
 }
 
