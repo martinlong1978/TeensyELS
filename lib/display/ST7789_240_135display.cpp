@@ -88,14 +88,15 @@ void Display::update() {
 }
 
 void Display::drawSpindleRpm() {
-  int rpm = m_spindle->getEstimatedVelocityInRPM();
+  int rrpm = m_spindle->getEstimatedVelocityInRPM();
+  int rpm = abs(rrpm);
   char rpmString[10];
   sprintf(rpmString, "%4dRPM", rpm);
   // pad the rpm with spaces so the RPM text stays in the same place
   if (strcmp(rpmString, m_rpmString)) {
     tft.setCursor(100, 0);
     tft.setTextSize(3);
-    tft.setTextColor(TFT_WHITE);
+    tft.setTextColor(rrpm < 0 ? TFT_RED : TFT_WHITE);
     tft.fillRect(100, 0, 85, 32, TFT_BLACK);
     tft.print(rpmString);
     strcpy(m_rpmString, rpmString);
@@ -201,12 +202,18 @@ void Display::drawEnabled() {
     tft.drawBitmap(56, 84, scaled, 32, 32, TFT_BLACK);
     break;
   case GlobalMotionMode::MM_JOG_LEFT:
-  case GlobalMotionMode::MM_JOG_RIGHT:
     // todo bitmap for jogging
-    tft.setCursor(55, 88);
+    tft.setCursor(58, 88);
     tft.setTextSize(4);
     tft.setTextColor(TFT_BLACK);
-    tft.print("<>");
+    tft.print("<");
+    break;
+  case GlobalMotionMode::MM_JOG_RIGHT:
+    // todo bitmap for jogging
+    tft.setCursor(58, 88);
+    tft.setTextSize(4);
+    tft.setTextColor(TFT_BLACK);
+    tft.print(">");
     break;
   case GlobalMotionMode::MM_ENABLED:
     ScaleBMP(runSymbol, scaled, 16, 16);

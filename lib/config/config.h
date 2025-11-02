@@ -5,7 +5,7 @@
 #ifndef ELS_CONFIG_H
 #define ELS_CONFIG_H
 
-#define ELS_OFFLINE
+//#define ELS_OFFLINE
 
 
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(arr[0]))
@@ -134,8 +134,8 @@
 #define ELS_INVERT_DIRECTION
 
 #ifdef ELS_INVERT_DIRECTION
-#define ELS_DIR_RIGHT 0
-#define ELS_DIR_LEFT 1
+#define ELS_DIR_RIGHT 1
+#define ELS_DIR_LEFT 0
 #else
 #define ELS_DIR_RIGHT 1
 #define ELS_DIR_LEFT 0
@@ -149,7 +149,7 @@
 
 // extra config options
 // jog speed in mm/s
-#define ELS_JOG_SPEED_MM 30
+#define ELS_JOG_SPEED_MM 40
 #define ELS_JOG_SPEED_PPS  ELS_JOG_SPEED_MM * ELS_LEADSCREW_STEPS_PER_MM
 
 /**
@@ -168,8 +168,8 @@
 #define LEADSCREW_JERK 0.5
 
 // The acceleration of the leadscrew in mm/s^2
-#define LEADSCREW_ACCEL 50
-#define LEADSCREW_MAX_SPEED_MM 30
+#define LEADSCREW_ACCEL 100
+#define LEADSCREW_MAX_SPEED_MM 40
 #define LEADSCREW_MAX_SPEED_PPS  LEADSCREW_MAX_SPEED_MM * ELS_LEADSCREW_STEPS_PER_MM
 
 
