@@ -10,6 +10,8 @@
 #include <icons/runSymbol.h>
 #include <icons/threadSymbol.h>
 #include <icons/unlockedSymbol.h>
+#include <icons/right.h>
+#include <icons/left.h>
 
 // Add some basic bitmap scaling for double-resolution screens.
 uint8_t spread(uint8_t in) {
@@ -39,13 +41,18 @@ void ScaleBMP(const uint8_t source[], uint8_t dest[], int sizex, int sizey) {
   }
 }
 
-void Display::init() {
+void Display::initvars() {
   strcpy(m_rpmString, "");
   strcpy(m_pitchString, "");
+  strcpy(m_jogString, "");
   m_mode = GlobalFeedMode::FM_UNSET;
   m_motionMode = GlobalMotionMode::MM_UNSET;
   m_locked = GlobalButtonLock::LK_UNSET;
   m_sync = GlobalThreadSyncState::SS_UNSET;
+}
+
+void Display::init() {
+  initvars();
   tft.init();
   tft.setRotation(3);
   tft.fillScreen(TFT_BLACK);
@@ -73,14 +80,28 @@ void Display::update() {
     if (bytes > 0)tft.fillRect(0, 70, percent, 40, TFT_WHITE);
 
   } else {
-    drawMode();
-    drawPitch();
-    drawLocked();
-    drawEnabled();
-    drawSpindleRpm();
-    drawSyncStatus();
-
-    drawStopStatus();
+    GlobalSystemMode mode = GlobalState::getInstance()->getSystemMode();
+    if (mode != m_systemMode) {
+      initvars();
+      tft.fillScreen(TFT_BLACK);
+      m_systemMode = mode;
+    }
+    switch (mode) {
+    case SM_NORMAL:
+      drawMode();
+      drawPitch();
+      drawLocked();
+      drawEnabled();
+      drawSpindleRpm();
+      drawSyncStatus();
+      drawStopStatus();
+      break;
+    case SM_JOG:
+      drawLocked();
+      drawEnabled();
+      drawJogSpeed();
+      break;
+    }
   }
 #ifdef ESP32
   writeLed();
@@ -187,6 +208,21 @@ void Display::drawPitch() {
   tft.print(pitch);
 }
 
+
+void Display::drawJogSpeed() {
+  GlobalState* state = GlobalState::getInstance();
+  char pitch[10];
+  sprintf(pitch, "%d%s", (int)(state->getJogSpeed() * 100), "%");
+
+  if (!strcmp(pitch, m_jogString))return;
+  strcpy(m_jogString, pitch);
+  tft.fillRect(110, 22, 140, 40, TFT_BLACK);
+  tft.setCursor(110, 32);
+  tft.setTextSize(4);
+  tft.setTextColor(TFT_WHITE);
+  tft.print(pitch);
+}
+
 void Display::drawEnabled() {
   GlobalState* state = GlobalState::getInstance();
   GlobalMotionMode mode = state->getMotionMode();
@@ -198,32 +234,27 @@ void Display::drawEnabled() {
   switch (mode) {
   case GlobalMotionMode::MM_DISABLED:
   case GlobalMotionMode::MM_DECELLERATE:
-    tft.fillRoundRect(52, 80, 40, 40, 4, TFT_WHITE);
+    tft.fillRoundRect(52, 95, 40, 40, 4, TFT_WHITE);
     ScaleBMP(pauseSymbol, scaled, 16, 16);
-    tft.drawBitmap(56, 84, scaled, 32, 32, TFT_BLACK);
+    tft.drawBitmap(56, 99, scaled, 32, 32, TFT_BLACK);
     break;
   case GlobalMotionMode::MM_JOG_LEFT:
   case GlobalMotionMode::MM_INTERACTIVE_JOG_LEFT:
-    // todo bitmap for jogging
-    tft.fillRoundRect(52, 80, 40, 40, 4, TFT_YELLOW);
-    tft.setCursor(58, 88);
-    tft.setTextSize(4);
-    tft.setTextColor(TFT_BLACK);
-    tft.print("<");
+    tft.fillRoundRect(52, 95, 40, 40, 4, TFT_YELLOW);
+    ScaleBMP(left, scaled, 16, 16);
+    tft.drawBitmap(56, 99, scaled, 32, 32, TFT_BLACK);
     break;
   case GlobalMotionMode::MM_JOG_RIGHT:
   case GlobalMotionMode::MM_INTERACTIVE_JOG_RIGHT:
-    // todo bitmap for jogging
-    tft.fillRoundRect(52, 80, 40, 40, 4, TFT_YELLOW);
-    tft.setCursor(58, 88);
-    tft.setTextSize(4);
-    tft.setTextColor(TFT_BLACK);
-    tft.print(">");
+    tft.fillRoundRect(52, 95, 40, 40, 4, TFT_YELLOW);
+    ScaleBMP(right, scaled, 16, 16);
+    tft.drawBitmap(56, 99, scaled, 32, 32, TFT_BLACK);
+
     break;
   case GlobalMotionMode::MM_ENABLED:
-    tft.fillRoundRect(52, 80, 40, 40, 4, TFT_GREEN);
+    tft.fillRoundRect(52, 95, 40, 40, 4, TFT_GREEN);
     ScaleBMP(runSymbol, scaled, 16, 16);
-    tft.drawBitmap(56, 84, scaled, 32, 32, TFT_BLACK);
+    tft.drawBitmap(56, 99, scaled, 32, 32, TFT_BLACK);
     break;
   }
   updateLed();
@@ -272,16 +303,16 @@ void Display::drawLocked() {
   if (lock == m_locked)return;
   m_locked = lock;
 
-  tft.fillRoundRect(4, 80, 40, 40, 4, lock == LK_LOCKED ? TFT_RED : TFT_GREEN);
+  tft.fillRoundRect(0, 95, 40, 40, 4, lock == LK_LOCKED ? TFT_RED : TFT_GREEN);
   uint8_t scaled[128];
   switch (lock) {
   case GlobalButtonLock::LK_LOCKED:
     ScaleBMP(lockedSymbol, scaled, 16, 16);
-    tft.drawBitmap(8, 84, scaled, 32, 32, TFT_BLACK);
+    tft.drawBitmap(4, 99, scaled, 32, 32, TFT_BLACK);
     break;
   case GlobalButtonLock::LK_UNLOCKED:
     ScaleBMP(unlockedSymbol, scaled, 16, 16);
-    tft.drawBitmap(8, 84, scaled, 32, 32, TFT_BLACK);
+    tft.drawBitmap(4, 99, scaled, 32, 32, TFT_BLACK);
     break;
   }
   updateLed();

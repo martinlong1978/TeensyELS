@@ -81,6 +81,8 @@ private:
 
   int m_feedSelect;
 
+  int m_jogSpeed;
+
   // the position at which the spindle will be back in sync with the leadscrew
   // note that this position actually has *two* solutions, left and right
   // but we only use the "left" position and calculate the "right" position when
@@ -96,6 +98,7 @@ private:
     m_motionMode = MM_DISABLED;
     m_systemMode = SM_NORMAL;
     m_resyncPulseCount = 0;
+    m_jogSpeed = 5;
   }
 
 public:
@@ -109,6 +112,11 @@ public:
 
   bool getDebugMode();
   void setDebugMode(bool mode);
+
+  float getJogSpeed();
+
+  void incJogSpeed();
+  void decJogSpeed();
 
   static GlobalState* getInstance();
 

@@ -376,7 +376,7 @@ void Leadscrew::update() {
       break;
     case MM_INTERACTIVE_JOG_LEFT:
     case MM_INTERACTIVE_JOG_RIGHT:
-      shouldStop = m_leadscrewSpeed > ELS_JOG_SPEED_PPS ||
+      shouldStop = m_leadscrewSpeed > ( ((ELS_JOG_SPEED_PPS) *  m_globalState->getJogSpeed())) ||
         nextDirection != m_currentDirection;
       break;
     }

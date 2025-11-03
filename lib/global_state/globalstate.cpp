@@ -11,23 +11,23 @@ GlobalState* GlobalState::getInstance() {
   return m_instance;
 }
 
-bool GlobalState::getDebugMode() { 
-  return m_debugMode; 
-} 
- 
-void GlobalState::setDebugMode(bool mode) { 
-  if(mode == m_debugMode)return;
-  if (mode) { 
-    Serial.printf("Heap: %d PSRam %d \n", ESP.getFreeHeap(), ESP.getFreePsram()); 
-    debugBuffer = (DebugData*)malloc(100000); 
-    debugInit = (DebugData*)debugBuffer; 
-  } else { 
-    Serial.printf("Bytes found %d, %d items of %d bytes\n", (debugBuffer - debugInit) * sizeof(DebugData), (debugBuffer - debugInit), sizeof(DebugData)); 
-    int count = (debugBuffer - debugInit); 
-    debugBuffer = debugInit; 
-     Serial.println("time,posError,posErrorRaw,pulseToTarget,pos,expectedPos,speed,direction,targetSpeed,speedDiff,timeToTarget");
-    for (int i = 0; i < count; i++) { 
-      Serial.printf("%d,%f,%f,%f,%d,%f,%f,%d,%f,%f,%f\n", 
+bool GlobalState::getDebugMode() {
+  return m_debugMode;
+}
+
+void GlobalState::setDebugMode(bool mode) {
+  if (mode == m_debugMode)return;
+  if (mode) {
+    Serial.printf("Heap: %d PSRam %d \n", ESP.getFreeHeap(), ESP.getFreePsram());
+    debugBuffer = (DebugData*)malloc(100000);
+    debugInit = (DebugData*)debugBuffer;
+  } else {
+    Serial.printf("Bytes found %d, %d items of %d bytes\n", (debugBuffer - debugInit) * sizeof(DebugData), (debugBuffer - debugInit), sizeof(DebugData));
+    int count = (debugBuffer - debugInit);
+    debugBuffer = debugInit;
+    Serial.println("time,posError,posErrorRaw,pulseToTarget,pos,expectedPos,speed,direction,targetSpeed,speedDiff,timeToTarget");
+    for (int i = 0; i < count; i++) {
+      Serial.printf("%d,%f,%f,%f,%d,%f,%f,%d,%f,%f,%f\n",
         debugBuffer->tm,  //d 
         debugBuffer->positionError, //f
         debugBuffer->positionErrorRaw, //f
@@ -39,14 +39,14 @@ void GlobalState::setDebugMode(bool mode) {
         debugBuffer->m_targetSpeed, //f
         debugBuffer->m_speedDif, //f
         debugBuffer->m_timeToTarget //f
-      ); 
-      debugBuffer++; 
-    } 
-    free(debugInit); 
-  } 
-  m_debugMode = mode; 
-} 
- 
+      );
+      debugBuffer++;
+    }
+    free(debugInit);
+  }
+  m_debugMode = mode;
+}
+
 
 void GlobalState::setFeedMode(GlobalFeedMode mode) {
   m_feedMode = mode;
@@ -57,6 +57,17 @@ void GlobalState::setFeedMode(GlobalFeedMode mode) {
 }
 
 GlobalFeedMode GlobalState::getFeedMode() { return m_feedMode; }
+
+float GlobalState::getJogSpeed() {
+  return jogSpeeds[m_jogSpeed];
+}
+
+void GlobalState::incJogSpeed() {
+  m_jogSpeed = min(5, m_jogSpeed + 1);
+}
+void GlobalState::decJogSpeed() {
+  m_jogSpeed = max(0, m_jogSpeed - 1);
+}
 
 int GlobalState::getFeedSelect() { return m_feedSelect; }
 int GlobalState::getCurrentFeedSelectArraySize() {
@@ -164,8 +175,11 @@ int  GlobalState::getOTABytes() { return OTAbytes; }
 int  GlobalState::getOTALength() { return OTAlength; }
 void  GlobalState::setOTAContentLength(int length) { OTAlength = length; }
 
-void GlobalState::toggleSystemMode() { m_systemMode = m_systemMode == SM_NORMAL ? SM_JOG : SM_NORMAL;}
-GlobalSystemMode GlobalState::getSystemMode() { return m_systemMode;}
+void GlobalState::toggleSystemMode() {
+  m_systemMode = m_systemMode == SM_NORMAL ? SM_JOG : SM_NORMAL;
+  m_jogSpeed = 5;
+}
+GlobalSystemMode GlobalState::getSystemMode() { return m_systemMode; }
 
 void  GlobalState::setDisplayReset() { m_displayReset = true; }
 bool  GlobalState::getDisplayReset() {

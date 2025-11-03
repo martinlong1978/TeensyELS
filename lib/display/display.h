@@ -31,6 +31,7 @@ private:
   Spindle* m_spindle;
   Leadscrew* m_leadscrew;
   GlobalState* m_globalState;
+  GlobalSystemMode m_systemMode;
 #ifdef ELS_UI_ENCODER
   EncoderColour firstColour = EC_NONE;
   EncoderColour secondColour = EC_NONE;
@@ -39,6 +40,7 @@ private:
 #if ELS_DISPLAY == ST7789_240_135
   char m_rpmString[10];
   char m_pitchString[10];
+  char m_jogString[10];
   GlobalFeedMode m_mode = GlobalFeedMode::FM_UNSET;
   GlobalMotionMode m_motionMode = GlobalMotionMode::MM_UNSET;
   GlobalButtonLock m_locked = GlobalButtonLock::LK_UNSET;
@@ -66,6 +68,7 @@ public:
   void update();
 
 protected:
+  void initvars();
   void drawMode();
   void drawPitch();
   void drawEnabled();
@@ -75,4 +78,5 @@ protected:
   void drawSyncStatus();
   void updateLed();
   void writeLed();
+  void drawJogSpeed();
 };

@@ -55,9 +55,15 @@ void ButtonPad::rateIncreaseHandler(ButtonInfo press) {
     return;
   }
 
-  if (press.buttonState == BS_CLICKED) {
-    GlobalState::getInstance()->nextFeedPitch();
-    m_leadscrew->setTargetPitchMM(GlobalState::getInstance()->getCurrentFeedPitch());
+  GlobalState* globalState = GlobalState::getInstance();
+
+
+  if (globalState->getSystemMode() == SM_NORMAL && press.buttonState == BS_CLICKED) {
+    globalState->nextFeedPitch();
+    m_leadscrew->setTargetPitchMM(globalState->getCurrentFeedPitch());
+  }
+  if (globalState->getSystemMode() == SM_JOG && press.buttonState == BS_CLICKED) {
+    globalState->incJogSpeed();
   }
 }
 
@@ -67,10 +73,14 @@ void ButtonPad::rateDecreaseHandler(ButtonInfo press) {
   if (lockState == GlobalButtonLock::LK_LOCKED) {
     return;
   }
+  GlobalState* globalState = GlobalState::getInstance();
 
-  if (press.buttonState == BS_CLICKED) {
-    GlobalState::getInstance()->prevFeedPitch();
-    m_leadscrew->setTargetPitchMM(GlobalState::getInstance()->getCurrentFeedPitch());
+  if (globalState->getSystemMode() == SM_NORMAL && press.buttonState == BS_CLICKED) {
+    globalState->prevFeedPitch();
+    m_leadscrew->setTargetPitchMM(globalState->getCurrentFeedPitch());
+  }
+  if (globalState->getSystemMode() == SM_JOG && press.buttonState == BS_CLICKED) {
+    globalState->decJogSpeed();
   }
 }
 

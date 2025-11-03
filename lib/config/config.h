@@ -168,7 +168,7 @@
 #define LEADSCREW_JERK 0.5
 
 // The acceleration of the leadscrew in mm/s^2
-#define LEADSCREW_ACCEL 100
+#define LEADSCREW_ACCEL 150
 #define LEADSCREW_MAX_SPEED_MM 40
 #define LEADSCREW_MAX_SPEED_PPS  LEADSCREW_MAX_SPEED_MM * ELS_LEADSCREW_STEPS_PER_MM
 
@@ -187,6 +187,7 @@
   ((float)US_PER_SECOND / ((float)LEADSCREW_JERK * (float)ELS_LEADSCREW_STEPS_PER_MM))
 #endif
 
+const float jogSpeeds[] =  {0.01, 0.05, 0.1, 0.25, 0.5, 1};
 
 // metric thread pitch is defined as mm/rev
 const float threadPitchMetric[] = { 0.35, 0.40, 0.45, 0.50, 0.60, 0.70, 0.80,
