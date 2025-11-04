@@ -16,10 +16,15 @@
 #include <Adafruit_SSD1306.h>
 
 #elif  ELS_DISPLAY == ST7789_240_135
-#define USER_SETUP_LOADED
-#include "displayconfig.h"
 #include <TFT_eSPI.h>
 #include <SPI.h>
+
+#elif  ELS_DISPLAY == ST7789_240_135_LVGL
+#include <lvgl.h>
+#include <TFT_eSPI.h>
+#include <SPI.h>
+
+
 #else
 
 #error "Please choose a valid display. Refer to config.h for options"
@@ -46,7 +51,12 @@ private:
   GlobalButtonLock m_locked = GlobalButtonLock::LK_UNSET;
   GlobalThreadSyncState m_sync = GlobalThreadSyncState::SS_UNSET;
 #endif
+#if ELS_DISPLAY == ST7789_240_135_LVGL
+  lv_display_t* disp;
+  #define DRAW_BUF_SIZE (TFT_WIDTH * TFT_HEIGHT / 10 * (LV_COLOR_DEPTH / 8))
+  uint32_t *draw_buf;
 
+#endif
 public:
 #if ELS_DISPLAY == SSD1306_128_64
   Adafruit_SSD1306 m_ssd1306;
@@ -79,4 +89,5 @@ protected:
   void updateLed();
   void writeLed();
   void drawJogSpeed();
+  void drawOTA();
 };
