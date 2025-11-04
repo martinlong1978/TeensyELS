@@ -55,6 +55,12 @@ private:
   lv_display_t* disp;
   #define DRAW_BUF_SIZE (TFT_WIDTH * TFT_HEIGHT / 10 * (LV_COLOR_DEPTH / 8))
   uint32_t *draw_buf;
+  bool initialised = false;
+
+  lv_obj_t* rpmLabel;
+  lv_obj_t* pitchLabel;
+  lv_obj_t* endStopLabel;
+  lv_obj_t* feedSymbolObj;
 
 #endif
 public:

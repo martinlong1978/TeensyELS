@@ -4,7 +4,7 @@
 #include <display.h>
 #include <globalstate.h>
 // Images
-#include <icons/feedSymbol.h>
+//#include <icons/feedSymbol.h>
 #include <icons/lockedSymbol.h>
 #include <icons/pauseSymbol.h>
 #include <icons/runSymbol.h>
@@ -26,16 +26,40 @@ void Display::init() {
   // tft.init();
   // tft.setRotation(3);
   // tft.fillScreen(TFT_BLACK);
+
+  if (!initialised) {
+    draw_buf = (uint32_t*)malloc(DRAW_BUF_SIZE);
+    initialised = true;
+  }
+
   lv_init();
   lv_tick_set_cb(my_tick);
-  draw_buf = (uint32_t*)malloc(DRAW_BUF_SIZE);
   disp = lv_tft_espi_create(TFT_WIDTH, TFT_HEIGHT, draw_buf, DRAW_BUF_SIZE);
   lv_display_set_rotation(disp, LV_DISPLAY_ROTATION_90);
 
-  lv_obj_t* label = lv_label_create(lv_screen_active());
-  lv_label_set_text(label, "Hello Arduino");
-  lv_obj_set_style_text_font(label, &lv_font_montserrat_26, 0);
-  lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
+  pitchLabel = lv_label_create(lv_screen_active());
+  rpmLabel = lv_label_create(lv_screen_active());
+  endStopLabel = lv_label_create(lv_screen_active());
+
+  lv_obj_set_style_text_font(pitchLabel, &lv_font_montserrat_36, 0);
+  lv_obj_set_style_text_font(rpmLabel, &lv_font_montserrat_26, 0);
+  lv_obj_set_style_text_font(endStopLabel, &lv_font_montserrat_26, 0);
+
+  lv_label_set_text(pitchLabel, "0.25mm");
+  lv_label_set_text(rpmLabel, "3000rpm");
+  lv_label_set_text(endStopLabel, "[]");
+
+  lv_obj_set_pos(rpmLabel, 160, 0);
+  lv_obj_set_pos(pitchLabel, 160, 100);
+  lv_obj_set_pos(endStopLabel, 0, 0);
+
+  LV_IMAGE_DECLARE(feedSymbol);
+  feedSymbolObj = lv_image_create(lv_screen_active());
+  lv_image_set_src(feedSymbolObj, &feedSymbol);
+  lv_obj_set_pos(feedSymbolObj, 160, 150);
+  lv_obj_set_style_bg_color(feedSymbolObj, lv_color_hex(0x000000), 0);
+  //lv_label_set_text(label, "Hello Arduino");
+  //lv_obj_align(label, LV_ALIGN_CENTER, 0, 0); 
 
   //lv_obj_t* label2 = lv_label_create(lv_screen_active());
   //lv_label_set_text(label2, "Hello again");
@@ -99,19 +123,12 @@ void Display::drawOTA() {
 }
 
 void Display::drawSpindleRpm() {
-  // int rrpm = m_spindle->getEstimatedVelocityInRPM();
-  // int rpm = abs(rrpm);
-  // char rpmString[10];
-  // sprintf(rpmString, "%4dRPM", rpm);
-  // // pad the rpm with spaces so the RPM text stays in the same place
-  // if (strcmp(rpmString, m_rpmString)) {
-  //   tft.setCursor(100, 0);
-  //   tft.setTextSize(3);
-  //   tft.setTextColor(rrpm < 0 ? TFT_RED : TFT_WHITE);
-  //   tft.fillRect(100, 0, 85, 32, TFT_BLACK);
-  //   tft.print(rpmString);
-  //   strcpy(m_rpmString, rpmString);
-  // }
+  int rrpm = m_spindle->getEstimatedVelocityInRPM();
+  int rpm = abs(rrpm);
+  char rpmString[10];
+  sprintf(rpmString, "%4dRPM", rpm);
+  lv_label_set_text(rpmLabel, rpmString);
+  lv_obj_set_style_text_color(rpmLabel, lv_color_hex(rpm < 0 ? 0xFF0000 : 0x000000), 0);
 }
 
 void Display::drawStopStatus() {
