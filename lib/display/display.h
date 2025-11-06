@@ -42,6 +42,7 @@ LV_IMAGE_DECLARE(left);
 LV_IMAGE_DECLARE(right);
 LV_IMAGE_DECLARE(pauseSymbol);
 LV_IMAGE_DECLARE(syncSymbol);
+LV_IMAGE_DECLARE(jog);
 
 
 class Display {

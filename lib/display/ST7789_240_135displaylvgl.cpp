@@ -175,7 +175,10 @@ void Display::drawSyncStatus() {
 
 void Display::drawMode() {
   GlobalFeedMode mode = GlobalState::getInstance()->getFeedMode();
-  if (mode == GlobalFeedMode::FM_FEED) {
+  GlobalSystemMode sysmode = GlobalState::getInstance()->getSystemMode();
+  if (sysmode == SM_JOG) {
+    lv_image_set_src(feedSymbolObj, &jog);
+  } else if (mode == GlobalFeedMode::FM_FEED) {
     lv_image_set_src(feedSymbolObj, &feedSymbol);
   } else if (mode == GlobalFeedMode::FM_THREAD) {
     lv_image_set_src(feedSymbolObj, &threadSymbol);
@@ -207,18 +210,18 @@ void Display::drawPitch() {
 
       lv_slider_set_min_value(pitchSlider, 0);
       lv_slider_set_max_value(pitchSlider, sizeof(feedPitchMetric) / sizeof(float));
-      lv_slider_set_value(pitchSlider,feedSelect + 1, LV_ANIM_OFF);
+      lv_slider_set_value(pitchSlider, feedSelect + 1, LV_ANIM_OFF);
     }
   } else {
     if (mode == GlobalFeedMode::FM_THREAD) {
       sprintf(pitch, "%dTPI", (int)threadPitchImperial[feedSelect]);
- 
+
       lv_slider_set_min_value(pitchSlider, 0);
       lv_slider_set_max_value(pitchSlider, sizeof(threadPitchImperial) / sizeof(float));
       lv_slider_set_value(pitchSlider, feedSelect + 1, LV_ANIM_OFF);
     } else {
       sprintf(pitch, "%dth", (int)(feedPitchImperial[feedSelect] * 1000));
- 
+
       lv_slider_set_min_value(pitchSlider, 0);
       lv_slider_set_max_value(pitchSlider, sizeof(feedPitchImperial) / sizeof(float));
       lv_slider_set_value(pitchSlider, feedSelect + 1, LV_ANIM_OFF);
