@@ -31,6 +31,19 @@
 
 #endif
 
+
+LV_IMAGE_DECLARE(feedSymbol);
+LV_IMAGE_DECLARE(threadSymbol);
+LV_IMAGE_DECLARE(leftstop);
+LV_IMAGE_DECLARE(rightstop);
+LV_IMAGE_DECLARE(unlocked);
+LV_IMAGE_DECLARE(locked);
+LV_IMAGE_DECLARE(left);
+LV_IMAGE_DECLARE(right);
+LV_IMAGE_DECLARE(pauseSymbol);
+LV_IMAGE_DECLARE(syncSymbol);
+
+
 class Display {
 private:
   Spindle* m_spindle;
@@ -53,14 +66,27 @@ private:
 #endif
 #if ELS_DISPLAY == ST7789_240_135_LVGL
   lv_display_t* disp;
-  #define DRAW_BUF_SIZE (TFT_WIDTH * TFT_HEIGHT / 10 * (LV_COLOR_DEPTH / 8))
-  uint32_t *draw_buf;
+#define DRAW_BUF_SIZE (TFT_WIDTH * TFT_HEIGHT / 10 * (LV_COLOR_DEPTH / 8))
+  uint32_t* draw_buf;
   bool initialised = false;
 
   lv_obj_t* rpmLabel;
   lv_obj_t* pitchLabel;
-  lv_obj_t* endStopLabel;
   lv_obj_t* feedSymbolObj;
+  lv_obj_t* leftStopObj;
+  lv_obj_t* leftStopRectObj;
+  lv_obj_t* rightStopObj;
+  lv_obj_t* rightStopRectObj;
+
+  lv_obj_t* pitchSlider;
+
+  lv_obj_t* lockedObj;
+  lv_obj_t* lockedRectObj;
+  lv_obj_t* syncObj;
+  lv_obj_t* syncRectObj;
+  lv_obj_t* enableObj;
+  lv_obj_t* enableRectObj;
+
 
 #endif
 public:

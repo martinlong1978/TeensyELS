@@ -623,7 +623,7 @@
 #define LV_FONT_MONTSERRAT_42 0
 #define LV_FONT_MONTSERRAT_44 0
 #define LV_FONT_MONTSERRAT_46 0
-#define LV_FONT_MONTSERRAT_48 0
+#define LV_FONT_MONTSERRAT_48 1
 
 /* Demonstrate special features */
 #define LV_FONT_MONTSERRAT_28_COMPRESSED    0  /**< bpp = 3 */
@@ -785,7 +785,7 @@
 
 #define LV_USE_SCALE      0
 
-#define LV_USE_SLIDER     0   /**< Requires: lv_bar */
+#define LV_USE_SLIDER     1   /**< Requires: lv_bar */
 
 #define LV_USE_SPAN       1
 #if LV_USE_SPAN

@@ -114,6 +114,7 @@ public:
   void setDebugMode(bool mode);
 
   float getJogSpeed();
+  int getJogIndex();
 
   void incJogSpeed();
   void decJogSpeed();

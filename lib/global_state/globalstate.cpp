@@ -62,6 +62,10 @@ float GlobalState::getJogSpeed() {
   return jogSpeeds[m_jogSpeed];
 }
 
+int GlobalState::getJogIndex() {
+  return m_jogSpeed;
+}
+
 void GlobalState::incJogSpeed() {
   m_jogSpeed = min(5, m_jogSpeed + 1);
 }

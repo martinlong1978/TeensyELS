@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="32"
+   height="32"
+   viewBox="0 0 8.4666665 8.4666666"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4 (86a8ad7, 2024-10-11)"
+   sodipodi:docname="locked.svg"
+   inkscape:export-filename="locked.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="22.627417"
+     inkscape:cx="21.080621"
+     inkscape:cy="14.252621"
+     inkscape:window-width="2736"
+     inkscape:window-height="1718"
+     inkscape:window-x="-11"
+     inkscape:window-y="-11"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1.13279;stroke-linejoin:round;stroke-dasharray:none"
+       d="M 1.9694789,2.9088375 C 1.987902,0.58848401 6.493226,0.67019711 6.4923672,2.9502723 l 10e-8,3.1801274"
+       id="path4"
+       sodipodi:nodetypes="ccc" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1.13279;stroke-linejoin:round;stroke-dasharray:none"
+       d="M 6.492385,2.9088378 C 6.4739619,0.58848431 1.9686381,0.67019741 1.9694969,2.9502723 v 3.1801274"
+       id="path4-8"
+       sodipodi:nodetypes="ccc" />
+    <rect
+       style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.709893;stroke-linecap:square;stroke-linejoin:miter;stroke-dasharray:none"
+       id="rect4"
+       width="6.2333794"
+       height="2.8654804"
+       x="1.1142423"
+       y="4.5040312"
+       ry="0" />
+  </g>
+</svg>
