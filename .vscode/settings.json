@@ -1,6 +1,7 @@
 {
     "C_Cpp.default.compilerPath": "gcc",
     "files.associations": {
+        "*.h": "cpp",
         "array": "cpp",
         "string_view": "cpp",
         "initializer_list": "cpp",
@@ -59,6 +60,7 @@
         "thread": "cpp",
         "cinttypes": "cpp",
         "typeinfo": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "regex": "cpp"
     }
 }

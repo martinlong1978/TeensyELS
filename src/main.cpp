@@ -6,6 +6,8 @@
 #include <leadscrew.h>
 #include <spindle.h>
 
+#include "WebSettings.h"
+
 #include "ESPCommsManager.h"
 #include <WiFi.h>
 
@@ -24,7 +26,6 @@ IntervalTimer timer;
 #endif
 
 
-const uint32_t NVM_Offset = 0x9000;
 
 GlobalState* globalState = GlobalState::getInstance();
 #ifdef ELS_SPINDLE_DRIVEN
@@ -57,6 +58,7 @@ Display display(&spindle, &leadscrew);
 int64_t lastcycle;
 int cyclecount;
 int finalcyclecount;
+bool configMode = false;
 
 
 // have to handle the leadscrew updates in a timer callback so we can update the
@@ -109,22 +111,29 @@ void comms_loop(void* parameters) { commsManager.loop(); }
 const char* ssid = "ELS_Wifi";
 const char* password = "123456789";
 
-WiFiServer server;
+//WiFiServer server;
 
 void runWifiSettings() {
-  WiFi.softAP(ssid, password);
+  configMode = true;
+  WiFi.mode(WIFI_AP);
+  delay(100);
+  bool result = WiFi.softAP(ssid, password);
+  if (result == true) {
+    Serial.println("Access Point Ready");
+    Serial.println(WiFi.softAPIP()); // Prints 192.168.4.1
+  } else {
+    Serial.println("Access Point Failed!");
+  }
   IPAddress IP = WiFi.softAPIP();
   Serial.print("AP IP address: ");
   Serial.println(IP);
-  server.begin();
+  //server.begin();
   display.showWifi(ssid, password, IP);
+  startWebServer();
 }
-
 
 void setup() {
   Serial.begin(921600);
-
-  uint32_t address = 0x3000;
 
   pinMode(ELS_PAD_H2, INPUT_PULLDOWN);
   pinMode(ELS_PAD_V2, OUTPUT);
@@ -135,13 +144,12 @@ void setup() {
     runWifiSettings();
   } else {
 
-    uint32_t myVar;
-    ESP.flashRead(NVM_Offset + address, &myVar, sizeof(myVar));
-    Serial.printf("Got stored value %d\n", myVar);
-    myVar++;
-    Serial.printf("Saving stored value %d\n", myVar);
-    ESP.flashEraseSector((NVM_Offset + address) / 4096);
-    ESP.flashWrite(NVM_Offset + address, &myVar, sizeof(myVar));
+   WebSettings *webSettings =  getWebSettings();
+
+   Serial.printf("SSID %s\n", webSettings->ssid);
+   Serial.printf("password %s\n", webSettings->password);
+   Serial.printf("url %s\n", webSettings->url);
+
 
     // config - compile time checks for safety
     CHECK_BOUNDS(DEFAULT_METRIC_THREAD_PITCH_IDX, threadPitchMetric,
@@ -228,9 +236,14 @@ void setup() {
 }
 
 void loop() {
+  if (configMode) {
+    wifiLoop();
+  } else {
 #ifdef ESP32  
-  vTaskDelay(1000);
+    vTaskDelay(1000);
 #else
-  displayLoop();
+    displayLoop();
 #endif
+
+  }
 }
