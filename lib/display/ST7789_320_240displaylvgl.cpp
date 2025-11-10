@@ -1,7 +1,7 @@
 #include <config.h>
 
 #if ELS_DISPLAY == ST7789_240_135_LVGL
-#include <display.h>
+#include <ST7789_320_240displaylvgl.h>
 #include <globalstate.h>
 
 #define COLOUR_BRIGHTGREEN lv_color_hex(0x00FF00)
