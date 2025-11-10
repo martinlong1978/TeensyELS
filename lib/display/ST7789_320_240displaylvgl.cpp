@@ -18,12 +18,48 @@ void Display::initvars() {
 
 }
 
-void Display::init() {
-  // initvars();
-  // tft.init();
-  // tft.setRotation(3);
-  // tft.fillScreen(TFT_BLACK);
+void Display::showWifi(const char* ssid, const char* password, IPAddress ip) {
+  initDisplay();
 
+  lv_obj_t* ssidLabel = lv_label_create(lv_screen_active());
+  lv_obj_t* passwordLabel = lv_label_create(lv_screen_active());
+  lv_obj_t* ipLabel = lv_label_create(lv_screen_active());
+
+  lv_obj_t* ssidText = lv_label_create(lv_screen_active());
+  lv_obj_t* passwordText = lv_label_create(lv_screen_active());
+  lv_obj_t* ipText = lv_label_create(lv_screen_active());
+
+  lv_obj_set_style_text_font(ssidLabel, &lv_font_montserrat_26, 0);
+  lv_obj_set_style_text_font(passwordLabel, &lv_font_montserrat_26, 0);
+  lv_obj_set_style_text_font(ipLabel, &lv_font_montserrat_26, 0);
+
+  lv_obj_set_style_text_font(ssidText, &lv_font_montserrat_48, 0);
+  lv_obj_set_style_text_font(passwordText, &lv_font_montserrat_48, 0);
+  lv_obj_set_style_text_font(ipText, &lv_font_montserrat_48, 0);
+
+  lv_obj_set_pos(ssidLabel, 10, 10);
+  lv_obj_set_pos(passwordLabel, 10, 80);
+  lv_obj_set_pos(ipLabel, 10, 150);
+
+  lv_obj_set_pos(ssidText, 10, 30);
+  lv_obj_set_pos(passwordText, 10, 100);
+  lv_obj_set_pos(ipText, 10, 170);
+
+  lv_label_set_text(ssidLabel, "Wifi SSID");
+  lv_label_set_text(passwordLabel, "Password");
+  lv_label_set_text(ipLabel, "IP Address");
+
+
+  lv_label_set_text(ssidText, ssid);
+  lv_label_set_text(passwordText, password);
+  lv_label_set_text(ipText, ip.toString().c_str());
+
+  lv_timer_handler();
+
+}
+
+
+void Display::initDisplay() {
   if (!initialised) {
     draw_buf = (uint32_t*)malloc(DRAW_BUF_SIZE);
     initialised = true;
@@ -33,6 +69,12 @@ void Display::init() {
   lv_tick_set_cb(my_tick);
   disp = lv_tft_espi_create(TFT_WIDTH, TFT_HEIGHT, draw_buf, DRAW_BUF_SIZE);
   lv_display_set_rotation(disp, LV_DISPLAY_ROTATION_90);
+}
+
+void Display::init() {
+
+
+  initDisplay();
 
   pitchLabel = lv_label_create(lv_screen_active());
   rpmLabel = lv_label_create(lv_screen_active());
@@ -98,6 +140,11 @@ void Display::init() {
 
 
 }
+
+void showWifi(const char* ssid, const char* password, IPAddress ip) {
+
+}
+
 
 void Display::update() {
   //  tft.fillScreen(TFT_BLACK); // Rely on localised blanking to avoid blink, for now.

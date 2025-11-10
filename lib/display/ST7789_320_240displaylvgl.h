@@ -56,6 +56,7 @@ private:
   lv_obj_t* enableObj;
   lv_obj_t* enableRectObj;
 
+  void initDisplay();
 
 public:
   Display(Spindle* spindle, Leadscrew* leadscrew) {
@@ -66,6 +67,7 @@ public:
 
   void init();
   void update();
+  void showWifi(const char * ssid, const char * password, IPAddress ip);
 
 protected:
   void initvars();

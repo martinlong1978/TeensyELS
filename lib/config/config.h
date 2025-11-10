@@ -34,8 +34,8 @@
 #define ELS_SPINDLE_DIR -1
 #else
 #ifdef ESP32
-#define ELS_SPINDLE_ENCODER_A 37
-#define ELS_SPINDLE_ENCODER_B 36
+#define ELS_SPINDLE_ENCODER_A 34
+#define ELS_SPINDLE_ENCODER_B 35
 #else
 #define ELS_SPINDLE_ENCODER_A 14 
 #define ELS_SPINDLE_ENCODER_B 15 
@@ -44,10 +44,11 @@
 
 #define ELS_UI_ENCODER
 #ifdef ELS_UI_ENCODER
-#define ELS_UI_ENCODER_A 38  
+#define ELS_UI_ENCODER_A 36  
 #define ELS_UI_ENCODER_B 39  
 #define ELS_IND_RED 22   
 #define ELS_IND_GREEN 21  
+#define ELS_IND_BLUE 14   
 #endif
 
 #if defined(CORE_TEENSY)

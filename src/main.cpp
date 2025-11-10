@@ -7,6 +7,7 @@
 #include <spindle.h>
 
 #include "ESPCommsManager.h"
+#include <WiFi.h>
 
 #include "buttonpad.h"
 #include "config.h"
@@ -22,6 +23,8 @@
 IntervalTimer timer;
 #endif
 
+
+const uint32_t NVM_Offset = 0x9000;
 
 GlobalState* globalState = GlobalState::getInstance();
 #ifdef ELS_SPINDLE_DRIVEN
@@ -86,7 +89,7 @@ void DisplayTask(void* parameter) {
     //uint64_t delay = (100000 - (c - m)) / 1000;
     //if (delay > 0) {
       //vTaskDelay((delay > 100 ? 100 : delay) / portTICK_PERIOD_MS);
-      vTaskDelay((100) / portTICK_PERIOD_MS);
+    vTaskDelay((100) / portTICK_PERIOD_MS);
     //}
     //m = c + 100000;
   }
@@ -103,21 +106,54 @@ void comms_loop(void* parameters) { commsManager.loop(); }
 
 #endif
 
+const char* ssid = "ELS_Wifi";
+const char* password = "123456789";
+
+WiFiServer server;
+
+void runWifiSettings() {
+  WiFi.softAP(ssid, password);
+  IPAddress IP = WiFi.softAPIP();
+  Serial.print("AP IP address: ");
+  Serial.println(IP);
+  server.begin();
+  display.showWifi(ssid, password, IP);
+}
+
 
 void setup() {
   Serial.begin(921600);
 
-  // config - compile time checks for safety
-  CHECK_BOUNDS(DEFAULT_METRIC_THREAD_PITCH_IDX, threadPitchMetric,
-    "DEFAULT_METRIC_THREAD_PITCH_IDX out of bounds");
-  CHECK_BOUNDS(DEFAULT_METRIC_FEED_PITCH_IDX, feedPitchMetric,
-    "DEFAULT_METRIC_FEED_PITCH_IDX out of bounds");
-  CHECK_BOUNDS(DEFAULT_IMPERIAL_THREAD_PITCH_IDX, threadPitchImperial,
-    "DEFAULT_IMPERIAL_THREAD_PITCH_IDX out of bounds");
-  CHECK_BOUNDS(DEFAULT_IMPERIAL_FEED_PITCH_IDX, feedPitchImperial,
-    "DEFAULT_IMPERIAL_FEED_PITCH_IDX out of bounds");
+  uint32_t address = 0x3000;
 
-  // Pinmodes
+  pinMode(ELS_PAD_H2, INPUT_PULLDOWN);
+  pinMode(ELS_PAD_V2, OUTPUT);
+  digitalWrite(ELS_PAD_V2, 1);
+
+  if (digitalRead(ELS_PAD_H2) == 1) {
+    Serial.println("AP setting mode\n");
+    runWifiSettings();
+  } else {
+
+    uint32_t myVar;
+    ESP.flashRead(NVM_Offset + address, &myVar, sizeof(myVar));
+    Serial.printf("Got stored value %d\n", myVar);
+    myVar++;
+    Serial.printf("Saving stored value %d\n", myVar);
+    ESP.flashEraseSector((NVM_Offset + address) / 4096);
+    ESP.flashWrite(NVM_Offset + address, &myVar, sizeof(myVar));
+
+    // config - compile time checks for safety
+    CHECK_BOUNDS(DEFAULT_METRIC_THREAD_PITCH_IDX, threadPitchMetric,
+      "DEFAULT_METRIC_THREAD_PITCH_IDX out of bounds");
+    CHECK_BOUNDS(DEFAULT_METRIC_FEED_PITCH_IDX, feedPitchMetric,
+      "DEFAULT_METRIC_FEED_PITCH_IDX out of bounds");
+    CHECK_BOUNDS(DEFAULT_IMPERIAL_THREAD_PITCH_IDX, threadPitchImperial,
+      "DEFAULT_IMPERIAL_THREAD_PITCH_IDX out of bounds");
+    CHECK_BOUNDS(DEFAULT_IMPERIAL_FEED_PITCH_IDX, feedPitchImperial,
+      "DEFAULT_IMPERIAL_FEED_PITCH_IDX out of bounds");
+
+    // Pinmodes
 
 #ifndef ELS_SPINDLE_DRIVEN
 //  pinMode(ELS_SPINDLE_ENCODER_A, INPUT_PULLUP); // encoder pin 1
@@ -125,70 +161,70 @@ void setup() {
 #endif
 
 #ifdef ELS_USE_RMT
-  rmt_obj_t* leadscreRMT = rmtInit(ELS_LEADSCREW_STEP, true, RMT_MEM_64);
-  leadscrew.setRMT(leadscreRMT);
-  rmtSetTick(leadscreRMT, 2500);
+    rmt_obj_t* leadscreRMT = rmtInit(ELS_LEADSCREW_STEP, true, RMT_MEM_64);
+    leadscrew.setRMT(leadscreRMT);
+    rmtSetTick(leadscreRMT, 2500);
 
 #else
-  pinMode(ELS_LEADSCREW_STEP, OUTPUT); // step output pin
+    pinMode(ELS_LEADSCREW_STEP, OUTPUT); // step output pin
 #endif
-  pinMode(ELS_LEADSCREW_DIR, OUTPUT);  // direction output pin
+    pinMode(ELS_LEADSCREW_DIR, OUTPUT);  // direction output pin
 
 #ifdef ELS_UI_ENCODER
-  //  pinMode(ELS_UI_ENCODER_A, INPUT); // encoder pin 1
-  //  pinMode(ELS_UI_ENCODER_B, INPUT); // encoder pin 2
+    //  pinMode(ELS_UI_ENCODER_A, INPUT); // encoder pin 1
+    //  pinMode(ELS_UI_ENCODER_B, INPUT); // encoder pin 2
 
 #ifdef ELS_IND_GREEN
-  pinMode(ELS_IND_GREEN, OUTPUT);
-  pinMode(ELS_IND_RED, OUTPUT);
+    pinMode(ELS_IND_GREEN, OUTPUT);
+    pinMode(ELS_IND_RED, OUTPUT);
 #endif
 #endif
 
-  pinMode(ELS_STEPPER_ENA, OUTPUT);
-  digitalWrite(ELS_STEPPER_ENA, 0);
+    pinMode(ELS_STEPPER_ENA, OUTPUT);
+    digitalWrite(ELS_STEPPER_ENA, 0);
 
 #ifdef ELS_USE_BUTTON_ARRAY
 #else
-  pinMode(ELS_RATE_INCREASE_BUTTON, INPUT_PULLUP);  // rate Inc
-  pinMode(ELS_RATE_DECREASE_BUTTON, INPUT_PULLUP);  // rate Dec
-  pinMode(ELS_MODE_CYCLE_BUTTON, INPUT_PULLUP);     // mode cycle
-  pinMode(ELS_THREAD_SYNC_BUTTON, INPUT_PULLUP);    // thread sync
-  pinMode(ELS_HALF_NUT_BUTTON, INPUT_PULLUP);       // half nut
-  pinMode(ELS_ENABLE_BUTTON, INPUT_PULLUP);         // enable toggle
-  pinMode(ELS_LOCK_BUTTON, INPUT_PULLUP);           // lock toggle
-  pinMode(ELS_JOG_LEFT_BUTTON, INPUT_PULLUP);       // jog left
-  pinMode(ELS_JOG_RIGHT_BUTTON, INPUT_PULLUP);      // jog right
+    pinMode(ELS_RATE_INCREASE_BUTTON, INPUT_PULLUP);  // rate Inc
+    pinMode(ELS_RATE_DECREASE_BUTTON, INPUT_PULLUP);  // rate Dec
+    pinMode(ELS_MODE_CYCLE_BUTTON, INPUT_PULLUP);     // mode cycle
+    pinMode(ELS_THREAD_SYNC_BUTTON, INPUT_PULLUP);    // thread sync
+    pinMode(ELS_HALF_NUT_BUTTON, INPUT_PULLUP);       // half nut
+    pinMode(ELS_ENABLE_BUTTON, INPUT_PULLUP);         // enable toggle
+    pinMode(ELS_LOCK_BUTTON, INPUT_PULLUP);           // lock toggle
+    pinMode(ELS_JOG_LEFT_BUTTON, INPUT_PULLUP);       // jog left
+    pinMode(ELS_JOG_RIGHT_BUTTON, INPUT_PULLUP);      // jog right
 #endif
 
-  // Display Initalisation
+    // Display Initalisation
 
-  display.init();
+    display.init();
 
-  leadscrew.setTargetPitchMM(globalState->getCurrentFeedPitch());
+    leadscrew.setTargetPitchMM(globalState->getCurrentFeedPitch());
 
-  display.update();
+    display.update();
 
 #ifdef ESP32
 
-  TaskHandle_t spindleTask;
-  TaskHandle_t displayTask;
-  //TaskHandle_t commsTask;
-  xTaskCreatePinnedToCore(SpindleTask, "Spindle", 4096, NULL, 24 | portPRIVILEGE_BIT, &spindleTask, 0);
-  xTaskCreatePinnedToCore(DisplayTask, "Display", 8000, NULL, 1, &displayTask, 1);
-  //xTaskCreatePinnedToCore(comms_loop, "Comms", 16000, NULL, 10, &commsTask, 1);
-  disableLoopWDT();
-  esp_task_wdt_delete(xTaskGetHandle("IDLE0"));
-  esp_task_wdt_delete(xTaskGetHandle("IDLE1"));
-  esp_task_wdt_delete(spindleTask);
-  esp_task_wdt_delete(displayTask);
-  //esp_task_wdt_delete(commsTask);
+    TaskHandle_t spindleTask;
+    TaskHandle_t displayTask;
+    //TaskHandle_t commsTask;
+    xTaskCreatePinnedToCore(SpindleTask, "Spindle", 4096, NULL, 24 | portPRIVILEGE_BIT, &spindleTask, 0);
+    xTaskCreatePinnedToCore(DisplayTask, "Display", 8000, NULL, 1, &displayTask, 1);
+    //xTaskCreatePinnedToCore(comms_loop, "Comms", 16000, NULL, 10, &commsTask, 1);
+    disableLoopWDT();
+    esp_task_wdt_delete(xTaskGetHandle("IDLE0"));
+    esp_task_wdt_delete(xTaskGetHandle("IDLE1"));
+    esp_task_wdt_delete(spindleTask);
+    esp_task_wdt_delete(displayTask);
+    //esp_task_wdt_delete(commsTask);
 
 #else
-  timer.begin(timerCallback, LEADSCREW_TIMER_US);
+    timer.begin(timerCallback, LEADSCREW_TIMER_US);
 #endif
 
-  delay(2000);
-
+    delay(2000);
+  }
 }
 
 void loop() {
