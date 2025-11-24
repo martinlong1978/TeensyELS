@@ -4453,7 +4453,7 @@
 	)
 	(wire
 		(pts
-			(xy 311.15 29.21) (xy 309.88 29.21)
+			(xy 311.15 33.02) (xy 313.69 33.02)
 		)
 		(stroke
 			(width 0)
@@ -5971,16 +5971,6 @@
 		)
 		(uuid "fbe512d6-8ccf-44d4-b637-94d84b4a3d01")
 	)
-	(wire
-		(pts
-			(xy 311.15 33.02) (xy 311.15 29.21)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "ff394b6e-4272-4fc3-b50f-97745677251e")
-	)
 	(label "EN"
 		(at 128.27 119.38 180)
 		(effects
@@ -6142,7 +6132,7 @@
 		(uuid "3c5c1d9c-87e5-4b4e-934a-3373680eef9f")
 	)
 	(label "Blue"
-		(at 309.88 29.21 0)
+		(at 313.69 33.02 0)
 		(effects
 			(font
 				(size 1.27 1.27)
