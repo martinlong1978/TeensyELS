@@ -11,7 +11,7 @@ enum EncoderColour { EC_NONE = 0, EC_RED = 1, EC_GREEN = 2, EC_YELLOW = 3 };
 // Major modes are the main modes of the application, like the feed or thread
 // The spindle acts the same way in both threading and feeding mode
 // this is just for the indicator on the screen
-enum GlobalFeedMode { FM_UNSET = -1, FM_FEED = 0, FM_THREAD = 1 };
+enum GlobalFeedMode { FM_UNSET = -1, FM_FEED = 0, FM_THREAD = 1, FM_JOG = 2 };
 
 // The motion mode of the leadscrew in relation to the spindle
 // Disabled: The leadscrew does not move when the spindle is moving
@@ -42,8 +42,6 @@ enum GlobalThreadSyncState { SS_UNSET, SS_SYNC, SS_UNSYNC };
  */
 enum GlobalButtonLock { LK_UNSET, LK_UNLOCKED, LK_LOCKED };
 
-enum GlobalSystemMode {SM_NORMAL, SM_JOG};
-
 typedef struct DebugData {
   int tm;
   float positionError;
@@ -69,7 +67,6 @@ private:
 
 
 
-  GlobalSystemMode m_systemMode;
   GlobalFeedMode m_feedMode;
   GlobalMotionMode m_motionMode;
   GlobalUnitMode m_unitMode;
@@ -90,15 +87,14 @@ private:
   int m_resyncPulseCount;
 
   GlobalState() {
-    setFeedMode(DEFAULT_FEED_MODE);
     setUnitMode(DEFAULT_UNIT_MODE);
     setButtonLock(LK_LOCKED);
     setFeedSelect(-1);
     setThreadSyncState(SS_UNSYNC);
     m_motionMode = MM_DISABLED;
-    m_systemMode = SM_NORMAL;
     m_resyncPulseCount = 0;
     m_jogSpeed = 5;
+    m_feedMode = DEFAULT_FEED_MODE;
   }
 
 public:
@@ -121,7 +117,7 @@ public:
 
   static GlobalState* getInstance();
 
-  void setFeedMode(GlobalFeedMode mode);
+  void IncFeedMode();
   GlobalFeedMode getFeedMode();
 
   void setMotionMode(GlobalMotionMode mode);
@@ -154,9 +150,6 @@ public:
   int nextFeedPitch();
   int prevFeedPitch();
   
-  void toggleSystemMode();
-  GlobalSystemMode getSystemMode();
-
 protected:
   int getCurrentFeedSelectArraySize();
 };

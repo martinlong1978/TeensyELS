@@ -48,8 +48,19 @@ void GlobalState::setDebugMode(bool mode) {
 }
 
 
-void GlobalState::setFeedMode(GlobalFeedMode mode) {
-  m_feedMode = mode;
+void GlobalState::IncFeedMode() {
+  switch (m_feedMode) {
+  case FM_UNSET:
+  case FM_JOG:
+    m_feedMode = FM_FEED;
+    break;
+  case FM_FEED:
+    m_feedMode = FM_THREAD;
+    break;
+  case FM_THREAD:
+    m_feedMode = FM_JOG;
+    break;
+  }
 
   // when switching feed modes ensure that the default for the next mode is
   // selected via setFeedSelect - depends on the fallback in the function
@@ -139,7 +150,9 @@ float GlobalState::getCurrentFeedPitch() {
 }
 
 int GlobalState::nextFeedPitch() {
-  if (m_feedSelect != getCurrentFeedSelectArraySize() - 1) {
+  if (m_feedMode == FM_JOG) {
+    incJogSpeed();
+  } else   if (m_feedSelect != getCurrentFeedSelectArraySize() - 1) {
     setFeedSelect(m_feedSelect + 1);
   }
 
@@ -147,7 +160,9 @@ int GlobalState::nextFeedPitch() {
 }
 
 int GlobalState::prevFeedPitch() {
-  if (m_feedSelect != 0) {
+  if (m_feedMode == FM_JOG) {
+    decJogSpeed();
+  } else if (m_feedSelect != 0) {
     setFeedSelect(m_feedSelect - 1);
   }
 
@@ -179,11 +194,6 @@ int  GlobalState::getOTABytes() { return OTAbytes; }
 int  GlobalState::getOTALength() { return OTAlength; }
 void  GlobalState::setOTAContentLength(int length) { OTAlength = length; }
 
-void GlobalState::toggleSystemMode() {
-  m_systemMode = m_systemMode == SM_NORMAL ? SM_JOG : SM_NORMAL;
-  m_jogSpeed = 5;
-}
-GlobalSystemMode GlobalState::getSystemMode() { return m_systemMode; }
 
 void  GlobalState::setDisplayReset() { m_displayReset = true; }
 bool  GlobalState::getDisplayReset() {

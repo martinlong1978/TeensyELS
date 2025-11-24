@@ -30,7 +30,6 @@ private:
   Spindle* m_spindle;
   Leadscrew* m_leadscrew;
   GlobalState* m_globalState;
-  GlobalSystemMode m_systemMode;
 #ifdef ELS_UI_ENCODER
   EncoderColour firstColour = EC_NONE;
   EncoderColour secondColour = EC_NONE;

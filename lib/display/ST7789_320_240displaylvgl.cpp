@@ -248,8 +248,7 @@ void Display::drawSyncStatus() {
 
 void Display::drawMode() {
   GlobalFeedMode mode = GlobalState::getInstance()->getFeedMode();
-  GlobalSystemMode sysmode = GlobalState::getInstance()->getSystemMode();
-  if (sysmode == SM_JOG) {
+  if (mode == FM_JOG) {
     lv_image_set_src(feedSymbolObj, &jog);
   } else if (mode == GlobalFeedMode::FM_FEED) {
     lv_image_set_src(feedSymbolObj, &feedSymbol);
@@ -262,11 +261,10 @@ void Display::drawPitch() {
   GlobalState* state = GlobalState::getInstance();
   GlobalUnitMode unit = state->getUnitMode();
   GlobalFeedMode mode = state->getFeedMode();
-  GlobalSystemMode sysmode = GlobalState::getInstance()->getSystemMode();
 
   int feedSelect = state->getFeedSelect();
   char pitch[10];
-  if (sysmode == SM_JOG) {
+  if (mode == FM_JOG) {
     sprintf(pitch, "%d%s", (int)(state->getJogSpeed() * 100), "%");
     lv_slider_set_min_value(pitchSlider, 0);
     lv_slider_set_max_value(pitchSlider, sizeof(jogSpeeds) / sizeof(int));

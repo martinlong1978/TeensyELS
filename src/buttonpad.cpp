@@ -57,12 +57,9 @@ void ButtonPad::rateIncreaseHandler(ButtonInfo press) {
   GlobalState* globalState = GlobalState::getInstance();
 
 
-  if (globalState->getSystemMode() == SM_NORMAL && press.buttonState == BS_CLICKED) {
+  if (press.buttonState == BS_CLICKED) {
     globalState->nextFeedPitch();
     m_leadscrew->setTargetPitchMM(globalState->getCurrentFeedPitch());
-  }
-  if (globalState->getSystemMode() == SM_JOG && press.buttonState == BS_CLICKED) {
-    globalState->incJogSpeed();
   }
 }
 
@@ -74,12 +71,9 @@ void ButtonPad::rateDecreaseHandler(ButtonInfo press) {
   }
   GlobalState* globalState = GlobalState::getInstance();
 
-  if (globalState->getSystemMode() == SM_NORMAL && press.buttonState == BS_CLICKED) {
+  if (press.buttonState == BS_CLICKED) {
     globalState->prevFeedPitch();
     m_leadscrew->setTargetPitchMM(globalState->getCurrentFeedPitch());
-  }
-  if (globalState->getSystemMode() == SM_JOG && press.buttonState == BS_CLICKED) {
-    globalState->decJogSpeed();
   }
 }
 
@@ -138,17 +132,6 @@ void ButtonPad::threadSyncHandler(ButtonInfo press) {
   if (press.buttonState == BS_HELD) {
     GlobalState::getInstance()->setDisplayReset();
   }
-  if (press.buttonState == BS_CLICKED) {
-    GlobalState::getInstance()->toggleSystemMode();
-    // if (GlobalState::getInstance()->getMotionMode() ==
-    //   GlobalMotionMode::MM_ENABLED) {
-    //   GlobalState::getInstance()->setThreadSyncState(
-    //     GlobalThreadSyncState::SS_UNSYNC);
-    // } else {
-    //   GlobalState::getInstance()->setThreadSyncState(
-    //     GlobalThreadSyncState::SS_SYNC);
-    // }
-  }
 }
 
 void ButtonPad::modeCycleHandler(ButtonInfo press) {
@@ -162,14 +145,7 @@ void ButtonPad::modeCycleHandler(ButtonInfo press) {
 
   // pressing mode button swaps between feed and thread 
   if (press.buttonState == BS_CLICKED) {
-    switch (GlobalState::getInstance()->getFeedMode()) {
-    case GlobalFeedMode::FM_FEED:
-      GlobalState::getInstance()->setFeedMode(GlobalFeedMode::FM_THREAD);
-      break;
-    case GlobalFeedMode::FM_THREAD:
-      GlobalState::getInstance()->setFeedMode(GlobalFeedMode::FM_FEED);
-      break;
-    }
+    GlobalState::getInstance()->IncFeedMode();
     m_leadscrew->setTargetPitchMM(globalState->getCurrentFeedPitch());
   }
 
@@ -193,7 +169,7 @@ void ButtonPad::jogDirectionHandler(ButtonInfo press) {
   GlobalState* globalState = GlobalState::getInstance();
   GlobalButtonLock lockState = globalState->getButtonLock();
   GlobalMotionMode motionMode = globalState->getMotionMode();
-  GlobalSystemMode systemMode = globalState->getSystemMode();
+  GlobalFeedMode feedMode = globalState->getFeedMode();
 
   // no jogging functionality allowed during lock or enable 
   if (lockState == GlobalButtonLock::LK_LOCKED ||
@@ -202,7 +178,7 @@ void ButtonPad::jogDirectionHandler(ButtonInfo press) {
   }
 
   // single click should jog to the stop position 
-  if (systemMode == SM_NORMAL && press.buttonState == BS_CLICKED) {
+  if (feedMode != FM_JOG && press.buttonState == BS_CLICKED) {
     switch (press.button) {
     case ELS_JOG_LEFT_BUTTON:
       if (globalState->getMotionMode() == GlobalMotionMode::MM_JOG_LEFT) {
@@ -230,7 +206,7 @@ void ButtonPad::jogDirectionHandler(ButtonInfo press) {
   /**
    * holding the jog button will set/unset the stop position
    */
-  if (systemMode == SM_NORMAL && press.buttonState == BS_HELD) {
+  if (feedMode != FM_JOG && press.buttonState == BS_HELD) {
     switch (press.button) {
     case ELS_JOG_LEFT_BUTTON:
       if (m_leadscrew->getStopPositionState(LeadscrewStopPosition::LEFT) ==
@@ -252,7 +228,7 @@ void ButtonPad::jogDirectionHandler(ButtonInfo press) {
     }
   }
 
-  if (systemMode == SM_JOG && press.buttonState == BS_PRESSED) {
+  if (feedMode == FM_JOG && press.buttonState == BS_PRESSED) {
     globalState->setThreadSyncState(GlobalThreadSyncState::SS_UNSYNC);
     switch (press.button) {
     case ELS_JOG_LEFT_BUTTON:
@@ -263,7 +239,7 @@ void ButtonPad::jogDirectionHandler(ButtonInfo press) {
       break;
     }
   }
-  if (systemMode == SM_JOG && press.buttonState == BS_RELEASED) {
+  if (feedMode == FM_JOG && press.buttonState == BS_RELEASED) {
     globalState->setMotionMode(MM_DECELLERATE);
   }
 }
