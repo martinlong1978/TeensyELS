@@ -44,11 +44,11 @@
 
 #define ELS_UI_ENCODER
 #ifdef ELS_UI_ENCODER
-#define ELS_UI_ENCODER_A 36  
-#define ELS_UI_ENCODER_B 39  
+#define ELS_UI_ENCODER_A 39  
+#define ELS_UI_ENCODER_B 36  
 #define ELS_IND_RED 22   
 #define ELS_IND_GREEN 21  
-#define ELS_IND_BLUE 14   
+#define ELS_IND_BLUE 12   
 #endif
 
 #if defined(CORE_TEENSY)
@@ -97,9 +97,9 @@
 #define ELS_PAD_H2 33
 #define ELS_PAD_H3 2
 
-#define ELS_PAD_V1 15
-#define ELS_PAD_V2 13
-#define ELS_PAD_V3 12
+#define ELS_PAD_V1 13
+#define ELS_PAD_V2 14
+#define ELS_PAD_V3 15
 #endif
 
 /**

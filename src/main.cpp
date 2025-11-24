@@ -185,6 +185,8 @@ void setup() {
 #ifdef ELS_IND_GREEN
     pinMode(ELS_IND_GREEN, OUTPUT);
     pinMode(ELS_IND_RED, OUTPUT);
+    pinMode(ELS_IND_BLUE, OUTPUT);
+    digitalWrite(ELS_IND_BLUE, 0);
 #endif
 #endif
 
