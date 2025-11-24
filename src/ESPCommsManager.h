@@ -7,9 +7,10 @@
 #include <HardwareSerial.h>
 #include <WiFi.h>
 #include "config.h"
-#include "SECRETS.h"
 #include <HTTPClient.h>
 #include <HttpsOTAUpdate.h>
+#include "WebSettings.h"
+
 
 
 #define CHECK_SUFFIX(subject, suffix) strcmp(&(subject[strlen(subject) - sizeof(suffix) + 1]), suffix) == 0
@@ -27,8 +28,8 @@ private:
     bool state;
     bool switchState;
     int switchRead;
-    void wifiConnect();
-    void wifi_loop();
+    void wifiConnect(WebSettings *webSettings);
+    void wifi_loop(WebSettings *webSettings);
     HttpsOTAStatus_t otastatus;
     int relayConfig[4];
 

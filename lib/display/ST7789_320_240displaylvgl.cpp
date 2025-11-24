@@ -71,6 +71,32 @@ void Display::initDisplay() {
   lv_display_set_rotation(disp, LV_DISPLAY_ROTATION_90);
 }
 
+void Display::initialiseOta() {
+  initOta = true;
+  lv_obj_clean(lv_screen_active());
+
+  lv_style_t knobStyle;
+
+  lv_style_init(&knobStyle);
+
+  updateLabel = lv_label_create(lv_screen_active());
+  lv_label_set_text(updateLabel, "Updating...");
+  lv_obj_set_style_text_font(updateLabel, &lv_font_montserrat_26, 0);
+  lv_obj_align(updateLabel, LV_ALIGN_CENTER, 0, 0);
+
+  updateSlider = lv_slider_create(lv_screen_active());
+  lv_obj_set_size(updateSlider, 280, 10);
+  lv_obj_set_pos(updateSlider, 20, 150);
+
+  lv_obj_set_style_opa(updateSlider, LV_OPA_0, LV_PART_KNOB);
+
+  lv_slider_set_range(updateSlider, 0, 100);
+  lv_obj_set_style_pad_all(updateSlider, 0, 0);
+
+
+
+}
+
 void Display::init() {
 
 
@@ -156,6 +182,9 @@ void Display::update() {
   int bytes = GlobalState::getInstance()->getOTABytes();
   int length = GlobalState::getInstance()->getOTALength();
   if (GlobalState::getInstance()->hasOTA()) {
+    if (!initOta) {
+      initialiseOta();
+    }
     drawOTA();
 
   } else {
@@ -173,18 +202,15 @@ void Display::update() {
 }
 
 void Display::drawOTA() {
-  //   if (!updating) {
-  //   tft.fillRect(0, 0, 240, 135, TFT_BLACK);
-  //   tft.setCursor(10, 10);
-  //   tft.setTextSize(3);
-  //   tft.setTextColor(TFT_WHITE);
-  //   tft.print("UPDATING");
-  //   updating = true;
-  // }
-  // tft.drawRect(0, 70, 240, 40, TFT_WHITE);
-  // int percent = (((float)(bytes * 240)) / ((float)length));
-  // if (bytes > 0)tft.fillRect(0, 70, percent, 40, TFT_WHITE);
-
+  int bytes = GlobalState::getInstance()->getOTABytes();
+  int length = GlobalState::getInstance()->getOTALength();
+  int percent = (((float)(bytes * 100)) / ((float)length));
+  lv_slider_set_value(updateSlider, bytes > 0 ? percent : 0, LV_ANIM_OFF);
+  if (percent > 99 && bytes > 0) {
+    lv_label_set_text(updateLabel, "Rebooting...");
+  } else {
+    lv_label_set_text(updateLabel, "Updating...");
+  }
 }
 
 void Display::drawSpindleRpm() {

@@ -1,4 +1,7 @@
 
+#ifndef WebSettings_h
+#define WebSettings_h
+
 
 typedef struct WebSettings {
     char  ssid[32];
@@ -12,3 +15,5 @@ WebSettings* getWebSettings();
 void startWebServer() ;
 
 void wifiLoop() ;
+
+#endif

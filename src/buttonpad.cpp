@@ -6,7 +6,6 @@
 #include <config.h> 
 #include <globalstate.h> 
 #include <HttpsOTAUpdate.h> 
-#include "SECRETS.h" 
 
 ButtonPad::ButtonPad(Spindle* spindle, Leadscrew* leadscrew, KeyArray* pad)
   : m_spindle(spindle),

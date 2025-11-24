@@ -26,6 +26,7 @@ LV_IMAGE_DECLARE(jog);
 
 class Display {
 private:
+  bool initOta = false;
   Spindle* m_spindle;
   Leadscrew* m_leadscrew;
   GlobalState* m_globalState;
@@ -48,6 +49,7 @@ private:
   lv_obj_t* rightStopRectObj;
 
   lv_obj_t* pitchSlider;
+  lv_obj_t* updateSlider;
 
   lv_obj_t* lockedObj;
   lv_obj_t* lockedRectObj;
@@ -56,7 +58,10 @@ private:
   lv_obj_t* enableObj;
   lv_obj_t* enableRectObj;
 
+  lv_obj_t* updateLabel;
+
   void initDisplay();
+  void initialiseOta();
 
 public:
   Display(Spindle* spindle, Leadscrew* leadscrew) {
