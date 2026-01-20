@@ -1,4 +1,3 @@
-#ifdef ESP32
 #ifndef ESPCommsManager_h
 #define ESPCommsManager_h
 #include <Arduino.h>
@@ -43,5 +42,4 @@ public:
 
 
 
-#endif
 #endif

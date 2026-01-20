@@ -211,11 +211,6 @@ void loop() {
   if (configMode) {
     wifiLoop();
   } else {
-#ifdef ESP32  
     vTaskDelay(1000);
-#else
-    displayLoop();
-#endif
-
   }
 }

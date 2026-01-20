@@ -1,8 +1,4 @@
-#if defined(ESP32)
 #include <ESP32Encoder.h>
-#elif defined(CORE_TEENSY)
-#include <Encoder.h>
-#endif
 #include <axis.h>
 
 #pragma once
@@ -15,17 +11,10 @@ private:
 
     unsigned long m_lastFetchTime;
 
-#ifndef ELS_SPINDLE_DRIVEN
-#if defined(ESP32)
     ESP32Encoder  m_encoder;
-#elif defined(CORE_TEENSY)
-    Encoder  m_encoder;#endif
-#endif
 
 public:
-#ifndef ELS_SPINDLE_DRIVEN
     Spindle(int pinA, int pinB);
-#endif
 
     void update();
     void setCurrentPosition(int position);
@@ -38,4 +27,3 @@ public:
     float getEstimatedVelocityInRPM();
     float getEstimatedVelocityInPPS();
 };
-#endif

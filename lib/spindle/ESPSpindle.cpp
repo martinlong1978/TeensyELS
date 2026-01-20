@@ -1,14 +1,9 @@
 #include <config.h>
-#if defined(ESP32)
 #include "Spindle.h"
 
 #include <math.h>
 
-#ifndef ELS_SPINDLE_DRIVEN
 Spindle::Spindle(int pinA, int pinB) : m_encoder() {
-#else
-Spindle::Spindle() {
-#endif
   ESP32Encoder::useInternalWeakPullResistors = puType::none;
   m_encoder.attachFullQuad(pinA, pinB);
   gpio_pullup_en((gpio_num_t)pinA);
@@ -89,4 +84,3 @@ int Spindle::consumePosition() {
   m_unconsumedPosition = 0;
   return position;
 }
-#endif

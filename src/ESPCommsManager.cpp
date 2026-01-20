@@ -1,4 +1,3 @@
-#ifdef ESP32
 #include "ESPCommsManager.h"
 #include <globalstate.h>
 
@@ -74,5 +73,3 @@ void ESPCommsManager::wifi_loop(WebSettings *webSettings) {
     wifiConnect(webSettings);
 }
 
-
-#endif

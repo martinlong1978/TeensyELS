@@ -196,9 +196,7 @@ void Display::update() {
     drawSyncStatus();
     drawStopStatus();
   }
-#ifdef ESP32
   writeLed();
-#endif
 }
 
 void Display::drawOTA() {
@@ -349,7 +347,6 @@ void Display::drawEnabled() {
   updateLed();
 }
 
-#ifdef ESP32   // TODO Make portable
 void Display::writeLed() {
 #ifdef ELS_UI_ENCODER
   int64_t time = micros() / 250000;
@@ -358,7 +355,6 @@ void Display::writeLed() {
   digitalWrite(ELS_IND_RED, c & 1);
 #endif
 }
-#endif
 
 
 void Display::updateLed() {
