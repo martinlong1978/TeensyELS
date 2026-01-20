@@ -17,28 +17,15 @@
 #include "keyarray.h"
 
 //#define FULLMONITOR
-#ifdef ESP32
 #include <esp_task_wdt.h>
 #include <leadscrew_io_esp.h>
-#else
-#include <leadscrew_io_teensy.h>
-IntervalTimer timer;
-#endif
 
 
 
 GlobalState* globalState = GlobalState::getInstance();
-#ifdef ELS_SPINDLE_DRIVEN
-Spindle spindle;
-#else
 Spindle spindle(ELS_SPINDLE_ENCODER_A, ELS_SPINDLE_ENCODER_B);
-#endif
 
-#ifdef ESP32
 LeadscrewIOESP leadscrewIOImpl;
-#else
-LeadscrewIOTeensy leadscrewIOImpl;
-#endif
 
 Leadscrew leadscrew(&spindle,
   &leadscrewIOImpl,
@@ -47,13 +34,9 @@ Leadscrew leadscrew(&spindle,
   ELS_LEADSCREW_STEPPER_PPR* ELS_GEARBOX_RATIO,
   ELS_LEADSCREW_PITCH_MM, ELS_SPINDLE_ENCODER_PPR);
 
-#ifdef ESP32  
 KeyArray keyArray(&leadscrew);
 ButtonPad keyPad(&spindle, &leadscrew, &keyArray);
 ESPCommsManager commsManager;
-#else
-ButtonHandler keyPad(&spindle, &leadscrew);
-#endif
 Display display(&spindle, &leadscrew);
 int64_t lastcycle;
 int cyclecount;
@@ -79,7 +62,6 @@ void displayLoop() {
   display.update();
 }
 
-#ifdef ESP32
 void DisplayTask(void* parameter) {
   // Ensure interrupts are initialised on the right core.  
   keyArray.initPad();
@@ -106,7 +88,6 @@ void SpindleTask(void* parameter) {
 
 void comms_loop(void* parameters) { commsManager.loop(); }
 
-#endif
 
 const char* ssid = "ELS_Wifi";
 const char* password = "123456789";
@@ -163,24 +144,18 @@ void setup() {
 
     // Pinmodes
 
-#ifndef ELS_SPINDLE_DRIVEN
-//  pinMode(ELS_SPINDLE_ENCODER_A, INPUT_PULLUP); // encoder pin 1
-//  pinMode(ELS_SPINDLE_ENCODER_B, INPUT_PULLUP); // encoder pin 2
-#endif
 
 #ifdef ELS_USE_RMT
     rmt_obj_t* leadscreRMT = rmtInit(ELS_LEADSCREW_STEP, true, RMT_MEM_64);
     leadscrew.setRMT(leadscreRMT);
     rmtSetTick(leadscreRMT, 2500);
-
 #else
     pinMode(ELS_LEADSCREW_STEP, OUTPUT); // step output pin
 #endif
+
     pinMode(ELS_LEADSCREW_DIR, OUTPUT);  // direction output pin
 
 #ifdef ELS_UI_ENCODER
-    //  pinMode(ELS_UI_ENCODER_A, INPUT); // encoder pin 1
-    //  pinMode(ELS_UI_ENCODER_B, INPUT); // encoder pin 2
 
 #ifdef ELS_IND_GREEN
     pinMode(ELS_IND_GREEN, OUTPUT);
@@ -214,7 +189,6 @@ void setup() {
 
     display.update();
 
-#ifdef ESP32
 
     TaskHandle_t spindleTask;
     TaskHandle_t displayTask;
@@ -228,10 +202,6 @@ void setup() {
     esp_task_wdt_delete(spindleTask);
     esp_task_wdt_delete(displayTask);
     //esp_task_wdt_delete(commsTask);
-
-#else
-    timer.begin(timerCallback, LEADSCREW_TIMER_US);
-#endif
 
     delay(2000);
   }
