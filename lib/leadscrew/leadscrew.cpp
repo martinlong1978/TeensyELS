@@ -14,11 +14,11 @@ using namespace std;
  * Another class should handle the motor control and acceleration
  */
 
-Leadscrew::Leadscrew(Spindle* spindle, LeadscrewIO* io,
+Leadscrew::Leadscrew(LatheConfigDerived *config, Spindle* spindle, LeadscrewIO* io,
   float leadscrewAccel, float initialPulseDelay,
   int motorPulsePerRevolution,
   float leadscrewPitch, int encoderPPR)
-  : motorPulsePerRevolution(motorPulsePerRevolution),
+  : config(config), motorPulsePerRevolution(motorPulsePerRevolution),
   leadscrewPitch(leadscrewPitch),
   encoderPPR(encoderPPR),
   m_io(io),
@@ -256,7 +256,7 @@ void Leadscrew::update() {
       m_currentDirection = LeadscrewDirection::UNKNOWN;
     }
     if (m_currentDirection == LeadscrewDirection::UNKNOWN) {
-      m_io->writeDirPin(ELS_DIR_RIGHT);
+      m_io->writeDirPin(config->dirRight());
       m_currentDirection = LeadscrewDirection::RIGHT;
     }
   } else if ((((positionError < -1 && !jogMode) || m_motionMode == MM_JOG_LEFT) && !hitLeftEndstop) || m_motionMode == MM_INTERACTIVE_JOG_LEFT) {
@@ -265,7 +265,7 @@ void Leadscrew::update() {
       m_currentDirection = LeadscrewDirection::UNKNOWN;
     }
     if (m_currentDirection == LeadscrewDirection::UNKNOWN) {
-      m_io->writeDirPin(ELS_DIR_LEFT);
+      m_io->writeDirPin(config->dirLeft());
       m_currentDirection = LeadscrewDirection::LEFT;
     }
   } else {
@@ -370,13 +370,13 @@ void Leadscrew::update() {
       break;
     case MM_JOG_LEFT:
     case MM_JOG_RIGHT:
-      shouldStop = m_leadscrewSpeed > ELS_JOG_SPEED_PPS ||
+      shouldStop = m_leadscrewSpeed > config->jogSpeedPps() ||
         nextDirection != m_currentDirection ||
         goingToHitLeftEndstop || goingToHitRightEndstop;
       break;
     case MM_INTERACTIVE_JOG_LEFT:
     case MM_INTERACTIVE_JOG_RIGHT:
-      shouldStop = m_leadscrewSpeed > ( ((ELS_JOG_SPEED_PPS) *  m_globalState->getJogSpeed())) ||
+      shouldStop = m_leadscrewSpeed > ( ((config->jogSpeedPps()) *  m_globalState->getJogSpeed())) ||
         nextDirection != m_currentDirection;
       break;
     }
@@ -388,7 +388,7 @@ void Leadscrew::update() {
       m_currentPulseDelay = m_leadscrewSpeed == 0 ? initialPulseDelay : US_PER_SECOND / m_leadscrewSpeed;
     } else {
       m_leadscrewSpeed += m_leadscrewAccel * min(m_currentPulseDelay, initialPulseDelay) / US_PER_SECOND;
-      m_leadscrewSpeed = min(m_leadscrewSpeed, LEADSCREW_MAX_SPEED_PPS);
+      m_leadscrewSpeed = min(m_leadscrewSpeed, config->leadscrewMaxSpeedPps());
       m_currentPulseDelay = m_leadscrewSpeed == 0 ? initialPulseDelay : US_PER_SECOND / m_leadscrewSpeed;
     }
 

@@ -46,6 +46,6 @@ public:
     KeyArray(Leadscrew* leadscrew);
 };
 
-extern KeyArray keyArray;
+extern KeyArray *keyArray;
 #endif
 #endif

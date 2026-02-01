@@ -19,25 +19,23 @@
 //#define FULLMONITOR
 #include <esp_task_wdt.h>
 #include <leadscrew_io_esp.h>
+#include "latheconfig.h"
 
 
+Leadscrew* leadscrew;
+
+KeyArray* keyArray;
+ButtonPad* keyPad;
+Display* display;
+Spindle* spindle;
 
 GlobalState* globalState = GlobalState::getInstance();
-Spindle spindle(ELS_SPINDLE_ENCODER_A, ELS_SPINDLE_ENCODER_B);
 
 LeadscrewIOESP leadscrewIOImpl;
 
-Leadscrew leadscrew(&spindle,
-  &leadscrewIOImpl,
-  ACCEL_PULSE_SEC,
-  LEADSCREW_INITIAL_PULSE_DELAY_US,
-  ELS_LEADSCREW_STEPPER_PPR* ELS_GEARBOX_RATIO,
-  ELS_LEADSCREW_PITCH_MM, ELS_SPINDLE_ENCODER_PPR);
-
-KeyArray keyArray(&leadscrew);
-ButtonPad keyPad(&spindle, &leadscrew, &keyArray);
 ESPCommsManager commsManager;
-Display display(&spindle, &leadscrew);
+
+
 int64_t lastcycle;
 int cyclecount;
 int finalcyclecount;
@@ -50,21 +48,21 @@ void timerCallback() {
   if (GlobalState::getInstance()->hasOTA()) {
     commsManager.loop();
   } else {
-    spindle.update();
-    leadscrew.update();
+    spindle->update();
+    leadscrew->update();
   }
 }
 
 
 void displayLoop() {
-  keyPad.handle();
+  keyPad->handle();
 
-  display.update();
+  display->update();
 }
 
 void DisplayTask(void* parameter) {
   // Ensure interrupts are initialised on the right core.  
-  keyArray.initPad();
+  keyArray->initPad();
   uint64_t m = 1;
   while (true) {
     displayLoop();
@@ -109,27 +107,52 @@ void runWifiSettings() {
   Serial.print("AP IP address: ");
   Serial.println(IP);
   //server.begin();
-  display.showWifi(ssid, password, IP);
+  display->showWifi(ssid, password, IP);
   startWebServer();
 }
 
 void setup() {
+
+
   Serial.begin(921600);
 
   pinMode(ELS_PAD_H2, INPUT_PULLDOWN);
   pinMode(ELS_PAD_V2, OUTPUT);
   digitalWrite(ELS_PAD_V2, 1);
 
-  if (digitalRead(ELS_PAD_H2) == 1) {
+  WebSettings* webSettings = getWebSettings();
+  LatheConfig* config = getLatheSettings();
+
+  bool checks = (webSettings->check == CHECKVALUE) && (config->check == CHECKVALUE); 
+
+  if (digitalRead(ELS_PAD_H2) == 1 || !checks) {
+    display = new Display();
     Serial.println("AP setting mode\n");
     runWifiSettings();
   } else {
 
-   WebSettings *webSettings =  getWebSettings();
 
-   Serial.printf("SSID %s\n", webSettings->ssid);
-   Serial.printf("password %s\n", webSettings->password);
-   Serial.printf("url %s\n", webSettings->url);
+    Serial.printf("SSID %s\n", webSettings->ssid);
+    Serial.printf("password %s\n", webSettings->password);
+    Serial.printf("url %s\n", webSettings->url);
+
+
+    LatheConfigDerived* derivedConfig = new LatheConfigDerived(config);
+
+    spindle = new Spindle(ELS_SPINDLE_ENCODER_A, ELS_SPINDLE_ENCODER_B, derivedConfig);
+
+
+    leadscrew = new Leadscrew(derivedConfig, spindle,
+      &leadscrewIOImpl,
+      derivedConfig->accellerationPulseSec(),
+      derivedConfig->leadscrewInitialPulseDelay(),
+      derivedConfig->stepperPpr() * derivedConfig->gearboxRatio(),
+      derivedConfig->leadscrewPitchMm(), derivedConfig->spindleEncoderPpr());
+
+    keyArray = new KeyArray(leadscrew);
+    keyPad = new ButtonPad(spindle, leadscrew, keyArray);
+    display = new Display(spindle, leadscrew);
+
 
 
     // config - compile time checks for safety
@@ -147,7 +170,7 @@ void setup() {
 
 #ifdef ELS_USE_RMT
     rmt_obj_t* leadscreRMT = rmtInit(ELS_LEADSCREW_STEP, true, RMT_MEM_64);
-    leadscrew.setRMT(leadscreRMT);
+    leadscrew->setRMT(leadscreRMT);
     rmtSetTick(leadscreRMT, 2500);
 #else
     pinMode(ELS_LEADSCREW_STEP, OUTPUT); // step output pin
@@ -183,11 +206,11 @@ void setup() {
 
     // Display Initalisation
 
-    display.init();
+    display->init();
 
-    leadscrew.setTargetPitchMM(globalState->getCurrentFeedPitch());
+    leadscrew->setTargetPitchMM(globalState->getCurrentFeedPitch());
 
-    display.update();
+    display->update();
 
 
     TaskHandle_t spindleTask;

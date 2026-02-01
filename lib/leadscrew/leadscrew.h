@@ -3,6 +3,7 @@
 #include <Arduino.h>
 #include "leadscrew_io.h"
 #include "globalstate.h"
+#include "latheconfig.h"
 #pragma once
 
 
@@ -41,6 +42,8 @@ private:
   rmt_data_t rmt_data[24];
   rmt_obj_t *rmtObj;
 #endif
+
+  LatheConfigDerived *config;
 
   Spindle* m_spindle;
   LeadscrewIO* m_io;
@@ -90,7 +93,7 @@ private:
   GlobalState *m_globalState;
 
 public:
-  Leadscrew(Spindle* spindle, LeadscrewIO* io,
+  Leadscrew(LatheConfigDerived *config, Spindle* spindle, LeadscrewIO* io,
     float leadscrewAccel, float initialPulseDelay, 
     int motorPulsePerRevolution,
     float leadscrewPitch, int encoderPPR);

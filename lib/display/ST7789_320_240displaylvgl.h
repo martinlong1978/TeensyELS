@@ -21,7 +21,7 @@ LV_IMAGE_DECLARE(pauseSymbol);
 LV_IMAGE_DECLARE(syncSymbol);
 LV_IMAGE_DECLARE(jog);
 
-#define DRAW_BUF_SIZE (TFT_WIDTH * TFT_HEIGHT / 10 * (LV_COLOR_DEPTH / 8))
+#define DRAW_BUF_SIZE ((TFT_WIDTH * TFT_HEIGHT / 10) * (LV_COLOR_DEPTH / 8))
 
 
 class Display {
@@ -66,6 +66,10 @@ public:
   Display(Spindle* spindle, Leadscrew* leadscrew) {
     this->m_spindle = spindle;
     this->m_leadscrew = leadscrew;
+    this->m_globalState = GlobalState::getInstance();
+  }
+
+  Display() {
     this->m_globalState = GlobalState::getInstance();
   }
 

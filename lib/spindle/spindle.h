@@ -1,5 +1,6 @@
 #include <ESP32Encoder.h>
 #include <axis.h>
+#include "latheconfig.h"
 
 #pragma once
 
@@ -12,9 +13,10 @@ private:
     unsigned long m_lastFetchTime;
 
     ESP32Encoder  m_encoder;
+    LatheConfigDerived *config;
 
 public:
-    Spindle(int pinA, int pinB);
+    Spindle(int pinA, int pinB, LatheConfigDerived *config);
 
     void update();
     void setCurrentPosition(int position);

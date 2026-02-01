@@ -1,13 +1,15 @@
 #include <config.h>
 #include "Spindle.h"
+#include "latheconfig.h"
 
 #include <math.h>
 
-Spindle::Spindle(int pinA, int pinB) : m_encoder() {
+Spindle::Spindle(int pinA, int pinB, LatheConfigDerived *latheConfig) : m_encoder(), config(latheConfig) {
   ESP32Encoder::useInternalWeakPullResistors = puType::none;
   m_encoder.attachFullQuad(pinA, pinB);
   gpio_pullup_en((gpio_num_t)pinA);
   gpio_pullup_en((gpio_num_t)pinB);
+  
 
   m_unconsumedPosition = 0;
   m_lastPulseTimestamp = micros();
@@ -42,7 +44,9 @@ void Spindle::setCurrentPosition(int position) {
   int positionDelta = position - m_currentPosition;
   m_unconsumedPosition += positionDelta;
 
-  m_currentPosition = (position + ELS_SPINDLE_ENCODER_PPR) % ELS_SPINDLE_ENCODER_PPR;
+  int ppr = config->spindleEncoderPpr();
+  
+  m_currentPosition = (position + ppr) % ppr;
 }
 
 void Spindle::incrementCurrentPosition(int amount) {
@@ -76,7 +80,7 @@ float Spindle::getEstimatedVelocityInPPS() {
 float Spindle::getEstimatedVelocityInRPM() {
   if (m_lastRevMicros == 0)return 0;
   if (micros() - m_lastRevTimestamp > 1000000)return 0;
-  return -((m_lastRevSize * 60000000) / (m_lastRevMicros * ELS_SPINDLE_ENCODER_PPR));
+  return -((m_lastRevSize * 60000000) / (m_lastRevMicros * config->spindleEncoderPpr()));
 }
 
 int Spindle::consumePosition() {

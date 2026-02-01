@@ -3,10 +3,11 @@
 // not using pragma once to allow for multiple inclusion in tests, do not
 // remove!
 #include "board.h"
+
+
 #ifndef ELS_CONFIG_H
 #define ELS_CONFIG_H
 
-//#define ELS_OFFLINE
 
 
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(arr[0]))
@@ -18,34 +19,9 @@
 // the amount of microseconds in a second
 #define US_PER_SECOND 1000000
 
-#define ELS_SPINDLE_ENCODER_PPR 1200
-
 // Number of pulses between speed updates
 #define ELS_SPEED_COUNTS 300
-#define ELS_LEADSCREW_STEPPER_PPR 400
 
-// uncomment this if your leadscrew direction is inverted to what is expected
-// i.e if setting right stop actually sets the left stop
-#define ELS_INVERT_DIRECTION
-
-#ifdef ELS_INVERT_DIRECTION
-#define ELS_DIR_RIGHT 1
-#define ELS_DIR_LEFT 0
-#else
-#define ELS_DIR_RIGHT 1
-#define ELS_DIR_LEFT 0
-#endif
-
-#define ELS_GEARBOX_RATIO 2
-#define ELS_LEADSCREW_PITCH_MM ((float)(2.54))
-
-#define ELS_LEADSCREW_STEPS_PER_MM \
-  (float)((ELS_LEADSCREW_STEPPER_PPR * ELS_GEARBOX_RATIO) / ELS_LEADSCREW_PITCH_MM)
-
-// extra config options
-// jog speed in mm/s
-#define ELS_JOG_SPEED_MM 40
-#define ELS_JOG_SPEED_PPS  ELS_JOG_SPEED_MM * ELS_LEADSCREW_STEPS_PER_MM
 
 /**
  * The unit mode the system should start up in
@@ -59,27 +35,7 @@
  // The default starting speed for leadscrew in mm/s
  // this is the maximum allowable speed (in mm/s) for the leadscrew to
  // instantaneously start moving from 0
- // #define ACCEL_DISABLED
 #define LEADSCREW_JERK 0.5
-
-// The acceleration of the leadscrew in mm/s^2
-#define LEADSCREW_ACCEL 150
-#define LEADSCREW_MAX_SPEED_MM 40
-#define LEADSCREW_MAX_SPEED_PPS  LEADSCREW_MAX_SPEED_MM * ELS_LEADSCREW_STEPS_PER_MM
-
-
-
-// The initial delay between pulses in microseconds for the leadscrew starting
-// from 0 do not change - this is a calculated value, to change the initial
-// speed look at the jerk value
-#ifdef ACCEL_DISABLED
-#define LEADSCREW_INITIAL_PULSE_DELAY_US 0
-#define ACCEL_PULSE_SEC
-#else
-#define ACCEL_PULSE_SEC LEADSCREW_ACCEL * ELS_LEADSCREW_STEPS_PER_MM
-#define LEADSCREW_INITIAL_PULSE_DELAY_US \
-  ((float)US_PER_SECOND / ((float)LEADSCREW_JERK * (float)ELS_LEADSCREW_STEPS_PER_MM))
-#endif
 
 const float jogSpeeds[] =  {0.01, 0.05, 0.1, 0.25, 0.5, 1};
 

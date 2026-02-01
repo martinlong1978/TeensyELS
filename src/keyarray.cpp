@@ -161,16 +161,16 @@ void KeyArray::handleRelease() {
 
 
 void buttonInterrupt() {
-    keyArray.handle();
+    keyArray->handle();
 }
 
 void buttonInterruptRelease() {
-    keyArray.handleRelease();
+    keyArray->handleRelease();
 }
 
 
 void IRAM_ATTR timerInterrupt() {
-    keyArray.handleTimer();
+    keyArray->handleTimer();
 }
 #endif
 
