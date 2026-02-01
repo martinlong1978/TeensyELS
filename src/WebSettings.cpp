@@ -101,7 +101,14 @@ void showPage() {
     
     html += "<input type='submit' value='Submit'>";
     html += "</form>";
+    html += "<form method='GET' action='/reset'>";
+    html += "<input type='submit' value='Reset'>";
+    html += "</form>";
+
     html += "</body></html>";
+
+    delete webSettings;
+    delete latheConfig;
 
     webServer->send(200, "text/html", html);
 }
@@ -122,7 +129,6 @@ void setValues() {
     Serial.printf("SSID %s\n", webServer->arg("ssid").c_str());
     Serial.printf("Password %s\n", webServer->arg("password").c_str());
     Serial.printf("update url %s\n", webServer->arg("url").c_str());
-    webServer->send(200, "text/plain", "");
     WebSettings settings;
     strcpy(settings.ssid, webServer->arg("ssid").c_str());
     strcpy(settings.password, webServer->arg("password").c_str());
@@ -146,12 +152,19 @@ void setValues() {
     ESP.flashWrite(NVM_Offset + address, (uint32_t*)&settings, sizeof(WebSettings));
     ESP.flashWrite(NVM_Offset + latheaddress,  (uint32_t*)&config, sizeof(LatheConfig));
 
+    showPage();
+
+}
+
+void reset() {
+    ESP.restart();
 }
 
 void startWebServer() {
     webServer = new WebServer(80);
     webServer->on("/", HTTP_GET, showPage);
     webServer->on("/set", HTTP_POST, setValues);
+    webServer->on("/reset", HTTP_GET, reset);
     webServer->begin();
     Serial.println("Server is running");
 
