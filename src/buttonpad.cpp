@@ -418,11 +418,18 @@ void ButtonPad::applyIntent(UiIntent intent) {
     enableHandler();
     break;
 
-  // --- Not yet implemented -------------------------------------------------
+  // --- DRO DATUM: manual zero (Sec. 8, rule 1) ------------------------------
+  // Display::setManualZero() stores this as a DISPLAY datum, never through
+  // Leadscrew::setCurrentPosition() -- the stops are absolute against that
+  // same counter, and rezeroing it would silently shift both of them
+  // relative to the tool (docs/ux-redesign-progress.md, "A landmine for
+  // whoever wires up ZeroDro"). null-checked like every other display call
+  // here: ButtonPad::handle() can run before main.cpp's setup() reaches
+  // `display = new Display(...)`.
   case UiIntent::ZeroDro:
-    // No-op: the manual-zero datum store does not exist yet. lib/dro resolves a
-    // datum from the stops, but nothing owns "the operator zeroed here"
-    // (docs/ux-redesign.md Sec. 8, rule 1). Owned by the DRO feature set.
+    if (display != nullptr) {
+      display->setManualZero(m_leadscrew->getCurrentPosition());
+    }
     break;
 
   // --- MENU (Sec. 6) -------------------------------------------------------
@@ -695,6 +702,17 @@ void ButtonPad::activateMenuTile() {
 // tens of milliseconds. A next/prev toggle could not make that check, because
 // by construction it always names a different value.
 void ButtonPad::setDroDatumPreference(DroDatumPreference wanted) {
+  // Sec. 8: re-picking Left or Right on this tile clears a manual zero, so one
+  // authority decides "what is zero" rather than two competing ones. This
+  // fires on every call, INCLUDING the idempotent short-circuit below - the
+  // intents that reach here are absolute (DroDatumLeft/Right, not a
+  // next/prev toggle: see the DroDatum arrow branch in lib/ui/uistate.cpp),
+  // so pressing LEFT while already on Left is still "re-picking Left" and
+  // must still clear a manual zero, even though there is nothing to persist.
+  if (display != nullptr) {
+    display->clearManualZero();
+  }
+
   uint8_t theme = THEME_DARK;
   DroDatumPreference datum = DroDatumPreference::Left;
   (void)readLathePreferences(theme, datum);
@@ -716,11 +734,6 @@ void ButtonPad::setDroDatumPreference(DroDatumPreference wanted) {
   if (display != nullptr) {
     display->setDroDatum(wanted);
   }
-  // Sec. 8 also has re-picking the datum CLEAR a manual zero. Not implemented,
-  // and deliberately not faked: there is no manual-zero store anywhere yet
-  // (drawTravel() hard-codes manualZeroSet false, and UiIntent::ZeroDro is
-  // still a no-op above), so there is nothing to clear. Whoever adds that store
-  // owns adding the clear here.
 }
 
 void ButtonPad::enableHandler() {

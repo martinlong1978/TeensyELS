@@ -71,6 +71,17 @@ private:
   // the flash copy is the authority at boot. Deliberately NOT touched by
   // resetObjectTree(), like m_palette - a screen rebuild must not revert it.
   DroDatumPreference m_droDatum;
+  // Manual-zero datum (OK held at rest). A DISPLAY-only datum, never
+  // Leadscrew::setCurrentPosition() -- the stops are stored absolute against
+  // that same counter, so rezeroing it would silently shift both stops
+  // relative to the tool (docs/ux-redesign-progress.md, "A landmine for
+  // whoever wires up ZeroDro"). Outranks both stops per docs/ux-redesign.md
+  // section 8 and is cleared only by re-picking Left or Right on the DRO
+  // datum menu tile (setDroDatum()). Like m_droDatum, deliberately NOT reset
+  // by resetObjectTree() and seeded explicitly in both constructors, since
+  // Display is heap-`new`ed.
+  bool m_manualZeroSet;
+  int m_manualZeroPulses;
 #ifdef ELS_UI_ENCODER
   EncoderColour firstColour = EC_NONE;
   EncoderColour secondColour = EC_NONE;
@@ -416,6 +427,15 @@ public:
   // save-then-apply order as setTheme(). See m_droDatum above for why the
   // display has to hold this rather than re-reading LatheConfig.
   void setDroDatum(DroDatumPreference datum);
+  // OK held at rest (UiIntent::ZeroDro): sets the manual-zero datum to the
+  // carriage's CURRENT pulse position. Pass Leadscrew::getCurrentPosition(),
+  // not a millimetre value -- lib/dro works in pulses throughout.
+  void setManualZero(int currentPulses);
+  // Re-picking Left or Right on the DRO datum menu tile clears a manual zero
+  // (docs/ux-redesign.md section 8): one authority for "what is zero" rather
+  // than two competing ones. Called from setDroDatum()'s caller, not from
+  // setDroDatum() itself, so tests of setDroDatum() alone stay focused.
+  void clearManualZero();
   // The boot splash: brand mark, name, and the running firmware version. Draws
   // and returns -- it does NOT hold the screen. main.cpp owns the dwell, so the
   // display library stays free of timing and the screenshot harness can render

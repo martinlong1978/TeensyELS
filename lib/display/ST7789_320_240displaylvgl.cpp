@@ -1691,6 +1691,9 @@ Display::Display(Spindle* spindle, Leadscrew* leadscrew, const UiState* ui) {
   // drawTravel() would clobber a menu change on the very next tick.
   this->m_droDatum = (leadscrew != nullptr) ? leadscrew->getConfig()->droDatum()
                                             : DroDatumPreference::Left;
+  // No manual zero at boot -- see the member comment in the header.
+  this->m_manualZeroSet = false;
+  this->m_manualZeroPulses = 0;
   // Owned by initDisplay(), which is the only writer and runs before any read
   // of either -- but CLAUDE.md's rule is every member, and these two are the
   // ones the class was missing (Display is `new`ed, so they are heap garbage
@@ -1724,6 +1727,8 @@ Display::Display() {
   this->m_palette = &PALETTE_DARK;  // no config available on this path -- default dark.
   this->m_droDatum = DroDatumPreference::Left;  // ditto; nothing on this path
                                                 // draws the travel band anyway.
+  this->m_manualZeroSet = false;    // ditto.
+  this->m_manualZeroPulses = 0;
   this->disp = nullptr;             // see the other constructor.
   this->draw_buf = nullptr;
   this->m_aboutIp = IPAddress();    // see the other constructor.
@@ -1908,6 +1913,20 @@ void Display::setTheme(uint8_t theme) {
 // datum end, the two stop readouts and the live position all move together.
 void Display::setDroDatum(DroDatumPreference datum) {
   m_droDatum = datum;
+}
+
+// OK held at rest. See the member comment for why this stores pulses rather
+// than calling through to Leadscrew -- it is a display-only reinterpretation
+// of the existing counter, exactly like the stop-relative readouts already
+// drawn in drawTravel() are.
+void Display::setManualZero(int currentPulses) {
+  m_manualZeroSet = true;
+  m_manualZeroPulses = currentPulses;
+}
+
+void Display::clearManualZero() {
+  m_manualZeroSet = false;
+  m_manualZeroPulses = 0;
 }
 
 void Display::initvars() {
@@ -3192,19 +3211,15 @@ void Display::drawPitch() {
 // booleans here, and an unset stop's stored pulses are never passed on: that
 // translation is the caller's job by contract (lib/dro never sees a sentinel).
 //
-// Two things this deliberately does NOT do yet:
-//   * Manual zero (OK-held) has no store anywhere in the firmware, so
-//     manualZeroSet is hard-false. It belongs with the OK-hold gesture in the
-//     button/focus rework (FS-I3 and the buttonpad rewrite), and it must be a
-//     DISPLAY datum -- NOT Leadscrew::setCurrentPosition(), because the stops
-//     are stored absolute against that same counter and rezeroing it would
-//     silently shift every stop relative to the tool.
+// One thing this deliberately does NOT do:
 //   * "the readout flashes for ~1 s whenever the datum moves" -- animation is
 //     out (10 FPS, section 8 "Renderer constraints"), so the datum change is
 //     shown statically by which end is emphasised.
-// The doc's `REL` tag for the origin datum is likewise not drawn: with manual
-// zero absent, the origin is reached only when NEITHER stop is set, and that
-// state is already unambiguous on screen -- both ends read "--".
+// The doc's `MAN`/`REL` tags and the manual-zero `▽` tick are likewise not
+// drawn -- the LVGL heap has room for roughly twenty more objects on the
+// WHOLE screen (see CLAUDE.md), which is too tight a budget to spend on a
+// tick mark. The live position readout still moves to the new zero
+// immediately; only the on-bar "which source is this" label is missing.
 void Display::drawTravel() {
   const LatheConfigDerived* cfg = m_leadscrew->getConfig();
   const bool imperial = (m_globalState->getUnitMode() == IMPERIAL);
@@ -3222,8 +3237,8 @@ void Display::drawTravel() {
   dro.rightStopSet = rightSet;
   dro.rightStopPulses = rightSet
     ? m_leadscrew->getStopPosition(LeadscrewStopPosition::RIGHT) : 0;
-  dro.manualZeroSet = false;  // see the note above -- no store for it yet.
-  dro.manualZeroPulses = 0;
+  dro.manualZeroSet = m_manualZeroSet;
+  dro.manualZeroPulses = m_manualZeroSet ? m_manualZeroPulses : 0;
   // m_droDatum, not cfg->droDatum(): the "DRO datum" menu tile changes the
   // preference at runtime and cannot write through to LatheConfig (see the
   // member's comment in the header). It is seeded FROM cfg in the constructor,
